@@ -7,11 +7,15 @@ inputs:
   name:
     required: true
     type: string
+  platform:
+    required: true
+    type: string
   run_id:
     required: true
     type: string
 
 runs:
+  runs-on: "${{ inputs.platform == 'ARM64' && 'ubuntu-24.04-arm' || 'ubuntu-24.04' }}"
   container:
     image: "${{ inputs.base_image }}"
   using: "composite"
