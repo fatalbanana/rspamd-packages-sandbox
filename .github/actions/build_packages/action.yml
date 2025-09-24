@@ -77,7 +77,7 @@ runs:
     - name: Upload packages
       uses: actions/upload-artifact@v4
       with:
-        name: packages-${{ env.RUNNER_ARCH }}-${{ inputs.name }}
+        name: packages-${{ runner.arch }}-${{ inputs.name }}
         path: |
           ${{ env.BUILDDIR }}/*.deb
           ${{ env.BUILDDIR }}/*.rpm
