@@ -71,11 +71,11 @@ runs:
           ../packpack/packpack
         fi
 
-      - name: Upload packages
-        uses: actions/upload-artifact@v4
-        with:
-          name: packages-${{ inputs.name }}
-          path: |
-            /build/*.deb
-            /build/*.rpm
-          retention-days: 1
+    - name: Upload packages
+      uses: actions/upload-artifact@v4
+      with:
+        name: packages-${{ inputs.name }}
+        path: |
+          /build/*.deb
+          /build/*.rpm
+        retention-days: 1
