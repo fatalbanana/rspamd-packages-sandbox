@@ -19,6 +19,8 @@ jobs:
         name: ['centos-8', 'centos-9', 'centos-10', 'debian-bullseye', 'debian-bookworm', 'debian-trixie', 'ubuntu-focal', 'ubuntu-jammy', 'ubuntu-noble']
         runner: ['ubuntu-24.04', 'ubuntu-24.04-arm']
     steps:
+      - uses: actions/checkout@v4
+
       - name: Determine base image
         id: base_image
         run: |
@@ -34,8 +36,6 @@ jobs:
             ubuntu-noble) echo "image=ubuntu:24.04" >> $GITHUB_OUTPUT ;;
             *) echo "Can't determine proper base image for ${{ matrix.name }}" >&2; exit 1 ;;
           esac
-
-      - uses: actions/checkout@v4
 
       - uses: ./.github/actions/build_packages
         id: build_packages
