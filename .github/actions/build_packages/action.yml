@@ -76,6 +76,6 @@ runs:
       with:
         name: packages-${{ inputs.name }}
         path: |
-          /build/*.deb
-          /build/*.rpm
+          ${GITHUB_WORKSPACE}/rspamd/build/*.deb
+          ${GITHUB_WORKSPACE}/rspamd/build/*.rpm
         retention-days: 1
