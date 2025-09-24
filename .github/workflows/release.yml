@@ -18,8 +18,7 @@ jobs:
         name: ['centos-8', 'centos-9', 'centos-10', 'debian-bullseye', 'debian-bookworm', 'debian-trixie', 'ubuntu-focal', 'ubuntu-jammy', 'ubuntu-noble']
         runner: ['ubuntu-24.04', 'ubuntu-24.04-arm']
     steps:
-      build_packages:
-        uses: ./.github/actions/build_packages
+      - uses: ./.github/actions/build_packages
         with:
           name: "${{ matrix.name }}"
         permissions:
