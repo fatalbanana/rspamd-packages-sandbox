@@ -42,8 +42,9 @@ jobs:
         with:
           name: "${{ matrix.name }}"
 
-      - uses: ./.github/actions/test_package
+      - uses: ./.github/workflows/test_package.yml
         with:
           base_image: "${{ steps.base_image.outputs.image }}"
           name: "${{ matrix.name }}"
           run_id: "${{ steps.build_packages.outputs.run_id }}"
+          platform: "${{ matrix.runner == 'ubuntu-24.04-arm' && 'ARM64' || 'X64' }}"
