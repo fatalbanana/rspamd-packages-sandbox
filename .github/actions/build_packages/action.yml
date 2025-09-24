@@ -71,11 +71,18 @@ runs:
           ../packpack/packpack
         fi
 
+    - name: WTF
+      shell: bash
+      run: |
+        find ${GITHUB_WORKSPACE} -name '*.deb'
+        find ${GITHUB_WORKSPACE} -name '*.rpm'
+
     - name: Upload packages
       uses: actions/upload-artifact@v4
       with:
         name: packages-${{ inputs.name }}
         path: |
-          ${GITHUB_WORKSPACE}/rspamd/build/*.deb
-          ${GITHUB_WORKSPACE}/rspamd/build/*.rpm
+          ${GITHUB_WORKSPACE}/build/*.deb
+          ${GITHUB_WORKSPACE}/build/*.rpm
         retention-days: 1
+        compression-level: 0
