@@ -4,6 +4,8 @@ inputs:
   name:
     required: true
     type: string
+outputs:
+  run_id: ${{ steps.get_run_id.outputs.run_id }}
 
 runs:
   using: "composite"
@@ -83,3 +85,7 @@ runs:
           ${{ env.BUILDDIR }}/*.rpm
         retention-days: 1
         compression-level: 0
+
+    - name: Get run ID
+      id: get_run_id
+      run: echo "run_id=${GITHUB_RUN_ID}" >> "$GITHUB_OUTPUT"

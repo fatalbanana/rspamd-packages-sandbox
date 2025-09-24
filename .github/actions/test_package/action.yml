@@ -1,0 +1,27 @@
+name: Test package
+
+inputs:
+  base_image:
+    required: true
+    type: string
+  name:
+    required: true
+    type: string
+  platform:
+    required: true
+    type: string
+  run_id:
+    required: true
+    type: string
+
+runs:
+  runs-on: "${{ inputs.platform == 'ARM64' && 'ubuntu-24.04-arm' || 'ubuntu-24.04' }}"
+  container:
+    image: "${{ inputs.base_image }}"
+  using: "composite"
+  steps:
+    - name: Download package
+      uses: actions/download-artifact@v5
+      with:
+        name: packages-${{ runner.arch }}-${{ inputs.name }}
+        run_id: ${{ inputs.run_id }}
