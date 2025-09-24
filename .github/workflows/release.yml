@@ -12,16 +12,16 @@ concurrency:
 
 jobs:
   build_packages:
+    runs-on: "${{ matrix.runner }}"
     strategy:
       matrix:
         name: ['centos-8', 'centos-9', 'centos-10', 'debian-bullseye', 'debian-bookworm', 'debian-trixie', 'ubuntu-focal', 'ubuntu-jammy', 'ubuntu-noble']
         runner: ['ubuntu-24.04', 'ubuntu-24.04-arm']
     steps:
       build_packages:
-        uses: ./.github/workflows/build_packages.yml
+        uses: ./.github/actions/build_packages
         with:
           name: "${{ matrix.name }}"
-          runner: "${{ matrix.runner }}"
         permissions:
           packages: write
           contents: read

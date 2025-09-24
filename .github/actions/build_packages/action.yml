@@ -1,0 +1,68 @@
+name: Build packages
+
+inputs:
+  name:
+    required: true
+    type: string
+
+runs:
+  using: "composite"
+  steps:
+    - name: Set Rspamd version
+      shell: bash
+      run: |
+        export RSPAMD_VERSION=`echo ${{ github.ref_name }} | sed s/^v// | sed 's/\+.*//'`
+        echo "RSPAMD_VERSION=${RSPAMD_VERSION}" >> "$GITHUB_ENV"
+
+    - name: Set OS-specific variables
+      shell: bash
+      run: |
+        if [[ "${{ inputs.name }}" == ubuntu_* || "${{ inputs.name }}" == debian_* ]]; then
+          echo "PKG_TYPE=deb" >> "$GITHUB_ENV"
+        elif [[ "${{ inputs.name }}" == centos_* ] ; then
+          echo "PKG_TYPE=rpm" >> "$GITHUB_ENV"
+        else
+          echo "Bad inputs.name: ${{ inputs.name }}"
+          exit 1
+        fi
+
+    - name: Check out rspamd
+      uses: actions/checkout@v4
+      with:
+        repository: rspamd/rspamd
+        path: rspamd
+        ref: "${{ env.RSPAMD_VERSION }}"
+
+    - name: Check out packpack
+      uses: actions/checkout@v4
+      with:
+        repository: packpack/packpack
+        path: packpack
+
+    - name: Build packages
+      shell: bash
+      run: |
+        export ASAN=0
+        export DEBIAN=0
+        export RPM=0
+        export LUAJIT=1
+        export PRESERVE_ENVVARS=LUAJIT,ASAN
+
+        if [[ "${{ env.PKG_TYPE }}" == "deb" ]]; then
+          export DEBIAN=1
+        elif [[ "${{ env.PKG_TYPE }}" == "rpm" ]]; then
+          export RPM=1
+        else
+          echo "Bad env.PKG_TYPE: ${{ env.PKG_TYPE }}"
+          exit 1
+        fi
+
+        export DOCKER_IMAGE=${{ inputs.name }}
+        export DOCKER_REPO=ghcr.io/rspamd/rspamd-build-docker
+
+        cd rspamd
+        ../packpack/packpack
+        if [ $RPM -eq 1 ]; then
+          export ASAN=1
+          ../packpack/packpack
+        fi
