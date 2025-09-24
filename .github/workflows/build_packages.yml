@@ -9,7 +9,6 @@ on:
       runner:
         required: true
         type: string
-    outputs:
 
 jobs:
   build:
