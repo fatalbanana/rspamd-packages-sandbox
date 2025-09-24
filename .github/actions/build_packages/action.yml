@@ -45,7 +45,7 @@ runs:
       shell: bash
       run: |
         export ASAN=0
-        export BUILD_DIR=${GITHUB_WORKSPACE}/build
+        export BUILD_DIR=${{ github.workspace }}/build
         export DEBIAN=0
         export DOCKER_IMAGE=${{ inputs.name }}
         export DOCKER_REPO=ghcr.io/rspamd/rspamd-build-docker
