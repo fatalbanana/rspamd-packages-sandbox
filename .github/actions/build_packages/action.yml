@@ -17,9 +17,9 @@ runs:
     - name: Set OS-specific variables
       shell: bash
       run: |
-        if [[ "${{ inputs.name }}" == ubuntu_* || "${{ inputs.name }}" == debian_* ]]; then
+        if [[ "${{ inputs.name }}" == ubuntu-* || "${{ inputs.name }}" == debian-* ]]; then
           echo "PKG_TYPE=deb" >> "$GITHUB_ENV"
-        elif [[ "${{ inputs.name }}" == centos_* ] ; then
+        elif [[ "${{ inputs.name }}" == centos-* ]] ; then
           echo "PKG_TYPE=rpm" >> "$GITHUB_ENV"
         else
           echo "Bad inputs.name: ${{ inputs.name }}"
