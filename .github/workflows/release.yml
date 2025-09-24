@@ -24,4 +24,3 @@ jobs:
       - uses: ./.github/actions/build_packages
         with:
           name: "${{ matrix.name }}"
-          platform: "${{ matrix.runner.endsWith('-arm') && 'arm64' || 'amd64' }}"
