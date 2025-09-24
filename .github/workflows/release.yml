@@ -11,80 +11,17 @@ concurrency:
   cancel-in-progress: false
 
 jobs:
-  build:
-    runs-on: {{ matrix.runner }}
+  build_packages:
     strategy:
       matrix:
+        name: ['centos-8', 'centos-9', 'centos-10', 'debian-bullseye', 'debian-bookworm', 'debian-trixie', 'ubuntu-focal', 'ubuntu-jammy', 'ubuntu-noble']
         runner: ['ubuntu-24.04', 'ubuntu-24.04-arm']
     steps:
-      packages_centos_8:
+      build_packages:
         uses: ./.github/workflows/build_packages.yml
         with:
-          name: "centos-8"
-        permissions:
-          packages: write
-          contents: read
-
-      packages_centos_9:
-        uses: ./.github/workflows/build_packages.yml
-        with:
-          name: "centos-9"
-        permissions:
-          packages: write
-          contents: read
-
-      packages_centos_10:
-        uses: ./.github/workflows/build_packages.yml
-        with:
-          name: "centos-10"
-        permissions:
-          packages: write
-          contents: read
-
-      packages_debian_bullseye:
-        uses: ./.github/workflows/build_packages.yml
-        with:
-          name: "debian-bullseye"
-        permissions:
-          packages: write
-          contents: read
-
-      packages_debian_bookworm:
-        uses: ./.github/workflows/build_packages.yml
-        with:
-          name: "debian-bookworm"
-        permissions:
-          packages: write
-          contents: read
-
-      packages_debian_trixie:
-        uses: ./.github/workflows/build_packages.yml
-        with:
-          name: "debian-trixie"
-        permissions:
-          packages: write
-          contents: read
-
-      packages_ubuntu_focal:
-        uses: ./.github/workflows/build_packages.yml
-        with:
-          name: "ubuntu-focal"
-        permissions:
-          packages: write
-          contents: read
-
-      packages_ubuntu_jammy:
-        uses: ./.github/workflows/build_packages.yml
-        with:
-          name: "ubuntu-jammy"
-        permissions:
-          packages: write
-          contents: read
-
-      packages_ubuntu_noble:
-        uses: ./.github/workflows/build_packages.yml
-        with:
-          name: "ubuntu-noble"
+          name: "${{ matrix.name }}"
+          runner: "${{ matrix.runner }}"
         permissions:
           packages: write
           contents: read
