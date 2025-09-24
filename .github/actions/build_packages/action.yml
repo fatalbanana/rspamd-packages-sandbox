@@ -5,7 +5,9 @@ inputs:
     required: true
     type: string
 outputs:
-  run_id: "${{ steps.get_run_id.outputs.run_id }}"
+  run_id:
+    description: "GitHub Actions run ID"
+    value: "${{ steps.get_run_id.outputs.run_id }}"
 
 runs:
   using: "composite"
