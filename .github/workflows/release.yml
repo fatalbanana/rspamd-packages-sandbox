@@ -12,7 +12,6 @@ concurrency:
 
 jobs:
   build_packages:
-    runs-on: '${{ matrix.runner }}'
     strategy:
       matrix:
         name: ['centos-8', 'centos-9', 'centos-10', 'debian-bullseye', 'debian-bookworm', 'debian-trixie', 'ubuntu-focal', 'ubuntu-jammy', 'ubuntu-noble']
@@ -22,6 +21,7 @@ jobs:
         uses: ./.github/workflows/build_packages.yml
         with:
           name: "${{ matrix.name }}"
+          runner: "${{ matrix.runner }}"
         permissions:
           packages: write
           contents: read

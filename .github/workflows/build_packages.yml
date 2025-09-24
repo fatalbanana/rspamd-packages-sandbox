@@ -6,9 +6,13 @@ on:
       name:
         required: true
         type: string
+      runner:
+        required: true
+        type: string
 
 jobs:
   build:
+    runs-on: "${{ inputs.runner }}"
     permissions:
       packages: write
       contents: read
