@@ -87,5 +87,6 @@ runs:
         compression-level: 0
 
     - name: Get run ID
+      shell: bash
       id: get_run_id
       run: echo "run_id=${GITHUB_RUN_ID}" >> "$GITHUB_OUTPUT"
