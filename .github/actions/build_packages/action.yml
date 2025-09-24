@@ -45,12 +45,17 @@ runs:
       shell: bash
       run: |
         export ASAN=0
+        export BUILD_DIR=${GITHUB_WORKSPACE}/build
         export DEBIAN=0
-        export RPM=0
+        export DOCKER_IMAGE=${{ inputs.name }}
+        export DOCKER_REPO=ghcr.io/rspamd/rspamd-build-docker
         export LUAJIT=1
         export PRESERVE_ENVVARS=LUAJIT,ASAN
-        export VERSION=$RSPAMD_VERSION
         export RELEASE=$RELEASE_VERSION
+        export RPM=0
+        export VERSION=$RSPAMD_VERSION
+
+        mkdir $BUILD_DIR
 
         if [[ "${{ env.PKG_TYPE }}" == "deb" ]]; then
           export DEBIAN=1
@@ -60,9 +65,6 @@ runs:
           echo "Bad env.PKG_TYPE: ${{ env.PKG_TYPE }}"
           exit 1
         fi
-
-        export DOCKER_IMAGE=${{ inputs.name }}
-        export DOCKER_REPO=ghcr.io/rspamd/rspamd-build-docker
 
         cd rspamd
         ../packpack/packpack
@@ -76,7 +78,7 @@ runs:
       with:
         name: packages-${{ inputs.name }}
         path: |
-          ${GITHUB_WORKSPACE}/rspamd/build/*.deb
-          ${GITHUB_WORKSPACE}/rspamd/build/*.rpm
+          ${GITHUB_WORKSPACE}/build/*.deb
+          ${GITHUB_WORKSPACE}/build/*.rpm
         retention-days: 1
         compression-level: 0
