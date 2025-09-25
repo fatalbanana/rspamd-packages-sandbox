@@ -69,6 +69,5 @@ runs:
     - name: Set up test environment
       shell: bash
       run: |
-        python3 -mvenv $GITHUB_WORKSPACE/venv
         python3 -mvenv $GITHUB_WORKSPACE/venv --system-site-packages
-        bash -c "source $GITHUB_WORKSPACE/venv/bin/activate && pip3 install --no-cache --disable-pip-version-check --no-binary :all: robotframework"
+        bash -c "source $GITHUB_WORKSPACE/venv/bin/activate && pip3 install robotframework"
