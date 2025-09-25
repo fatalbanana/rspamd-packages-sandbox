@@ -4,6 +4,9 @@ inputs:
   name:
     required: true
     type: string
+  platform:
+    required: true
+    type: string
   run_id:
     required: true
     type: string
@@ -16,5 +19,5 @@ jobs:
       - name: Download package
         uses: actions/download-artifact@v5
         with:
-          name: packages-${{ runner.arch }}-${{ inputs.name }}
+          name: packages-${{ inputs.platform }}-${{ inputs.name }}
           run_id: ${{ inputs.run_id }}
