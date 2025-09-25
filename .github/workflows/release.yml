@@ -21,30 +21,44 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Determine base image
-        id: base_image
-        run: |
-          case "${{ matrix.name }}" in
-            centos-8) echo "image=oraclelinux:8" >> $GITHUB_OUTPUT ;;
-            centos-9) echo "image=oraclelinux:9" >> $GITHUB_OUTPUT ;;
-            centos-10) echo "image=oraclelinux:10" >> $GITHUB_OUTPUT ;;
-            debian-bullseye) echo "image=debian:bullseye" >> $GITHUB_OUTPUT ;;
-            debian-bookworm) echo "image=debian:bookworm" >> $GITHUB_OUTPUT ;;
-            debian-trixie) echo "image=debian:trixie" >> $GITHUB_OUTPUT ;;
-            ubuntu-focal) echo "image=ubuntu:20.04" >> $GITHUB_OUTPUT ;;
-            ubuntu-jammy) echo "image=ubuntu:22.04" >> $GITHUB_OUTPUT ;;
-            ubuntu-noble) echo "image=ubuntu:24.04" >> $GITHUB_OUTPUT ;;
-            *) echo "Can't determine proper base image for ${{ matrix.name }}" >&2; exit 1 ;;
-          esac
-
       - uses: ./.github/actions/build_packages
         id: build_packages
         with:
           name: "${{ matrix.name }}"
 
-      - uses: ./.github/workflows/test_package.yml
+  test_package:
+    needs: build_packages
+    runs-on: "${{ matrix.runner }}"
+    container:
+      image: "${{ matrix.image }}"
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - name: centos-8
+            image: oraclelinux:8
+          - name: centos-9
+            image: oraclelinux:9
+          - name: centos-10
+            image: oraclelinux:10
+          - name: debian-bullseye
+            image: debian:bullseye
+          - name: debian-bookworm
+            image: debian:bookworm
+          - name: debian-trixie
+            image: debian:trixie
+          - name: ubuntu-focal
+            image: ubuntu:20.04
+          - name: ubuntu-jammy
+            image: ubuntu:22.04
+          - name: ubuntu-noble
+            image: ubuntu:24.04
+        runner: ['ubuntu-24.04', 'ubuntu-24.04-arm']
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: ./.github/actions/test_package
         with:
-          base_image: "${{ steps.base_image.outputs.image }}"
           name: "${{ matrix.name }}"
           run_id: "${{ steps.build_packages.outputs.run_id }}"
           platform: "${{ matrix.runner == 'ubuntu-24.04-arm' && 'ARM64' || 'X64' }}"

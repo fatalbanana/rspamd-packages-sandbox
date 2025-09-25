@@ -1,0 +1,21 @@
+name: Test package
+
+inputs:
+  name:
+    required: true
+    type: string
+  run_id:
+    required: true
+    type: string
+
+jobs:
+  test:
+    name: Test ${{ inputs.name }} package on ${{ runner.arch }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Download package
+        uses: actions/download-artifact@v5
+        with:
+          name: packages-${{ runner.arch }}-${{ inputs.name }}
+          run_id: ${{ inputs.run_id }}
