@@ -52,6 +52,10 @@ runs:
           dnf install -y gcc git python3 python3-devel python3-pip python3-psutil python3-tornado
         fi
 
+        if [[ "${{ inputs.name }}" == centos-8 ]]; then
+          dnf install -y libffi-devel
+        fi
+
         if [[ "${{ inputs.name }}" == centos-10 ]]; then
           dnf install -y valkey
           ln /usr/bin/valkey-server /usr/bin/redis-server
