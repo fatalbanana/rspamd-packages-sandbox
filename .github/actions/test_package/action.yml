@@ -11,13 +11,13 @@ inputs:
     required: true
     type: string
 
-jobs:
-  test:
-    steps:
-      - uses: actions/checkout@v4
+runs:
+  using: "composite"
+  steps:
+    - uses: actions/checkout@v4
 
-      - name: Download package
-        uses: actions/download-artifact@v5
-        with:
-          name: packages-${{ inputs.platform }}-${{ inputs.name }}
-          run_id: ${{ inputs.run_id }}
+    - name: Download package
+      uses: actions/download-artifact@v5
+      with:
+        name: packages-${{ inputs.platform }}-${{ inputs.name }}
+        run_id: ${{ inputs.run_id }}
