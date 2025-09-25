@@ -21,3 +21,28 @@ runs:
       with:
         name: packages-${{ inputs.platform }}-${{ inputs.name }}
         run-id: ${{ inputs.run_id || github.run_id }}
+
+    - name: Perform OS-specific steps
+      shell: bash
+      run: |
+        if [[ "${{ inputs.name }}" == ubuntu-* || "${{ inputs.name }}" == debian-* ]]; then
+          apt update
+          dpkg -i rspamd_*deb rspamd-dbg_*deb || true
+          apt-get install -f -y
+        elif [[ "${{ inputs.name }}" == centos-10 ]] ; then
+          dnf config-manager --set-enabled ol10_codeready_builder
+          dnf -qy install oracle-epel-release-el10
+        elif [[ "${{ inputs.name }}" == centos-9 ]] ; then
+          dnf -qy install epel-release
+          dnf config-manager --set-enabled ol9_codeready_builder
+        elif [[ "${{ inputs.name }}" == centos-8 ]] ; then
+          dnf -qy install epel-release
+          dnf config-manager --set-enabled ol8_codeready_builder
+        else
+          echo "Bad inputs.name: ${{ inputs.name }}"
+          exit 1
+        fi
+
+        if [[ "${{ inputs.name }}" == centos-* ]]; then
+          dnf install rspamd-[0-9]*4.rpm rspamd-debuginfo-[0-9]*4.rpm
+        fi
