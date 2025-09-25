@@ -1,0 +1,25 @@
+name: Test package
+
+inputs:
+  base_image:
+    required: true
+    type: string
+  name:
+    required: true
+    type: string
+  run_id:
+    required: true
+    type: string
+
+runs:
+  using: "composite"
+  test:
+    name: Test ${{ inputs.name }} package on ${{ inputs.platform }}
+    container:
+      image: "${{ inputs.base_image }}"
+    steps:
+      - name: Download package
+        uses: actions/download-artifact@v5
+        with:
+          name: packages-${{ runner.arch }}-${{ inputs.name }}
+          run_id: ${{ inputs.run_id }}

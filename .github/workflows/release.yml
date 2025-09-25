@@ -37,12 +37,25 @@ jobs:
             *) echo "Can't determine proper base image for ${{ matrix.name }}" >&2; exit 1 ;;
           esac
 
-      - uses: ./.github/actions/build_packages
+      - name: Build and upload package
+        uses: ./.github/actions/build_packages
         id: build_packages
         with:
           name: "${{ matrix.name }}"
 
-      - uses: ./.github/workflows/test_package.yml
+  test_package:
+    needs: build_packages
+    runs-on: "${{ matrix.runner }}"
+    strategy:
+      fail-fast: false
+      matrix:
+        name: ['centos-8', 'centos-9', 'centos-10', 'debian-bullseye', 'debian-bookworm', 'debian-trixie', 'ubuntu-focal', 'ubuntu-jammy', 'ubuntu-noble']
+        runner: ['ubuntu-24.04', 'ubuntu-24.04-arm']
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Test package
+        uses: ./.github/workflows/test_package.yml
         with:
           base_image: "${{ steps.base_image.outputs.image }}"
           name: "${{ matrix.name }}"
