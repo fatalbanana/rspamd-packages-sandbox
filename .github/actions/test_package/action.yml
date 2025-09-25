@@ -75,4 +75,4 @@ runs:
     - name: Run tests
       shell: bash
       run: |
-        bash -c "source $GITHUB_WORKSPACE/venv/bin/activate && robot --removekeywords wuks --exclude isbroken $GITHUB_WORKSPACE/rspamd/test/functional/cases"
+        RSPAMD_INSTALLROOT=/usr bash -c "source $GITHUB_WORKSPACE/venv/bin/activate && robot --removekeywords wuks --exclude isbroken $GITHUB_WORKSPACE/rspamd/test/functional/cases"
