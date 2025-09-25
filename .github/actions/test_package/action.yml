@@ -10,7 +10,6 @@ inputs:
 
 jobs:
   test:
-    name: Test ${{ inputs.name }} package on ${{ runner.arch }}
     steps:
       - uses: actions/checkout@v4
 
