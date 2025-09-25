@@ -9,6 +9,8 @@ on:
 
 jobs:
   test_package:
+    permissions:
+      actions: read
     runs-on: "${{ matrix.runner }}"
     container:
       image: "${{ matrix.image }}"
