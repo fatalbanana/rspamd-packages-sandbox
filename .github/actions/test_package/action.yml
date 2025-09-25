@@ -8,7 +8,7 @@ inputs:
     required: true
     type: string
   run_id:
-    required: true
+    required: false
     type: string
 
 runs:
@@ -20,4 +20,4 @@ runs:
       uses: actions/download-artifact@v5
       with:
         name: packages-${{ inputs.platform }}-${{ inputs.name }}
-        run_id: ${{ inputs.run_id }}
+        run-id: ${{ inputs.run_id || github.run_id }}

@@ -96,4 +96,3 @@ jobs:
         with:
           name: "${{ matrix.name }}"
           platform: "${{ runner.arch }}"
-          run_id: "${{ steps.build_packages.outputs.run_id }}"
