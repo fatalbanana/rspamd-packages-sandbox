@@ -26,9 +26,8 @@ runs:
       shell: bash
       run: |
         if [[ "${{ inputs.name }}" == ubuntu-* || "${{ inputs.name }}" == debian-* ]]; then
-          apt update
-          dpkg -i rspamd_*deb rspamd-dbg_*deb || true
-          apt-get install -f -y
+          apt-get update
+          apt-get install -f -y ./rspamd_*deb ./rspamd-dbg_*deb
         elif [[ "${{ inputs.name }}" == centos-10 ]] ; then
           dnf config-manager --set-enabled ol10_codeready_builder
           dnf -qy install oracle-epel-release-el10
