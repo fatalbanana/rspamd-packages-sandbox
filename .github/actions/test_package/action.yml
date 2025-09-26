@@ -102,3 +102,7 @@ runs:
         name: rspamdlog-${{ inputs.platform }}-${{ inputs.name }}
         path: ${GITHUB_WORKSPACE}/robot-save
         retention-days: 1
+
+    - name: Maybe die
+      if: steps.run_tests.outcome == 'failure'
+      run: exit 1
