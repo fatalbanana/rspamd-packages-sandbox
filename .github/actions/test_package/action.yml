@@ -86,13 +86,17 @@ runs:
       run: |
         RSPAMD_INSTALLROOT=/usr bash -c "source $GITHUB_WORKSPACE/venv/bin/activate && robot --removekeywords wuks --exclude isbroken $GITHUB_WORKSPACE/rspamd/test/functional/cases"
 
+    - name: Save workspace directory
+      if: steps.run_tests.outcome == 'failure'
+      run: echo "CONTAINER_WORKSPACE=${GITHUB_WORKSPACE}" >> "$GITHUB_ENV"
+
     - name: Upload robot logs
       if: steps.run_tests.outcome == 'failure'
       uses: actions/upload-artifact@v4
       with:
         name: robotlog-${{ inputs.platform }}-${{ inputs.name }}
         path: |
-          ${GITHUB_WORKSPACE}/*.*ml
+          ${{ env.CONTAINER_WORKSPACE }}/*.*ml
         retention-days: 1
 
     - name: Upload rspamd logs
@@ -100,7 +104,7 @@ runs:
       uses: actions/upload-artifact@v4
       with:
         name: rspamdlog-${{ inputs.platform }}-${{ inputs.name }}
-        path: ${GITHUB_WORKSPACE}/robot-save
+        path: ${{ env.CONTAINER_WORKSPACE }}/robot-save
         retention-days: 1
 
     - name: Maybe die
