@@ -87,6 +87,7 @@ runs:
         RSPAMD_INSTALLROOT=/usr bash -c "source $GITHUB_WORKSPACE/venv/bin/activate && robot --removekeywords wuks --exclude isbroken $GITHUB_WORKSPACE/rspamd/test/functional/cases"
 
     - name: Save workspace directory
+      shell: bash
       if: steps.run_tests.outcome == 'failure'
       run: echo "CONTAINER_WORKSPACE=${GITHUB_WORKSPACE}" >> "$GITHUB_ENV"
 
