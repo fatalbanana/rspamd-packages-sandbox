@@ -12,6 +12,7 @@ jobs:
     permissions:
       actions: read
       contents: read
+      packages: read
     runs-on: "${{ matrix.runner }}"
     container:
       image: "${{ matrix.image }}"
