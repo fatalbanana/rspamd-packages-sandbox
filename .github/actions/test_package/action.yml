@@ -92,7 +92,7 @@ runs:
       with:
         name: robotlog-${{ inputs.platform }}-${{ inputs.name }}
         path: |
-          ${{ env.GITHUB_WORKSPACE }}/*.*ml
+          ${GITHUB_WORKSPACE}/*.*ml
         retention-days: 1
 
     - name: Upload rspamd logs
@@ -100,5 +100,5 @@ runs:
       uses: actions/upload-artifact@v4
       with:
         name: rspamdlog-${{ inputs.platform }}-${{ inputs.name }}
-        path: ${{ env.GITHUB_WORKSPACE }}/robot-save
+        path: ${GITHUB_WORKSPACE}/robot-save
         retention-days: 1
