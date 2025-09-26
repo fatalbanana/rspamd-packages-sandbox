@@ -104,5 +104,6 @@ runs:
         retention-days: 1
 
     - name: Maybe die
+      shell: bash
       if: steps.run_tests.outcome == 'failure'
       run: exit 1
