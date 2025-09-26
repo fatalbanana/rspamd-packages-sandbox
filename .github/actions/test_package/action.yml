@@ -10,6 +10,9 @@ inputs:
   run_id:
     required: false
     type: string
+  token:
+    required: false
+    default: ${{ github.token }}
 
 runs:
   using: "composite"

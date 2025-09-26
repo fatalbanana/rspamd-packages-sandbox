@@ -1,15 +1,33 @@
-# to rather not wait for builds
-name: test
+name: release
 
 on:
+  push:
+    tags:
+      - "v[0-9]+.[0-9]+.[0-9]+\\+[0-9]+"
   workflow_dispatch:
-    inputs:
-      run_id:
-        required: true
+
+concurrency:
+  group: rspamd-packages-${{ github.ref_name }}
+  cancel-in-progress: false
 
 jobs:
+  build_packages:
+    runs-on: "${{ matrix.runner }}"
+    strategy:
+      fail-fast: false
+      matrix:
+        name: ['centos-8', 'centos-9', 'centos-10', 'debian-bullseye', 'debian-bookworm', 'debian-trixie', 'ubuntu-focal', 'ubuntu-jammy', 'ubuntu-noble']
+        runner: ['ubuntu-24.04', 'ubuntu-24.04-arm']
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: ./.github/actions/build_packages
+        id: build_packages
+        with:
+          name: "${{ matrix.name }}"
+
   test_package:
-    permissions: read-all
+    needs: build_packages
     runs-on: "${{ matrix.runner }}"
     container:
       image: "${{ matrix.image }}"
@@ -78,5 +96,3 @@ jobs:
         with:
           name: "${{ matrix.name }}"
           platform: "${{ runner.arch }}"
-          run_id: "${{ inputs.run_id }}"
-          token: "${{ secrets.MAGIC_TOKEN }}"
