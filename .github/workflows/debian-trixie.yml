@@ -1,0 +1,82 @@
+{
+   "concurrency": {
+      "cancel-in-progress": false,
+      "group": "rspamd-packages-debian-trixie"
+   },
+   "jobs": {
+      "debian-trixie-build-ARM64": {
+         "runs-on": "ubuntu-24.04-arm",
+         "steps": [
+            {
+               "uses": "actions/checkout@v4"
+            },
+            {
+               "uses": "./.github/actions/build_packages",
+               "with": {
+                  "name": "debian-trixie"
+               }
+            }
+         ]
+      },
+      "debian-trixie-build-X64": {
+         "runs-on": "ubuntu-24.04",
+         "steps": [
+            {
+               "uses": "actions/checkout@v4"
+            },
+            {
+               "uses": "./.github/actions/build_packages",
+               "with": {
+                  "name": "debian-trixie"
+               }
+            }
+         ]
+      },
+      "debian-trixie-test-ARM64": {
+         "container": {
+            "image": "debian:trixie"
+         },
+         "needs": "debian-trixie-build-ARM64",
+         "runs-on": "ubuntu-24.04-arm",
+         "steps": [
+            {
+               "uses": "actions/checkout@v4"
+            },
+            {
+               "uses": "./.github/actions/test_package",
+               "with": {
+                  "name": "debian-trixie",
+                  "platform": "${{ runner.arch }}"
+               }
+            }
+         ]
+      },
+      "debian-trixie-test-X64": {
+         "container": {
+            "image": "debian:trixie"
+         },
+         "needs": "debian-trixie-build-X64",
+         "runs-on": "ubuntu-24.04",
+         "steps": [
+            {
+               "uses": "actions/checkout@v4"
+            },
+            {
+               "uses": "./.github/actions/test_package",
+               "with": {
+                  "name": "debian-trixie",
+                  "platform": "${{ runner.arch }}"
+               }
+            }
+         ]
+      }
+   },
+   "name": "debian-trixie",
+   "on": {
+      "push": {
+         "tags": [
+            "v[0-9]+.[0-9]+.[0-9]+\\+[0-9]+"
+         ]
+      }
+   }
+}

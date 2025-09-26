@@ -1,0 +1,82 @@
+{
+   "concurrency": {
+      "cancel-in-progress": false,
+      "group": "rspamd-packages-ubuntu-focal"
+   },
+   "jobs": {
+      "ubuntu-focal-build-ARM64": {
+         "runs-on": "ubuntu-24.04-arm",
+         "steps": [
+            {
+               "uses": "actions/checkout@v4"
+            },
+            {
+               "uses": "./.github/actions/build_packages",
+               "with": {
+                  "name": "ubuntu-focal"
+               }
+            }
+         ]
+      },
+      "ubuntu-focal-build-X64": {
+         "runs-on": "ubuntu-24.04",
+         "steps": [
+            {
+               "uses": "actions/checkout@v4"
+            },
+            {
+               "uses": "./.github/actions/build_packages",
+               "with": {
+                  "name": "ubuntu-focal"
+               }
+            }
+         ]
+      },
+      "ubuntu-focal-test-ARM64": {
+         "container": {
+            "image": "ubuntu:20.04"
+         },
+         "needs": "ubuntu-focal-build-ARM64",
+         "runs-on": "ubuntu-24.04-arm",
+         "steps": [
+            {
+               "uses": "actions/checkout@v4"
+            },
+            {
+               "uses": "./.github/actions/test_package",
+               "with": {
+                  "name": "ubuntu-focal",
+                  "platform": "${{ runner.arch }}"
+               }
+            }
+         ]
+      },
+      "ubuntu-focal-test-X64": {
+         "container": {
+            "image": "ubuntu:20.04"
+         },
+         "needs": "ubuntu-focal-build-X64",
+         "runs-on": "ubuntu-24.04",
+         "steps": [
+            {
+               "uses": "actions/checkout@v4"
+            },
+            {
+               "uses": "./.github/actions/test_package",
+               "with": {
+                  "name": "ubuntu-focal",
+                  "platform": "${{ runner.arch }}"
+               }
+            }
+         ]
+      }
+   },
+   "name": "ubuntu-focal",
+   "on": {
+      "push": {
+         "tags": [
+            "v[0-9]+.[0-9]+.[0-9]+\\+[0-9]+"
+         ]
+      }
+   }
+}

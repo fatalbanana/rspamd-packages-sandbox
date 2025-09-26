@@ -1,0 +1,82 @@
+{
+   "concurrency": {
+      "cancel-in-progress": false,
+      "group": "rspamd-packages-centos-9"
+   },
+   "jobs": {
+      "centos-9-build-ARM64": {
+         "runs-on": "ubuntu-24.04-arm",
+         "steps": [
+            {
+               "uses": "actions/checkout@v4"
+            },
+            {
+               "uses": "./.github/actions/build_packages",
+               "with": {
+                  "name": "centos-9"
+               }
+            }
+         ]
+      },
+      "centos-9-build-X64": {
+         "runs-on": "ubuntu-24.04",
+         "steps": [
+            {
+               "uses": "actions/checkout@v4"
+            },
+            {
+               "uses": "./.github/actions/build_packages",
+               "with": {
+                  "name": "centos-9"
+               }
+            }
+         ]
+      },
+      "centos-9-test-ARM64": {
+         "container": {
+            "image": "oraclelinux:9"
+         },
+         "needs": "centos-9-build-ARM64",
+         "runs-on": "ubuntu-24.04-arm",
+         "steps": [
+            {
+               "uses": "actions/checkout@v4"
+            },
+            {
+               "uses": "./.github/actions/test_package",
+               "with": {
+                  "name": "centos-9",
+                  "platform": "${{ runner.arch }}"
+               }
+            }
+         ]
+      },
+      "centos-9-test-X64": {
+         "container": {
+            "image": "oraclelinux:9"
+         },
+         "needs": "centos-9-build-X64",
+         "runs-on": "ubuntu-24.04",
+         "steps": [
+            {
+               "uses": "actions/checkout@v4"
+            },
+            {
+               "uses": "./.github/actions/test_package",
+               "with": {
+                  "name": "centos-9",
+                  "platform": "${{ runner.arch }}"
+               }
+            }
+         ]
+      }
+   },
+   "name": "centos-9",
+   "on": {
+      "push": {
+         "tags": [
+            "v[0-9]+.[0-9]+.[0-9]+\\+[0-9]+"
+         ]
+      }
+   }
+}
