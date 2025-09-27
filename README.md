@@ -1,3 +1,2 @@
-## Experimental package builder for Rspamd
+## Build and release Rspamd packages using Github Actions
 
-Maybe this will become something useful & find a new home
