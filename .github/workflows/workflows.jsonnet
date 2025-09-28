@@ -35,9 +35,8 @@ local build_test_pipeline = {
     workflow_call: {
       inputs: {
         nightly: {
-          required: true,
-          default: false,
-          type: 'boolean',
+          required: false,
+          type: 'string',
         },
       },
     },

@@ -618,9 +618,8 @@
       "workflow_call": {
          "inputs": {
             "nightly": {
-               "default": false,
-               "required": true,
-               "type": "boolean"
+               "required": false,
+               "type": "string"
             }
          }
       }
