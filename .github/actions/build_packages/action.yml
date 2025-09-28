@@ -12,10 +12,6 @@ inputs:
 runs:
   using: "composite"
   steps:
-    - name: Set version information from tag
-      if: ${{ inputs.nightly == false }}
-      uses: ./.github/actions/set_version_from_tag
-
     - name: Set OS-specific variables
       shell: bash
       run: |
@@ -34,6 +30,23 @@ runs:
         repository: rspamd/rspamd
         path: rspamd
         ref: master
+
+    - name: Set version information for release
+      if: ${{ inputs.nightly == false }}
+      run: |
+        export RSPAMD_VERSION=`echo ${{ github.ref_name }} | sed s/^v// | sed 's/\+.*//'`
+        echo "RSPAMD_VERSION=${RSPAMD_VERSION}" >> "$GITHUB_ENV"
+        export RELEASE_VERSION=`echo ${{ github.ref_name }} | cut -d'+' -f2`
+        echo "RELEASE_VERSION=${RELEASE_VERSION}" >> "$GITHUB_ENV"
+
+    # TODO(maybe YOU): avoid pushing new nightly if there are no changes since last one
+    - name: Set version information for nightly
+      if: ${{ inputs.nightly == true }}
+      run: |
+        export RSPAMD_VERSION=`date +%Y%m%d.0.0`
+        echo "RSPAMD_VERSION=${RSPAMD_VERSION}" >> "$GITHUB_ENV"
+        export RELEASE_VERSION=`cd rspamd && git rev-parse --short HEAD`
+        echo "RELEASE_VERSION=${RELEASE_VERSION}" >> "$GITHUB_ENV"
 
     - name: Check out packpack
       uses: actions/checkout@v4
