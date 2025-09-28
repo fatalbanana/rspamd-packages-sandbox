@@ -1,5 +1,5 @@
-local build_pipeline(name, image) = {
-  name: name,
+local release_pipeline = {
+  name: 'release',
   on: {
     push: {
       tags: [
@@ -8,87 +8,93 @@ local build_pipeline(name, image) = {
     },
   },
   concurrency: {
-    group: 'rspamd-packages-' + name,
+    group: 'rspamd-packages-release',
     'cancel-in-progress': false,
-  },
-  jobs: {
-    [name + '-build-X64']: {
-      'runs-on': 'ubuntu-24.04',
-      steps: [
-        {
-          uses: 'actions/checkout@v4',
-        },
-        {
-          uses: './.github/actions/build_packages',
-          with: {
-            name: name,
-          },
-        },
-      ],
-    },
-    [name + '-build-ARM64']: {
-      'runs-on': 'ubuntu-24.04-arm',
-      steps: [
-        {
-          uses: 'actions/checkout@v4',
-        },
-        {
-          uses: './.github/actions/build_packages',
-          with: {
-            name: name,
-          },
-        },
-      ],
-    },
-    [name + '-test-X64']: {
-      container: {
-        image: image,
-      },
-      needs: name + '-build-X64',
-      'runs-on': 'ubuntu-24.04',
-      steps: [
-        {
-          uses: 'actions/checkout@v4',
-        },
-        {
-          uses: './.github/actions/test_package',
-          with: {
-            name: name,
-            platform: '${{ runner.arch }}',
-          },
-        },
-      ],
-    },
-    [name + '-test-ARM64']: {
-      container: {
-        image: image,
-      },
-      needs: name + '-build-ARM64',
-      'runs-on': 'ubuntu-24.04-arm',
-      steps: [
-        {
-          uses: 'actions/checkout@v4',
-        },
-        {
-          uses: './.github/actions/test_package',
-          with: {
-            name: name,
-            platform: '${{ runner.arch }}',
-          },
-        },
-      ],
-    },
   },
 };
 
+local build_jobs(name, image) = {
+  [name + '-build-X64']: {
+    'runs-on': 'ubuntu-24.04',
+    steps: [
+      {
+        uses: 'actions/checkout@v4',
+      },
+      {
+        uses: './.github/actions/build_packages',
+        with: {
+          name: name,
+        },
+      },
+    ],
+  },
+  [name + '-build-ARM64']: {
+    'runs-on': 'ubuntu-24.04-arm',
+    steps: [
+      {
+        uses: 'actions/checkout@v4',
+      },
+      {
+        uses: './.github/actions/build_packages',
+        with: {
+          name: name,
+        },
+      },
+    ],
+  },
+  [name + '-test-X64']: {
+    container: {
+      image: image,
+    },
+    needs: name + '-build-X64',
+    'runs-on': 'ubuntu-24.04',
+    steps: [
+      {
+        uses: 'actions/checkout@v4',
+      },
+      {
+        uses: './.github/actions/test_package',
+        with: {
+          name: name,
+          platform: '${{ runner.arch }}',
+        },
+      },
+    ],
+  },
+  [name + '-test-ARM64']: {
+    container: {
+      image: image,
+    },
+    needs: name + '-build-ARM64',
+    'runs-on': 'ubuntu-24.04-arm',
+    steps: [
+      {
+        uses: 'actions/checkout@v4',
+      },
+      {
+        uses: './.github/actions/test_package',
+        with: {
+          name: name,
+          platform: '${{ runner.arch }}',
+        },
+      },
+    ],
+  },
+};
+
+local all_build_jobs = {
+  jobs: 
+    build_jobs('centos-8', 'oraclelinux:8') +
+    build_jobs('centos-9', 'oraclelinux:9') +
+    build_jobs('centos-10', 'oraclelinux:10') +
+    build_jobs('debian-bullseye', 'debian:bullseye') +
+    build_jobs('debian-bookworm', 'debian:bookworm') +
+    build_jobs('debian-trixie', 'debian:trixie') +
+    build_jobs('ubuntu-focal', 'ubuntu:20.04') +
+    build_jobs('ubuntu-jammy', 'ubuntu:22.04') +
+    build_jobs('ubuntu-noble', 'ubuntu:24.04')
+};
+
 {
-  'centos-8.yml': build_pipeline('centos-8', 'oraclelinux:8'),
-  'centos-9.yml': build_pipeline('centos-9', 'oraclelinux:9'),
-  'centos-10.yml': build_pipeline('centos-10', 'oraclelinux:10'),
-  'debian-bullseye.yml': build_pipeline('debian-bullseye', 'debian:bullseye'),
-  'debian-bookworm.yml': build_pipeline('debian-bookworm', 'debian:bookworm'),
-  'debian-trixie.yml': build_pipeline('debian-trixie', 'debian:trixie'),
-  'ubuntu-focal.yml': build_pipeline('ubuntu-focal', 'ubuntu:20.04'),
-  'ubuntu-jammy.yml': build_pipeline('ubuntu-jammy', 'ubuntu:22.04'),
-  'ubuntu-noble.yml': build_pipeline('ubuntu-noble', 'ubuntu:24.04'),
+  'release.yml': release_pipeline + all_build_jobs,
 }
