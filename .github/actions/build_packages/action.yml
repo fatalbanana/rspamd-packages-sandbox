@@ -26,9 +26,9 @@ runs:
     - name: Check out rspamd
       uses: actions/checkout@v4
       with:
-        repository: fatalbanana/rspamd
+        repository: rspamd/rspamd
         path: rspamd
-        ref: include_cmath
+        ref: master
 
     - name: Check out packpack
       uses: actions/checkout@v4
