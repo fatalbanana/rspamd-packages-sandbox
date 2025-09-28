@@ -19,7 +19,7 @@ local platform_jobs(name, image) = {
   },
   local test_with = {
     name: name,
-    platform: '${{ runner.arch }}',
+    image: image,
     revision: '${{ needs.' + name + '-build-X64.outputs.revision }}',
   },
   [name + '-build-X64']: {
@@ -29,7 +29,7 @@ local platform_jobs(name, image) = {
         uses: 'actions/checkout@v4',
       },
       {
-        uses: './.github/actions/build_packages',
+        uses: './.github/build_packages.yml',
         with: build_with,
       },
     ],
@@ -41,7 +41,7 @@ local platform_jobs(name, image) = {
         uses: 'actions/checkout@v4',
       },
       {
-        uses: './.github/actions/build_packages',
+        uses: './.github/build_packages.yml',
         with: build_with,
       },
     ],
@@ -57,7 +57,7 @@ local platform_jobs(name, image) = {
         uses: 'actions/checkout@v4',
       },
       {
-        uses: './.github/actions/test_package',
+        uses: './.github/test_package.yml',
         with: test_with,
       },
     ],
@@ -73,7 +73,7 @@ local platform_jobs(name, image) = {
         uses: 'actions/checkout@v4',
       },
       {
-        uses: './.github/actions/test_package',
+        uses: './.github/test_package.yml',
         with: test_with,
       },
     ],
