@@ -22,6 +22,8 @@ jobs:
     container:
       image: ${{ inputs.image }}
     steps:
+      - uses: actions/checkout@v5
+
       - name: Download package
         uses: actions/download-artifact@v5
         with:
@@ -67,7 +69,7 @@ jobs:
           fi
 
       - name: Check out rspamd
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
         with:
           repository: rspamd/rspamd
           path: rspamd

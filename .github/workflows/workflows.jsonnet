@@ -26,10 +26,10 @@ local platform_jobs(name, image) = {
     'runs-on': 'ubuntu-24.04',
     steps: [
       {
-        uses: 'actions/checkout@v4',
+        uses: 'actions/checkout@v5',
       },
       {
-        uses: './.github/workflows/build_packages.yml',
+        uses: '${{ github.repository }}/.github/workflows/build_packages.yml',
         with: build_with,
       },
     ],
@@ -38,10 +38,10 @@ local platform_jobs(name, image) = {
     'runs-on': 'ubuntu-24.04-arm',
     steps: [
       {
-        uses: 'actions/checkout@v4',
+        uses: 'actions/checkout@v5',
       },
       {
-        uses: './.github/workflows/build_packages.yml',
+        uses: '${{ github.repository }}/.github/workflows/build_packages.yml',
         with: build_with,
       },
     ],
@@ -54,10 +54,10 @@ local platform_jobs(name, image) = {
     'runs-on': 'ubuntu-24.04',
     steps: [
       {
-        uses: 'actions/checkout@v4',
+        uses: 'actions/checkout@v5',
       },
       {
-        uses: './.github/workflows/test_package.yml',
+        uses: '${{ github.repository }}/.github/workflows/test_package.yml',
         with: test_with,
       },
     ],
@@ -70,10 +70,10 @@ local platform_jobs(name, image) = {
     'runs-on': 'ubuntu-24.04-arm',
     steps: [
       {
-        uses: 'actions/checkout@v4',
+        uses: 'actions/checkout@v5',
       },
       {
-        uses: './.github/workflows/test_package.yml',
+        uses: '${{ github.repository }}/.github/workflows/test_package.yml',
         with: test_with,
       },
     ],

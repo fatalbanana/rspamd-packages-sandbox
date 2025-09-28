@@ -42,7 +42,7 @@ jobs:
           echo "RELEASE_VERSION=${RELEASE_VERSION}" >> "$GITHUB_ENV"
 
       - name: Check out rspamd
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
         with:
           repository: rspamd/rspamd
           path: rspamd
@@ -63,7 +63,7 @@ jobs:
           echo "RELEASE_VERSION=${RELEASE_VERSION}" >> "$GITHUB_ENV"
 
       - name: Check out packpack
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
         with:
           repository: packpack/packpack
           path: packpack
