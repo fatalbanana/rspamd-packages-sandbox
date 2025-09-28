@@ -1,34 +1,3 @@
-local release_pipeline = {
-  name: 'release',
-  on: {
-    push: {
-      tags: [
-        'v[0-9]+.[0-9]+.[0-9]+\\+[0-9]+',
-      ],
-    },
-  },
-  concurrency: {
-    group: 'rspamd-packages-release',
-    'cancel-in-progress': false,
-  },
-};
-
-local nightly_pipeline = {
-  name: 'nightly',
-  on: {
-    schedule: [
-      {
-        cron: '0 0 * * *',
-      },
-    ],
-    workflow_dispatch: {},
-  },
-  concurrency: {
-    group: 'rspamd-packages-nightly',
-    'cancel-in-progress': true,
-  },
-};
-
 local build_test_release_pipeline = {
   name: 'build_test_release',
   on: {
