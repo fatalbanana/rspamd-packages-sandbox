@@ -32,7 +32,7 @@ local nightly_pipeline = {
 local build_test_pipeline = {
   name: 'build_and_test',
   on: {
-    workflow_dispatch: {
+    workflow_call: {
       inputs: {
         nightly: {
           required: true,
