@@ -8,6 +8,11 @@ inputs:
     required: false
     type: string
 
+outputs:
+  revision:
+    description: "Commit hash of rspamd"
+    value: ${{ steps.save_commit.outputs.revision }}
+
 runs:
   using: "composite"
   steps:
@@ -38,6 +43,12 @@ runs:
         repository: rspamd/rspamd
         path: rspamd
         ref: ${{ inputs.nightly && 'master' || env.RSPAMD_VERSION }}
+
+    - name: Save commit hash
+      id: save_commit
+      run: |
+        cd rspamd
+        echo "revision=$(git rev-parse HEAD)" >> "$GITHUB_OUTPUT"
 
     # TODO(maybe YOU): avoid pushing new nightly if there are no changes since last one
     - name: Set version information for nightly

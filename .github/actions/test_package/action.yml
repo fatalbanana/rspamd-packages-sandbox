@@ -7,6 +7,9 @@ inputs:
   platform:
     required: true
     type: string
+  revision:
+    required: true
+    type: string
   run_id:
     required: false
     type: string
@@ -63,15 +66,12 @@ runs:
           dnf install -y redis
         fi
 
-    - name: Set version information
-      uses: ./.github/actions/set_version
-
     - name: Check out rspamd
       uses: actions/checkout@v4
       with:
         repository: rspamd/rspamd
         path: rspamd
-        ref: "${{ env.RSPAMD_VERSION }}"
+        ref: "${{ inputs.revision }}"
 
     - name: Set up test environment
       shell: bash
