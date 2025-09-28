@@ -29,7 +29,7 @@ local platform_jobs(name, image) = {
         uses: 'actions/checkout@v4',
       },
       {
-        uses: './.github/build_packages.yml',
+        uses: './.github/workflows/build_packages.yml',
         with: build_with,
       },
     ],
@@ -41,7 +41,7 @@ local platform_jobs(name, image) = {
         uses: 'actions/checkout@v4',
       },
       {
-        uses: './.github/build_packages.yml',
+        uses: './.github/workflows/build_packages.yml',
         with: build_with,
       },
     ],
@@ -57,7 +57,7 @@ local platform_jobs(name, image) = {
         uses: 'actions/checkout@v4',
       },
       {
-        uses: './.github/test_package.yml',
+        uses: './.github/workflows/test_package.yml',
         with: test_with,
       },
     ],
@@ -73,7 +73,7 @@ local platform_jobs(name, image) = {
         uses: 'actions/checkout@v4',
       },
       {
-        uses: './.github/test_package.yml',
+        uses: './.github/workflows/test_package.yml',
         with: test_with,
       },
     ],
