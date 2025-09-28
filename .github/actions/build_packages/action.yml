@@ -28,7 +28,7 @@ runs:
       with:
         repository: rspamd/rspamd
         path: rspamd
-        ref: "${{ env.RSPAMD_VERSION }}"
+        ref: master
 
     - name: Check out packpack
       uses: actions/checkout@v4
