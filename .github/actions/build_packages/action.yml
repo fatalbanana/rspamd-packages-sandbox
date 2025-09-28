@@ -25,6 +25,7 @@ runs:
         fi
 
     - name: Set version information for release
+      shell: bash
       if: ${{ inputs.nightly == false }}
       run: |
         export RSPAMD_VERSION=`echo ${{ github.ref_name }} | sed s/^v// | sed 's/\+.*//'`
