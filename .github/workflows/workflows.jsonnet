@@ -29,7 +29,22 @@ local nightly_pipeline = {
   },
 };
 
-local build_jobs(name, image, nightly) = {
+local build_test_pipeline = {
+  name: 'build_and_test',
+  on: {
+    workflow_dispatch: {
+      inputs: {
+        nightly: {
+          required: true,
+          default: 'false',
+          type: 'boolean',
+        },
+      },
+    },
+  },
+};
+
+local build_jobs(name, image) = {
   [name + '-build-X64']: {
     'runs-on': 'ubuntu-24.04',
     steps: [
@@ -40,7 +55,7 @@ local build_jobs(name, image, nightly) = {
         uses: './.github/actions/build_packages',
         with: {
           name: name,
-          nightly: nightly,
+          nightly: '${{ inputs.nightly }}',
         },
       },
     ],
@@ -55,7 +70,7 @@ local build_jobs(name, image, nightly) = {
         uses: './.github/actions/build_packages',
         with: {
           name: name,
-          nightly: nightly,
+          nightly: '${{ inputs.nightly }}',
         },
       },
     ],
@@ -100,20 +115,19 @@ local build_jobs(name, image, nightly) = {
   },
 };
 
-local all_build_jobs(nightly) = {
+local all_build_jobs = {
   jobs: 
-    build_jobs('centos-8', 'oraclelinux:8', nightly) +
-    build_jobs('centos-9', 'oraclelinux:9', nightly) +
-    build_jobs('centos-10', 'oraclelinux:10', nightly) +
-    build_jobs('debian-bullseye', 'debian:bullseye', nightly) +
-    build_jobs('debian-bookworm', 'debian:bookworm', nightly) +
-    build_jobs('debian-trixie', 'debian:trixie', nightly) +
-    build_jobs('ubuntu-focal', 'ubuntu:20.04', nightly) +
-    build_jobs('ubuntu-jammy', 'ubuntu:22.04', nightly) +
-    build_jobs('ubuntu-noble', 'ubuntu:24.04', nightly)
+    build_jobs('centos-8', 'oraclelinux:8') +
+    build_jobs('centos-9', 'oraclelinux:9') +
+    build_jobs('centos-10', 'oraclelinux:10') +
+    build_jobs('debian-bullseye', 'debian:bullseye') +
+    build_jobs('debian-bookworm', 'debian:bookworm') +
+    build_jobs('debian-trixie', 'debian:trixie') +
+    build_jobs('ubuntu-focal', 'ubuntu:20.04') +
+    build_jobs('ubuntu-jammy', 'ubuntu:22.04') +
+    build_jobs('ubuntu-noble', 'ubuntu:24.04')
 };
 
 {
-  'nightly.yml': nightly_pipeline + all_build_jobs(true),
-  'release.yml': release_pipeline + all_build_jobs(false),
+  'build_test.yml': build_test_pipeline + all_build_jobs,
 }
