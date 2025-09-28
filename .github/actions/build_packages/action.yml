@@ -6,8 +6,7 @@ inputs:
     type: string
   nightly:
     required: false
-    type: boolean
-    default: false
+    type: string
 
 runs:
   using: "composite"
@@ -26,7 +25,7 @@ runs:
 
     - name: Set version information for release
       shell: bash
-      if: ${{ inputs.nightly == false }}
+      if: ${{ ! inputs.nightly }}
       run: |
         export RSPAMD_VERSION=`echo ${{ github.ref_name }} | sed s/^v// | sed 's/\+.*//'`
         echo "RSPAMD_VERSION=${RSPAMD_VERSION}" >> "$GITHUB_ENV"
@@ -43,7 +42,7 @@ runs:
     # TODO(maybe YOU): avoid pushing new nightly if there are no changes since last one
     - name: Set version information for nightly
       shell: bash
-      if: ${{ inputs.nightly == true }}
+      if: ${{ inputs.nightly }}
       run: |
         export RSPAMD_VERSION=`date +%Y%m%d.0.0`
         echo "RSPAMD_VERSION=${RSPAMD_VERSION}" >> "$GITHUB_ENV"

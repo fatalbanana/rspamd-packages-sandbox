@@ -11,5 +11,3 @@ concurrency:
 jobs:
   build_test:
     uses: ./.github/workflows/build_test.yml
-    with:
-      nightly: false
