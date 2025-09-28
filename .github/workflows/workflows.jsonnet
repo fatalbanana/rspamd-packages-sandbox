@@ -115,7 +115,7 @@ local platform_jobs(name, image) = {
 };
 
 local all_platform_jobs = {
-  jobs: 
+  jobs:
     platform_jobs('centos-8', 'oraclelinux:8') +
     platform_jobs('centos-9', 'oraclelinux:9') +
     platform_jobs('centos-10', 'oraclelinux:10') +
@@ -124,7 +124,7 @@ local all_platform_jobs = {
     platform_jobs('debian-trixie', 'debian:trixie') +
     platform_jobs('ubuntu-focal', 'ubuntu:20.04') +
     platform_jobs('ubuntu-jammy', 'ubuntu:22.04') +
-    platform_jobs('ubuntu-noble', 'ubuntu:24.04')
+    platform_jobs('ubuntu-noble', 'ubuntu:24.04'),
 };
 
 {
