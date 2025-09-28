@@ -46,6 +46,7 @@ runs:
 
     - name: Save commit hash
       id: save_commit
+      shell: bash
       run: |
         cd rspamd
         echo "revision=$(git rev-parse HEAD)" >> "$GITHUB_OUTPUT"
