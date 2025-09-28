@@ -36,7 +36,7 @@ local build_test_pipeline = {
       inputs: {
         nightly: {
           required: true,
-          default: 'false',
+          default: false,
           type: 'boolean',
         },
       },
