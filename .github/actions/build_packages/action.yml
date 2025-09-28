@@ -42,6 +42,7 @@ runs:
 
     # TODO(maybe YOU): avoid pushing new nightly if there are no changes since last one
     - name: Set version information for nightly
+      shell: bash
       if: ${{ inputs.nightly == true }}
       run: |
         export RSPAMD_VERSION=`date +%Y%m%d.0.0`
