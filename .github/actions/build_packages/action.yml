@@ -51,7 +51,6 @@ runs:
         cd rspamd
         echo "revision=$(git rev-parse HEAD)" >> "$GITHUB_OUTPUT"
 
-    # TODO(maybe YOU): avoid pushing new nightly if there are no changes since last one
     - name: Set version information for nightly
       shell: bash
       if: ${{ inputs.nightly }}
