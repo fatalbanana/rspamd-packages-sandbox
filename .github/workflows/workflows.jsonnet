@@ -29,8 +29,8 @@ local nightly_pipeline = {
   },
 };
 
-local build_test_pipeline = {
-  name: 'build_and_test',
+local build_test_release_pipeline = {
+  name: 'build_test_release',
   on: {
     workflow_call: {
       inputs: {
@@ -43,7 +43,7 @@ local build_test_pipeline = {
   },
 };
 
-local build_jobs(name, image) = {
+local platform_jobs(name, image) = {
   [name + '-build-X64']: {
     'runs-on': 'ubuntu-24.04',
     steps: [
@@ -114,19 +114,19 @@ local build_jobs(name, image) = {
   },
 };
 
-local all_build_jobs = {
+local all_platform_jobs = {
   jobs: 
-    build_jobs('centos-8', 'oraclelinux:8') +
-    build_jobs('centos-9', 'oraclelinux:9') +
-    build_jobs('centos-10', 'oraclelinux:10') +
-    build_jobs('debian-bullseye', 'debian:bullseye') +
-    build_jobs('debian-bookworm', 'debian:bookworm') +
-    build_jobs('debian-trixie', 'debian:trixie') +
-    build_jobs('ubuntu-focal', 'ubuntu:20.04') +
-    build_jobs('ubuntu-jammy', 'ubuntu:22.04') +
-    build_jobs('ubuntu-noble', 'ubuntu:24.04')
+    platform_jobs('centos-8', 'oraclelinux:8') +
+    platform_jobs('centos-9', 'oraclelinux:9') +
+    platform_jobs('centos-10', 'oraclelinux:10') +
+    platform_jobs('debian-bullseye', 'debian:bullseye') +
+    platform_jobs('debian-bookworm', 'debian:bookworm') +
+    platform_jobs('debian-trixie', 'debian:trixie') +
+    platform_jobs('ubuntu-focal', 'ubuntu:20.04') +
+    platform_jobs('ubuntu-jammy', 'ubuntu:22.04') +
+    platform_jobs('ubuntu-noble', 'ubuntu:24.04')
 };
 
 {
-  'build_test.yml': build_test_pipeline + all_build_jobs,
+  'build_test_release.yml': build_test_release_pipeline + all_platform_jobs,
 }

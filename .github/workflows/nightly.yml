@@ -10,7 +10,7 @@ concurrency:
   group: rspamd-packages-nightly
 
 jobs:
-  build_test:
-    uses: ./.github/workflows/build_test.yml
+  build_test_release:
+    uses: ./.github/workflows/build_test_release.yml
     with:
       nightly: "y"
