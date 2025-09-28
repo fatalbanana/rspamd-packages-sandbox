@@ -6,7 +6,7 @@ on:
   workflow_dispatch:
 
 concurrency:
-  cancel-in-progress: true
+  cancel-in-progress: false
   group: rspamd-packages-nightly
 
 jobs:
