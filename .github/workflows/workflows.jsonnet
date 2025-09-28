@@ -13,6 +13,15 @@ local build_test_release_pipeline = {
 };
 
 local platform_jobs(name, image) = {
+  local build_with = {
+    name: name,
+    nightly: '${{ inputs.nightly }}',
+  },
+  local test_with = {
+    name: name,
+    platform: '${{ runner.arch }}',
+    revision: '${{ needs.' + name + '-build-X64.outputs.revision }}',
+  },
   [name + '-build-X64']: {
     'runs-on': 'ubuntu-24.04',
     steps: [
@@ -21,10 +30,7 @@ local platform_jobs(name, image) = {
       },
       {
         uses: './.github/actions/build_packages',
-        with: {
-          name: name,
-          nightly: '${{ inputs.nightly }}',
-        },
+        with: build_with,
       },
     ],
   },
@@ -36,10 +42,7 @@ local platform_jobs(name, image) = {
       },
       {
         uses: './.github/actions/build_packages',
-        with: {
-          name: name,
-          nightly: '${{ inputs.nightly }}',
-        },
+        with: build_with,
       },
     ],
   },
@@ -55,10 +58,7 @@ local platform_jobs(name, image) = {
       },
       {
         uses: './.github/actions/test_package',
-        with: {
-          name: name,
-          platform: '${{ runner.arch }}',
-        },
+        with: test_with,
       },
     ],
   },
@@ -74,10 +74,7 @@ local platform_jobs(name, image) = {
       },
       {
         uses: './.github/actions/test_package',
-        with: {
-          name: name,
-          platform: '${{ runner.arch }}',
-        },
+        with: test_with,
       },
     ],
   },
