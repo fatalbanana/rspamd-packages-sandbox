@@ -7,7 +7,7 @@
                "uses": "actions/checkout@v5"
             },
             {
-               "uses": "${{ github.repository }}/.github/workflows/build_packages.yml",
+               "uses": "fatalbanana/rspamd-packages/.github/workflows/build_packages.yml@main",
                "with": {
                   "name": "centos-10",
                   "nightly": "${{ inputs.nightly }}"
@@ -22,7 +22,7 @@
                "uses": "actions/checkout@v5"
             },
             {
-               "uses": "${{ github.repository }}/.github/workflows/build_packages.yml",
+               "uses": "fatalbanana/rspamd-packages/.github/workflows/build_packages.yml@main",
                "with": {
                   "name": "centos-10",
                   "nightly": "${{ inputs.nightly }}"
@@ -41,7 +41,7 @@
                "uses": "actions/checkout@v5"
             },
             {
-               "uses": "${{ github.repository }}/.github/workflows/test_package.yml",
+               "uses": "fatalbanana/rspamd-packages/.github/workflows/test_package.yml@main",
                "with": {
                   "image": "oraclelinux:10",
                   "name": "centos-10",
@@ -61,7 +61,7 @@
                "uses": "actions/checkout@v5"
             },
             {
-               "uses": "${{ github.repository }}/.github/workflows/test_package.yml",
+               "uses": "fatalbanana/rspamd-packages/.github/workflows/test_package.yml@main",
                "with": {
                   "image": "oraclelinux:10",
                   "name": "centos-10",
@@ -77,7 +77,7 @@
                "uses": "actions/checkout@v5"
             },
             {
-               "uses": "${{ github.repository }}/.github/workflows/build_packages.yml",
+               "uses": "fatalbanana/rspamd-packages/.github/workflows/build_packages.yml@main",
                "with": {
                   "name": "centos-8",
                   "nightly": "${{ inputs.nightly }}"
@@ -92,7 +92,7 @@
                "uses": "actions/checkout@v5"
             },
             {
-               "uses": "${{ github.repository }}/.github/workflows/build_packages.yml",
+               "uses": "fatalbanana/rspamd-packages/.github/workflows/build_packages.yml@main",
                "with": {
                   "name": "centos-8",
                   "nightly": "${{ inputs.nightly }}"
@@ -111,7 +111,7 @@
                "uses": "actions/checkout@v5"
             },
             {
-               "uses": "${{ github.repository }}/.github/workflows/test_package.yml",
+               "uses": "fatalbanana/rspamd-packages/.github/workflows/test_package.yml@main",
                "with": {
                   "image": "oraclelinux:8",
                   "name": "centos-8",
@@ -131,7 +131,7 @@
                "uses": "actions/checkout@v5"
             },
             {
-               "uses": "${{ github.repository }}/.github/workflows/test_package.yml",
+               "uses": "fatalbanana/rspamd-packages/.github/workflows/test_package.yml@main",
                "with": {
                   "image": "oraclelinux:8",
                   "name": "centos-8",
@@ -147,7 +147,7 @@
                "uses": "actions/checkout@v5"
             },
             {
-               "uses": "${{ github.repository }}/.github/workflows/build_packages.yml",
+               "uses": "fatalbanana/rspamd-packages/.github/workflows/build_packages.yml@main",
                "with": {
                   "name": "centos-9",
                   "nightly": "${{ inputs.nightly }}"
@@ -162,7 +162,7 @@
                "uses": "actions/checkout@v5"
             },
             {
-               "uses": "${{ github.repository }}/.github/workflows/build_packages.yml",
+               "uses": "fatalbanana/rspamd-packages/.github/workflows/build_packages.yml@main",
                "with": {
                   "name": "centos-9",
                   "nightly": "${{ inputs.nightly }}"
@@ -181,7 +181,7 @@
                "uses": "actions/checkout@v5"
             },
             {
-               "uses": "${{ github.repository }}/.github/workflows/test_package.yml",
+               "uses": "fatalbanana/rspamd-packages/.github/workflows/test_package.yml@main",
                "with": {
                   "image": "oraclelinux:9",
                   "name": "centos-9",
@@ -201,7 +201,7 @@
                "uses": "actions/checkout@v5"
             },
             {
-               "uses": "${{ github.repository }}/.github/workflows/test_package.yml",
+               "uses": "fatalbanana/rspamd-packages/.github/workflows/test_package.yml@main",
                "with": {
                   "image": "oraclelinux:9",
                   "name": "centos-9",
@@ -217,7 +217,7 @@
                "uses": "actions/checkout@v5"
             },
             {
-               "uses": "${{ github.repository }}/.github/workflows/build_packages.yml",
+               "uses": "fatalbanana/rspamd-packages/.github/workflows/build_packages.yml@main",
                "with": {
                   "name": "debian-bookworm",
                   "nightly": "${{ inputs.nightly }}"
@@ -232,7 +232,7 @@
                "uses": "actions/checkout@v5"
             },
             {
-               "uses": "${{ github.repository }}/.github/workflows/build_packages.yml",
+               "uses": "fatalbanana/rspamd-packages/.github/workflows/build_packages.yml@main",
                "with": {
                   "name": "debian-bookworm",
                   "nightly": "${{ inputs.nightly }}"
@@ -251,7 +251,7 @@
                "uses": "actions/checkout@v5"
             },
             {
-               "uses": "${{ github.repository }}/.github/workflows/test_package.yml",
+               "uses": "fatalbanana/rspamd-packages/.github/workflows/test_package.yml@main",
                "with": {
                   "image": "debian:bookworm",
                   "name": "debian-bookworm",
@@ -271,7 +271,7 @@
                "uses": "actions/checkout@v5"
             },
             {
-               "uses": "${{ github.repository }}/.github/workflows/test_package.yml",
+               "uses": "fatalbanana/rspamd-packages/.github/workflows/test_package.yml@main",
                "with": {
                   "image": "debian:bookworm",
                   "name": "debian-bookworm",
@@ -287,7 +287,7 @@
                "uses": "actions/checkout@v5"
             },
             {
-               "uses": "${{ github.repository }}/.github/workflows/build_packages.yml",
+               "uses": "fatalbanana/rspamd-packages/.github/workflows/build_packages.yml@main",
                "with": {
                   "name": "debian-bullseye",
                   "nightly": "${{ inputs.nightly }}"
@@ -302,7 +302,7 @@
                "uses": "actions/checkout@v5"
             },
             {
-               "uses": "${{ github.repository }}/.github/workflows/build_packages.yml",
+               "uses": "fatalbanana/rspamd-packages/.github/workflows/build_packages.yml@main",
                "with": {
                   "name": "debian-bullseye",
                   "nightly": "${{ inputs.nightly }}"
@@ -321,7 +321,7 @@
                "uses": "actions/checkout@v5"
             },
             {
-               "uses": "${{ github.repository }}/.github/workflows/test_package.yml",
+               "uses": "fatalbanana/rspamd-packages/.github/workflows/test_package.yml@main",
                "with": {
                   "image": "debian:bullseye",
                   "name": "debian-bullseye",
@@ -341,7 +341,7 @@
                "uses": "actions/checkout@v5"
             },
             {
-               "uses": "${{ github.repository }}/.github/workflows/test_package.yml",
+               "uses": "fatalbanana/rspamd-packages/.github/workflows/test_package.yml@main",
                "with": {
                   "image": "debian:bullseye",
                   "name": "debian-bullseye",
@@ -357,7 +357,7 @@
                "uses": "actions/checkout@v5"
             },
             {
-               "uses": "${{ github.repository }}/.github/workflows/build_packages.yml",
+               "uses": "fatalbanana/rspamd-packages/.github/workflows/build_packages.yml@main",
                "with": {
                   "name": "debian-trixie",
                   "nightly": "${{ inputs.nightly }}"
@@ -372,7 +372,7 @@
                "uses": "actions/checkout@v5"
             },
             {
-               "uses": "${{ github.repository }}/.github/workflows/build_packages.yml",
+               "uses": "fatalbanana/rspamd-packages/.github/workflows/build_packages.yml@main",
                "with": {
                   "name": "debian-trixie",
                   "nightly": "${{ inputs.nightly }}"
@@ -391,7 +391,7 @@
                "uses": "actions/checkout@v5"
             },
             {
-               "uses": "${{ github.repository }}/.github/workflows/test_package.yml",
+               "uses": "fatalbanana/rspamd-packages/.github/workflows/test_package.yml@main",
                "with": {
                   "image": "debian:trixie",
                   "name": "debian-trixie",
@@ -411,7 +411,7 @@
                "uses": "actions/checkout@v5"
             },
             {
-               "uses": "${{ github.repository }}/.github/workflows/test_package.yml",
+               "uses": "fatalbanana/rspamd-packages/.github/workflows/test_package.yml@main",
                "with": {
                   "image": "debian:trixie",
                   "name": "debian-trixie",
@@ -427,7 +427,7 @@
                "uses": "actions/checkout@v5"
             },
             {
-               "uses": "${{ github.repository }}/.github/workflows/build_packages.yml",
+               "uses": "fatalbanana/rspamd-packages/.github/workflows/build_packages.yml@main",
                "with": {
                   "name": "ubuntu-focal",
                   "nightly": "${{ inputs.nightly }}"
@@ -442,7 +442,7 @@
                "uses": "actions/checkout@v5"
             },
             {
-               "uses": "${{ github.repository }}/.github/workflows/build_packages.yml",
+               "uses": "fatalbanana/rspamd-packages/.github/workflows/build_packages.yml@main",
                "with": {
                   "name": "ubuntu-focal",
                   "nightly": "${{ inputs.nightly }}"
@@ -461,7 +461,7 @@
                "uses": "actions/checkout@v5"
             },
             {
-               "uses": "${{ github.repository }}/.github/workflows/test_package.yml",
+               "uses": "fatalbanana/rspamd-packages/.github/workflows/test_package.yml@main",
                "with": {
                   "image": "ubuntu:20.04",
                   "name": "ubuntu-focal",
@@ -481,7 +481,7 @@
                "uses": "actions/checkout@v5"
             },
             {
-               "uses": "${{ github.repository }}/.github/workflows/test_package.yml",
+               "uses": "fatalbanana/rspamd-packages/.github/workflows/test_package.yml@main",
                "with": {
                   "image": "ubuntu:20.04",
                   "name": "ubuntu-focal",
@@ -497,7 +497,7 @@
                "uses": "actions/checkout@v5"
             },
             {
-               "uses": "${{ github.repository }}/.github/workflows/build_packages.yml",
+               "uses": "fatalbanana/rspamd-packages/.github/workflows/build_packages.yml@main",
                "with": {
                   "name": "ubuntu-jammy",
                   "nightly": "${{ inputs.nightly }}"
@@ -512,7 +512,7 @@
                "uses": "actions/checkout@v5"
             },
             {
-               "uses": "${{ github.repository }}/.github/workflows/build_packages.yml",
+               "uses": "fatalbanana/rspamd-packages/.github/workflows/build_packages.yml@main",
                "with": {
                   "name": "ubuntu-jammy",
                   "nightly": "${{ inputs.nightly }}"
@@ -531,7 +531,7 @@
                "uses": "actions/checkout@v5"
             },
             {
-               "uses": "${{ github.repository }}/.github/workflows/test_package.yml",
+               "uses": "fatalbanana/rspamd-packages/.github/workflows/test_package.yml@main",
                "with": {
                   "image": "ubuntu:22.04",
                   "name": "ubuntu-jammy",
@@ -551,7 +551,7 @@
                "uses": "actions/checkout@v5"
             },
             {
-               "uses": "${{ github.repository }}/.github/workflows/test_package.yml",
+               "uses": "fatalbanana/rspamd-packages/.github/workflows/test_package.yml@main",
                "with": {
                   "image": "ubuntu:22.04",
                   "name": "ubuntu-jammy",
@@ -567,7 +567,7 @@
                "uses": "actions/checkout@v5"
             },
             {
-               "uses": "${{ github.repository }}/.github/workflows/build_packages.yml",
+               "uses": "fatalbanana/rspamd-packages/.github/workflows/build_packages.yml@main",
                "with": {
                   "name": "ubuntu-noble",
                   "nightly": "${{ inputs.nightly }}"
@@ -582,7 +582,7 @@
                "uses": "actions/checkout@v5"
             },
             {
-               "uses": "${{ github.repository }}/.github/workflows/build_packages.yml",
+               "uses": "fatalbanana/rspamd-packages/.github/workflows/build_packages.yml@main",
                "with": {
                   "name": "ubuntu-noble",
                   "nightly": "${{ inputs.nightly }}"
@@ -601,7 +601,7 @@
                "uses": "actions/checkout@v5"
             },
             {
-               "uses": "${{ github.repository }}/.github/workflows/test_package.yml",
+               "uses": "fatalbanana/rspamd-packages/.github/workflows/test_package.yml@main",
                "with": {
                   "image": "ubuntu:24.04",
                   "name": "ubuntu-noble",
@@ -621,7 +621,7 @@
                "uses": "actions/checkout@v5"
             },
             {
-               "uses": "${{ github.repository }}/.github/workflows/test_package.yml",
+               "uses": "fatalbanana/rspamd-packages/.github/workflows/test_package.yml@main",
                "with": {
                   "image": "ubuntu:24.04",
                   "name": "ubuntu-noble",

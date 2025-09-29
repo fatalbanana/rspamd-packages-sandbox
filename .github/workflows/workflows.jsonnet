@@ -29,7 +29,7 @@ local platform_jobs(name, image) = {
         uses: 'actions/checkout@v5',
       },
       {
-        uses: '${{ github.repository }}/.github/workflows/build_packages.yml',
+        uses: 'fatalbanana/rspamd-packages/.github/workflows/build_packages.yml@main',
         with: build_with,
       },
     ],
@@ -41,7 +41,7 @@ local platform_jobs(name, image) = {
         uses: 'actions/checkout@v5',
       },
       {
-        uses: '${{ github.repository }}/.github/workflows/build_packages.yml',
+        uses: 'fatalbanana/rspamd-packages/.github/workflows/build_packages.yml@main',
         with: build_with,
       },
     ],
@@ -57,7 +57,7 @@ local platform_jobs(name, image) = {
         uses: 'actions/checkout@v5',
       },
       {
-        uses: '${{ github.repository }}/.github/workflows/test_package.yml',
+        uses: 'fatalbanana/rspamd-packages/.github/workflows/test_package.yml@main',
         with: test_with,
       },
     ],
@@ -73,7 +73,7 @@ local platform_jobs(name, image) = {
         uses: 'actions/checkout@v5',
       },
       {
-        uses: '${{ github.repository }}/.github/workflows/test_package.yml',
+        uses: 'fatalbanana/rspamd-packages/.github/workflows/test_package.yml@main',
         with: test_with,
       },
     ],
