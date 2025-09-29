@@ -24,27 +24,13 @@ local platform_jobs(name, image) = {
   },
   [name + '-build-X64']: {
     'runs-on': 'ubuntu-24.04',
-    steps: [
-      {
-        uses: 'actions/checkout@v5',
-      },
-      {
-        uses: 'fatalbanana/rspamd-packages/.github/workflows/build_packages.yml@main',
-        with: build_with,
-      },
-    ],
+    uses: 'fatalbanana/rspamd-packages/.github/workflows/build_packages.yml@main',
+    with: build_with,
   },
   [name + '-build-ARM64']: {
     'runs-on': 'ubuntu-24.04-arm',
-    steps: [
-      {
-        uses: 'actions/checkout@v5',
-      },
-      {
-        uses: 'fatalbanana/rspamd-packages/.github/workflows/build_packages.yml@main',
-        with: build_with,
-      },
-    ],
+    uses: 'fatalbanana/rspamd-packages/.github/workflows/build_packages.yml@main',
+    with: build_with,
   },
   [name + '-test-X64']: {
     container: {
@@ -52,15 +38,8 @@ local platform_jobs(name, image) = {
     },
     needs: name + '-build-X64',
     'runs-on': 'ubuntu-24.04',
-    steps: [
-      {
-        uses: 'actions/checkout@v5',
-      },
-      {
-        uses: 'fatalbanana/rspamd-packages/.github/workflows/test_package.yml@main',
-        with: test_with,
-      },
-    ],
+    uses: 'fatalbanana/rspamd-packages/.github/workflows/test_package.yml@main',
+    with: test_with,
   },
   [name + '-test-ARM64']: {
     container: {
@@ -68,15 +47,8 @@ local platform_jobs(name, image) = {
     },
     needs: name + '-build-ARM64',
     'runs-on': 'ubuntu-24.04-arm',
-    steps: [
-      {
-        uses: 'actions/checkout@v5',
-      },
-      {
-        uses: 'fatalbanana/rspamd-packages/.github/workflows/test_package.yml@main',
-        with: test_with,
-      },
-    ],
+    uses: 'fatalbanana/rspamd-packages/.github/workflows/test_package.yml@main',
+    with: test_with,
   },
 };
 
