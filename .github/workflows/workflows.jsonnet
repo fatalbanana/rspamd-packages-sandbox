@@ -24,31 +24,14 @@ local platform_jobs(name, image) = {
   },
   [name + '-build-X64']: {
     'runs-on': 'ubuntu-24.04',
-    'outputs': {
-      revision: '${{ steps.build_packages.outputs.revision }}',
-    },
-    steps: [
-      {
-        uses: 'actions/checkout@v4',
-      },
-      {
-        id: 'build_packages',
-        uses: 'fatalbanana/rspamd-packages-sandbox/.github/workflows/build_packages.yml@main',
-        with: build_with,
-      },
-    ],
+    id: 'build_packages',
+    uses: 'fatalbanana/rspamd-packages-sandbox/.github/workflows/build_packages.yml@main',
+    with: build_with,
   },
   [name + '-build-ARM64']: {
     'runs-on': 'ubuntu-24.04-arm',
-    steps: [
-      {
-        uses: 'actions/checkout@v4',
-      },
-      {
-        uses: 'fatalbanana/rspamd-packages-sandbox/.github/workflows/build_packages.yml@main',
-        with: build_with,
-      },
-    ],
+    uses: 'fatalbanana/rspamd-packages-sandbox/.github/workflows/build_packages.yml@main',
+    with: build_with,
   },
   [name + '-test-X64']: {
     container: {
@@ -56,15 +39,8 @@ local platform_jobs(name, image) = {
     },
     needs: name + '-build-X64',
     'runs-on': 'ubuntu-24.04',
-    steps: [
-      {
-        uses: 'actions/checkout@v4',
-      },
-      {
-        uses: 'fatalbanana/rspamd-packages-sandbox/.github/workflows/test_package.yml@main',
-        with: test_with('X64'),
-      },
-    ],
+    uses: 'fatalbanana/rspamd-packages-sandbox/.github/workflows/test_package.yml@main',
+    with: test_with('X64'),
   },
   [name + '-test-ARM64']: {
     container: {
@@ -72,15 +48,8 @@ local platform_jobs(name, image) = {
     },
     needs: name + '-build-ARM64',
     'runs-on': 'ubuntu-24.04-arm',
-    steps: [
-      {
-        uses: 'actions/checkout@v4',
-      },
-      {
-        uses: 'fatalbanana/rspamd-packages-sandbox/.github/workflows/test_package.yml@main',
-        with: test_with('ARM64'),
-      },
-    ],
+    uses: 'fatalbanana/rspamd-packages-sandbox/.github/workflows/test_package.yml@main',
+    with: test_with('ARM64'),
   },
 };
 
