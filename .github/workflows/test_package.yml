@@ -6,11 +6,11 @@ on:
       name:
         required: true
         type: string
-        description: 'The target OS/distro name used for package naming (e.g., ubuntu-22.04)'
+        description: 'The target OS/distro name to test (e.g., ubuntu-jammy, centos-9)'
       platform:
         required: true
         type: string
-        description: 'The GitHub Actions runner label to use for execution (e.g., ubuntu-latest, self-hosted).'
+        description: 'X64 or ARM64'
       revision:
         required: true
         type: string
@@ -18,7 +18,7 @@ on:
 
 jobs:
   test:
-    runs-on: ${{ inputs.platform }}
+    runs-on: ${{ inputs.platform == 'ARM64' && 'ubuntu-24.04-arm' || 'ubuntu-24.04' }}
 
     steps:
       - name: Download package

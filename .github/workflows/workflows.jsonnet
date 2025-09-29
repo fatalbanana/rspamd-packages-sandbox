@@ -13,9 +13,10 @@ local build_test_release_pipeline = {
 };
 
 local platform_jobs(name, image) = {
-  local build_with = {
+  local build_with(arch) = {
     name: name,
     nightly: '${{ inputs.nightly }}',
+    runner: if 'arch' == 'ARM64' then 'ubuntu-24.04-arm' else 'ubuntu-24.04',
   },
   local test_with(arch) = {
     name: name,
@@ -23,22 +24,19 @@ local platform_jobs(name, image) = {
     revision: '${{ needs.' + name + '-build-' + arch + '.outputs.revision }}',
   },
   [name + '-build-X64']: {
-    'runs-on': 'ubuntu-24.04',
     id: 'build_packages',
     uses: 'fatalbanana/rspamd-packages-sandbox/.github/workflows/build_packages.yml@main',
-    with: build_with,
+    with: build_with('X64'),
   },
   [name + '-build-ARM64']: {
-    'runs-on': 'ubuntu-24.04-arm',
     uses: 'fatalbanana/rspamd-packages-sandbox/.github/workflows/build_packages.yml@main',
-    with: build_with,
+    with: build_with('ARM64'),
   },
   [name + '-test-X64']: {
     container: {
       image: image,
     },
     needs: name + '-build-X64',
-    'runs-on': 'ubuntu-24.04',
     uses: 'fatalbanana/rspamd-packages-sandbox/.github/workflows/test_package.yml@main',
     with: test_with('X64'),
   },
@@ -47,7 +45,6 @@ local platform_jobs(name, image) = {
       image: image,
     },
     needs: name + '-build-ARM64',
-    'runs-on': 'ubuntu-24.04-arm',
     uses: 'fatalbanana/rspamd-packages-sandbox/.github/workflows/test_package.yml@main',
     with: test_with('ARM64'),
   },
