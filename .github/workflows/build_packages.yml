@@ -9,9 +9,6 @@ on:
       nightly:
         required: false
         type: string
-      runner:
-        required: true
-        type: string
 
 outputs:
   revision:
@@ -20,7 +17,6 @@ outputs:
 
 jobs:
   build_packages:
-    runs-on: ${{ inputs.runner }}
     steps:
       - name: Set OS-specific variables
         run: |

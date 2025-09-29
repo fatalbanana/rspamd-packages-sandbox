@@ -14,10 +14,10 @@ local build_test_release_pipeline = {
 
 local platform_jobs(name, image) = {
   local arm_runner = {
-    runner: 'ubuntu-24.04-arm',
+    'runs-on': 'ubuntu-24.04-arm',
   },
   local amd_runner = {
-    runner: 'ubuntu-24.04',
+    'runs-on': 'ubuntu-24.04',
   },
   local build_with = {
     name: name,
@@ -30,28 +30,28 @@ local platform_jobs(name, image) = {
   },
   [name + '-build-X64']: {
     uses: 'fatalbanana/rspamd-packages/.github/workflows/build_packages.yml@main',
-    with: build_with + amd_runner,
-  },
+    with: build_with,
+  } + amd_runner,
   [name + '-build-ARM64']: {
     uses: 'fatalbanana/rspamd-packages/.github/workflows/build_packages.yml@main',
-    with: build_with + arm_runner,
-  },
+    with: build_with,
+  } + arm_runner,
   [name + '-test-X64']: {
     container: {
       image: image,
     },
     needs: name + '-build-X64',
     uses: 'fatalbanana/rspamd-packages/.github/workflows/test_package.yml@main',
-    with: test_with + amd_runner,
-  },
+    with: test_with,
+  } + amd_runner,
   [name + '-test-ARM64']: {
     container: {
       image: image,
     },
     needs: name + '-build-ARM64',
     uses: 'fatalbanana/rspamd-packages/.github/workflows/test_package.yml@main',
-    with: test_with + arm_runner,
-  },
+    with: test_with,
+  } + arm_runner,
 };
 
 local all_platform_jobs = {
