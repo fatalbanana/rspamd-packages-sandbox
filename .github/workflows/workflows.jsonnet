@@ -24,11 +24,15 @@ local platform_jobs(name, image) = {
   },
   [name + '-build-X64']: {
     'runs-on': 'ubuntu-24.04',
+    'outputs': {
+      revision: '${{ steps.build_packages.outputs.revision }}',
+    },
     steps: [
       {
         uses: 'actions/checkout@v4',
       },
       {
+        id: 'build_packages',
         uses: './.github/actions/build_packages',
         with: build_with,
       },
