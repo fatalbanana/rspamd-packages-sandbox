@@ -10,12 +10,6 @@ inputs:
   revision:
     required: true
     type: string
-  run_id:
-    required: false
-    type: string
-  token:
-    required: false
-    default: ${{ github.token }}
 
 runs:
   using: "composite"
@@ -24,7 +18,6 @@ runs:
       uses: actions/download-artifact@v5
       with:
         name: packages-${{ inputs.platform }}-${{ inputs.name }}
-        run-id: ${{ inputs.run_id || github.run_id }}
 
     - name: Perform OS-specific steps
       shell: bash
