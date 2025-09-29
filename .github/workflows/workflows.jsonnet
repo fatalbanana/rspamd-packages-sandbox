@@ -20,7 +20,7 @@ local platform_jobs(name, image) = {
   local test_with = {
     name: name,
     platform: '${{ runner.arch }}',
-    revision: '${{ needs.' + name + '-build-X64.outputs.revision }}',
+    revision: '${{ needs.' + name + '-build-' + '${{ runner.arch }}' + '.outputs.revision }}',
   },
   [name + '-build-X64']: {
     'runs-on': 'ubuntu-24.04',
