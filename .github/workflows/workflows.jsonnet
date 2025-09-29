@@ -17,10 +17,10 @@ local platform_jobs(name, image) = {
     name: name,
     nightly: '${{ inputs.nightly }}',
   },
-  local test_with = {
+  local test_with(arch) = {
     name: name,
     platform: '${{ runner.arch }}',
-    revision: '${{ needs.' + name + '-build-' + '${{ runner.arch }}' + '.outputs.revision }}',
+    revision: '${{ needs.' + name + '-build-' + arch + '.outputs.revision }}',
   },
   [name + '-build-X64']: {
     'runs-on': 'ubuntu-24.04',
@@ -58,7 +58,7 @@ local platform_jobs(name, image) = {
       },
       {
         uses: './.github/actions/test_package',
-        with: test_with,
+        with: test_with('X64'),
       },
     ],
   },
@@ -74,7 +74,7 @@ local platform_jobs(name, image) = {
       },
       {
         uses: './.github/actions/test_package',
-        with: test_with,
+        with: test_with('ARM64'),
       },
     ],
   },

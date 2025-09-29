@@ -45,7 +45,7 @@
                "with": {
                   "name": "centos-10",
                   "platform": "${{ runner.arch }}",
-                  "revision": "${{ needs.centos-10-build-${{ runner.arch }}.outputs.revision }}"
+                  "revision": "${{ needs.centos-10-build-ARM64.outputs.revision }}"
                }
             }
          ]
@@ -65,7 +65,7 @@
                "with": {
                   "name": "centos-10",
                   "platform": "${{ runner.arch }}",
-                  "revision": "${{ needs.centos-10-build-${{ runner.arch }}.outputs.revision }}"
+                  "revision": "${{ needs.centos-10-build-X64.outputs.revision }}"
                }
             }
          ]
@@ -115,7 +115,7 @@
                "with": {
                   "name": "centos-8",
                   "platform": "${{ runner.arch }}",
-                  "revision": "${{ needs.centos-8-build-${{ runner.arch }}.outputs.revision }}"
+                  "revision": "${{ needs.centos-8-build-ARM64.outputs.revision }}"
                }
             }
          ]
@@ -135,7 +135,7 @@
                "with": {
                   "name": "centos-8",
                   "platform": "${{ runner.arch }}",
-                  "revision": "${{ needs.centos-8-build-${{ runner.arch }}.outputs.revision }}"
+                  "revision": "${{ needs.centos-8-build-X64.outputs.revision }}"
                }
             }
          ]
@@ -185,7 +185,7 @@
                "with": {
                   "name": "centos-9",
                   "platform": "${{ runner.arch }}",
-                  "revision": "${{ needs.centos-9-build-${{ runner.arch }}.outputs.revision }}"
+                  "revision": "${{ needs.centos-9-build-ARM64.outputs.revision }}"
                }
             }
          ]
@@ -205,7 +205,7 @@
                "with": {
                   "name": "centos-9",
                   "platform": "${{ runner.arch }}",
-                  "revision": "${{ needs.centos-9-build-${{ runner.arch }}.outputs.revision }}"
+                  "revision": "${{ needs.centos-9-build-X64.outputs.revision }}"
                }
             }
          ]
@@ -255,7 +255,7 @@
                "with": {
                   "name": "debian-bookworm",
                   "platform": "${{ runner.arch }}",
-                  "revision": "${{ needs.debian-bookworm-build-${{ runner.arch }}.outputs.revision }}"
+                  "revision": "${{ needs.debian-bookworm-build-ARM64.outputs.revision }}"
                }
             }
          ]
@@ -275,7 +275,7 @@
                "with": {
                   "name": "debian-bookworm",
                   "platform": "${{ runner.arch }}",
-                  "revision": "${{ needs.debian-bookworm-build-${{ runner.arch }}.outputs.revision }}"
+                  "revision": "${{ needs.debian-bookworm-build-X64.outputs.revision }}"
                }
             }
          ]
@@ -325,7 +325,7 @@
                "with": {
                   "name": "debian-bullseye",
                   "platform": "${{ runner.arch }}",
-                  "revision": "${{ needs.debian-bullseye-build-${{ runner.arch }}.outputs.revision }}"
+                  "revision": "${{ needs.debian-bullseye-build-ARM64.outputs.revision }}"
                }
             }
          ]
@@ -345,7 +345,7 @@
                "with": {
                   "name": "debian-bullseye",
                   "platform": "${{ runner.arch }}",
-                  "revision": "${{ needs.debian-bullseye-build-${{ runner.arch }}.outputs.revision }}"
+                  "revision": "${{ needs.debian-bullseye-build-X64.outputs.revision }}"
                }
             }
          ]
@@ -395,7 +395,7 @@
                "with": {
                   "name": "debian-trixie",
                   "platform": "${{ runner.arch }}",
-                  "revision": "${{ needs.debian-trixie-build-${{ runner.arch }}.outputs.revision }}"
+                  "revision": "${{ needs.debian-trixie-build-ARM64.outputs.revision }}"
                }
             }
          ]
@@ -415,7 +415,7 @@
                "with": {
                   "name": "debian-trixie",
                   "platform": "${{ runner.arch }}",
-                  "revision": "${{ needs.debian-trixie-build-${{ runner.arch }}.outputs.revision }}"
+                  "revision": "${{ needs.debian-trixie-build-X64.outputs.revision }}"
                }
             }
          ]
@@ -465,7 +465,7 @@
                "with": {
                   "name": "ubuntu-focal",
                   "platform": "${{ runner.arch }}",
-                  "revision": "${{ needs.ubuntu-focal-build-${{ runner.arch }}.outputs.revision }}"
+                  "revision": "${{ needs.ubuntu-focal-build-ARM64.outputs.revision }}"
                }
             }
          ]
@@ -485,7 +485,7 @@
                "with": {
                   "name": "ubuntu-focal",
                   "platform": "${{ runner.arch }}",
-                  "revision": "${{ needs.ubuntu-focal-build-${{ runner.arch }}.outputs.revision }}"
+                  "revision": "${{ needs.ubuntu-focal-build-X64.outputs.revision }}"
                }
             }
          ]
@@ -535,7 +535,7 @@
                "with": {
                   "name": "ubuntu-jammy",
                   "platform": "${{ runner.arch }}",
-                  "revision": "${{ needs.ubuntu-jammy-build-${{ runner.arch }}.outputs.revision }}"
+                  "revision": "${{ needs.ubuntu-jammy-build-ARM64.outputs.revision }}"
                }
             }
          ]
@@ -555,7 +555,7 @@
                "with": {
                   "name": "ubuntu-jammy",
                   "platform": "${{ runner.arch }}",
-                  "revision": "${{ needs.ubuntu-jammy-build-${{ runner.arch }}.outputs.revision }}"
+                  "revision": "${{ needs.ubuntu-jammy-build-X64.outputs.revision }}"
                }
             }
          ]
@@ -605,7 +605,7 @@
                "with": {
                   "name": "ubuntu-noble",
                   "platform": "${{ runner.arch }}",
-                  "revision": "${{ needs.ubuntu-noble-build-${{ runner.arch }}.outputs.revision }}"
+                  "revision": "${{ needs.ubuntu-noble-build-ARM64.outputs.revision }}"
                }
             }
          ]
@@ -625,7 +625,7 @@
                "with": {
                   "name": "ubuntu-noble",
                   "platform": "${{ runner.arch }}",
-                  "revision": "${{ needs.ubuntu-noble-build-${{ runner.arch }}.outputs.revision }}"
+                  "revision": "${{ needs.ubuntu-noble-build-X64.outputs.revision }}"
                }
             }
          ]
