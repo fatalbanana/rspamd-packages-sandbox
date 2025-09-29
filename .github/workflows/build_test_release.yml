@@ -1,19 +1,19 @@
 {
    "jobs": {
       "centos-10-build-ARM64": {
-         "runs-on": "ubuntu-24.04-arm",
          "uses": "fatalbanana/rspamd-packages/.github/workflows/build_packages.yml@main",
          "with": {
             "name": "centos-10",
-            "nightly": "${{ inputs.nightly }}"
+            "nightly": "${{ inputs.nightly }}",
+            "runner": "ubuntu-24.04-arm"
          }
       },
       "centos-10-build-X64": {
-         "runs-on": "ubuntu-24.04",
          "uses": "fatalbanana/rspamd-packages/.github/workflows/build_packages.yml@main",
          "with": {
             "name": "centos-10",
-            "nightly": "${{ inputs.nightly }}"
+            "nightly": "${{ inputs.nightly }}",
+            "runner": "ubuntu-24.04"
          }
       },
       "centos-10-test-ARM64": {
@@ -21,12 +21,12 @@
             "image": "oraclelinux:10"
          },
          "needs": "centos-10-build-ARM64",
-         "runs-on": "ubuntu-24.04-arm",
          "uses": "fatalbanana/rspamd-packages/.github/workflows/test_package.yml@main",
          "with": {
             "image": "oraclelinux:10",
             "name": "centos-10",
-            "revision": "${{ needs.centos-10-build-X64.outputs.revision }}"
+            "revision": "${{ needs.centos-10-build-X64.outputs.revision }}",
+            "runner": "ubuntu-24.04-arm"
          }
       },
       "centos-10-test-X64": {
@@ -34,28 +34,28 @@
             "image": "oraclelinux:10"
          },
          "needs": "centos-10-build-X64",
-         "runs-on": "ubuntu-24.04",
          "uses": "fatalbanana/rspamd-packages/.github/workflows/test_package.yml@main",
          "with": {
             "image": "oraclelinux:10",
             "name": "centos-10",
-            "revision": "${{ needs.centos-10-build-X64.outputs.revision }}"
+            "revision": "${{ needs.centos-10-build-X64.outputs.revision }}",
+            "runner": "ubuntu-24.04"
          }
       },
       "centos-8-build-ARM64": {
-         "runs-on": "ubuntu-24.04-arm",
          "uses": "fatalbanana/rspamd-packages/.github/workflows/build_packages.yml@main",
          "with": {
             "name": "centos-8",
-            "nightly": "${{ inputs.nightly }}"
+            "nightly": "${{ inputs.nightly }}",
+            "runner": "ubuntu-24.04-arm"
          }
       },
       "centos-8-build-X64": {
-         "runs-on": "ubuntu-24.04",
          "uses": "fatalbanana/rspamd-packages/.github/workflows/build_packages.yml@main",
          "with": {
             "name": "centos-8",
-            "nightly": "${{ inputs.nightly }}"
+            "nightly": "${{ inputs.nightly }}",
+            "runner": "ubuntu-24.04"
          }
       },
       "centos-8-test-ARM64": {
@@ -63,12 +63,12 @@
             "image": "oraclelinux:8"
          },
          "needs": "centos-8-build-ARM64",
-         "runs-on": "ubuntu-24.04-arm",
          "uses": "fatalbanana/rspamd-packages/.github/workflows/test_package.yml@main",
          "with": {
             "image": "oraclelinux:8",
             "name": "centos-8",
-            "revision": "${{ needs.centos-8-build-X64.outputs.revision }}"
+            "revision": "${{ needs.centos-8-build-X64.outputs.revision }}",
+            "runner": "ubuntu-24.04-arm"
          }
       },
       "centos-8-test-X64": {
@@ -76,28 +76,28 @@
             "image": "oraclelinux:8"
          },
          "needs": "centos-8-build-X64",
-         "runs-on": "ubuntu-24.04",
          "uses": "fatalbanana/rspamd-packages/.github/workflows/test_package.yml@main",
          "with": {
             "image": "oraclelinux:8",
             "name": "centos-8",
-            "revision": "${{ needs.centos-8-build-X64.outputs.revision }}"
+            "revision": "${{ needs.centos-8-build-X64.outputs.revision }}",
+            "runner": "ubuntu-24.04"
          }
       },
       "centos-9-build-ARM64": {
-         "runs-on": "ubuntu-24.04-arm",
          "uses": "fatalbanana/rspamd-packages/.github/workflows/build_packages.yml@main",
          "with": {
             "name": "centos-9",
-            "nightly": "${{ inputs.nightly }}"
+            "nightly": "${{ inputs.nightly }}",
+            "runner": "ubuntu-24.04-arm"
          }
       },
       "centos-9-build-X64": {
-         "runs-on": "ubuntu-24.04",
          "uses": "fatalbanana/rspamd-packages/.github/workflows/build_packages.yml@main",
          "with": {
             "name": "centos-9",
-            "nightly": "${{ inputs.nightly }}"
+            "nightly": "${{ inputs.nightly }}",
+            "runner": "ubuntu-24.04"
          }
       },
       "centos-9-test-ARM64": {
@@ -105,12 +105,12 @@
             "image": "oraclelinux:9"
          },
          "needs": "centos-9-build-ARM64",
-         "runs-on": "ubuntu-24.04-arm",
          "uses": "fatalbanana/rspamd-packages/.github/workflows/test_package.yml@main",
          "with": {
             "image": "oraclelinux:9",
             "name": "centos-9",
-            "revision": "${{ needs.centos-9-build-X64.outputs.revision }}"
+            "revision": "${{ needs.centos-9-build-X64.outputs.revision }}",
+            "runner": "ubuntu-24.04-arm"
          }
       },
       "centos-9-test-X64": {
@@ -118,28 +118,28 @@
             "image": "oraclelinux:9"
          },
          "needs": "centos-9-build-X64",
-         "runs-on": "ubuntu-24.04",
          "uses": "fatalbanana/rspamd-packages/.github/workflows/test_package.yml@main",
          "with": {
             "image": "oraclelinux:9",
             "name": "centos-9",
-            "revision": "${{ needs.centos-9-build-X64.outputs.revision }}"
+            "revision": "${{ needs.centos-9-build-X64.outputs.revision }}",
+            "runner": "ubuntu-24.04"
          }
       },
       "debian-bookworm-build-ARM64": {
-         "runs-on": "ubuntu-24.04-arm",
          "uses": "fatalbanana/rspamd-packages/.github/workflows/build_packages.yml@main",
          "with": {
             "name": "debian-bookworm",
-            "nightly": "${{ inputs.nightly }}"
+            "nightly": "${{ inputs.nightly }}",
+            "runner": "ubuntu-24.04-arm"
          }
       },
       "debian-bookworm-build-X64": {
-         "runs-on": "ubuntu-24.04",
          "uses": "fatalbanana/rspamd-packages/.github/workflows/build_packages.yml@main",
          "with": {
             "name": "debian-bookworm",
-            "nightly": "${{ inputs.nightly }}"
+            "nightly": "${{ inputs.nightly }}",
+            "runner": "ubuntu-24.04"
          }
       },
       "debian-bookworm-test-ARM64": {
@@ -147,12 +147,12 @@
             "image": "debian:bookworm"
          },
          "needs": "debian-bookworm-build-ARM64",
-         "runs-on": "ubuntu-24.04-arm",
          "uses": "fatalbanana/rspamd-packages/.github/workflows/test_package.yml@main",
          "with": {
             "image": "debian:bookworm",
             "name": "debian-bookworm",
-            "revision": "${{ needs.debian-bookworm-build-X64.outputs.revision }}"
+            "revision": "${{ needs.debian-bookworm-build-X64.outputs.revision }}",
+            "runner": "ubuntu-24.04-arm"
          }
       },
       "debian-bookworm-test-X64": {
@@ -160,28 +160,28 @@
             "image": "debian:bookworm"
          },
          "needs": "debian-bookworm-build-X64",
-         "runs-on": "ubuntu-24.04",
          "uses": "fatalbanana/rspamd-packages/.github/workflows/test_package.yml@main",
          "with": {
             "image": "debian:bookworm",
             "name": "debian-bookworm",
-            "revision": "${{ needs.debian-bookworm-build-X64.outputs.revision }}"
+            "revision": "${{ needs.debian-bookworm-build-X64.outputs.revision }}",
+            "runner": "ubuntu-24.04"
          }
       },
       "debian-bullseye-build-ARM64": {
-         "runs-on": "ubuntu-24.04-arm",
          "uses": "fatalbanana/rspamd-packages/.github/workflows/build_packages.yml@main",
          "with": {
             "name": "debian-bullseye",
-            "nightly": "${{ inputs.nightly }}"
+            "nightly": "${{ inputs.nightly }}",
+            "runner": "ubuntu-24.04-arm"
          }
       },
       "debian-bullseye-build-X64": {
-         "runs-on": "ubuntu-24.04",
          "uses": "fatalbanana/rspamd-packages/.github/workflows/build_packages.yml@main",
          "with": {
             "name": "debian-bullseye",
-            "nightly": "${{ inputs.nightly }}"
+            "nightly": "${{ inputs.nightly }}",
+            "runner": "ubuntu-24.04"
          }
       },
       "debian-bullseye-test-ARM64": {
@@ -189,12 +189,12 @@
             "image": "debian:bullseye"
          },
          "needs": "debian-bullseye-build-ARM64",
-         "runs-on": "ubuntu-24.04-arm",
          "uses": "fatalbanana/rspamd-packages/.github/workflows/test_package.yml@main",
          "with": {
             "image": "debian:bullseye",
             "name": "debian-bullseye",
-            "revision": "${{ needs.debian-bullseye-build-X64.outputs.revision }}"
+            "revision": "${{ needs.debian-bullseye-build-X64.outputs.revision }}",
+            "runner": "ubuntu-24.04-arm"
          }
       },
       "debian-bullseye-test-X64": {
@@ -202,28 +202,28 @@
             "image": "debian:bullseye"
          },
          "needs": "debian-bullseye-build-X64",
-         "runs-on": "ubuntu-24.04",
          "uses": "fatalbanana/rspamd-packages/.github/workflows/test_package.yml@main",
          "with": {
             "image": "debian:bullseye",
             "name": "debian-bullseye",
-            "revision": "${{ needs.debian-bullseye-build-X64.outputs.revision }}"
+            "revision": "${{ needs.debian-bullseye-build-X64.outputs.revision }}",
+            "runner": "ubuntu-24.04"
          }
       },
       "debian-trixie-build-ARM64": {
-         "runs-on": "ubuntu-24.04-arm",
          "uses": "fatalbanana/rspamd-packages/.github/workflows/build_packages.yml@main",
          "with": {
             "name": "debian-trixie",
-            "nightly": "${{ inputs.nightly }}"
+            "nightly": "${{ inputs.nightly }}",
+            "runner": "ubuntu-24.04-arm"
          }
       },
       "debian-trixie-build-X64": {
-         "runs-on": "ubuntu-24.04",
          "uses": "fatalbanana/rspamd-packages/.github/workflows/build_packages.yml@main",
          "with": {
             "name": "debian-trixie",
-            "nightly": "${{ inputs.nightly }}"
+            "nightly": "${{ inputs.nightly }}",
+            "runner": "ubuntu-24.04"
          }
       },
       "debian-trixie-test-ARM64": {
@@ -231,12 +231,12 @@
             "image": "debian:trixie"
          },
          "needs": "debian-trixie-build-ARM64",
-         "runs-on": "ubuntu-24.04-arm",
          "uses": "fatalbanana/rspamd-packages/.github/workflows/test_package.yml@main",
          "with": {
             "image": "debian:trixie",
             "name": "debian-trixie",
-            "revision": "${{ needs.debian-trixie-build-X64.outputs.revision }}"
+            "revision": "${{ needs.debian-trixie-build-X64.outputs.revision }}",
+            "runner": "ubuntu-24.04-arm"
          }
       },
       "debian-trixie-test-X64": {
@@ -244,28 +244,28 @@
             "image": "debian:trixie"
          },
          "needs": "debian-trixie-build-X64",
-         "runs-on": "ubuntu-24.04",
          "uses": "fatalbanana/rspamd-packages/.github/workflows/test_package.yml@main",
          "with": {
             "image": "debian:trixie",
             "name": "debian-trixie",
-            "revision": "${{ needs.debian-trixie-build-X64.outputs.revision }}"
+            "revision": "${{ needs.debian-trixie-build-X64.outputs.revision }}",
+            "runner": "ubuntu-24.04"
          }
       },
       "ubuntu-focal-build-ARM64": {
-         "runs-on": "ubuntu-24.04-arm",
          "uses": "fatalbanana/rspamd-packages/.github/workflows/build_packages.yml@main",
          "with": {
             "name": "ubuntu-focal",
-            "nightly": "${{ inputs.nightly }}"
+            "nightly": "${{ inputs.nightly }}",
+            "runner": "ubuntu-24.04-arm"
          }
       },
       "ubuntu-focal-build-X64": {
-         "runs-on": "ubuntu-24.04",
          "uses": "fatalbanana/rspamd-packages/.github/workflows/build_packages.yml@main",
          "with": {
             "name": "ubuntu-focal",
-            "nightly": "${{ inputs.nightly }}"
+            "nightly": "${{ inputs.nightly }}",
+            "runner": "ubuntu-24.04"
          }
       },
       "ubuntu-focal-test-ARM64": {
@@ -273,12 +273,12 @@
             "image": "ubuntu:20.04"
          },
          "needs": "ubuntu-focal-build-ARM64",
-         "runs-on": "ubuntu-24.04-arm",
          "uses": "fatalbanana/rspamd-packages/.github/workflows/test_package.yml@main",
          "with": {
             "image": "ubuntu:20.04",
             "name": "ubuntu-focal",
-            "revision": "${{ needs.ubuntu-focal-build-X64.outputs.revision }}"
+            "revision": "${{ needs.ubuntu-focal-build-X64.outputs.revision }}",
+            "runner": "ubuntu-24.04-arm"
          }
       },
       "ubuntu-focal-test-X64": {
@@ -286,28 +286,28 @@
             "image": "ubuntu:20.04"
          },
          "needs": "ubuntu-focal-build-X64",
-         "runs-on": "ubuntu-24.04",
          "uses": "fatalbanana/rspamd-packages/.github/workflows/test_package.yml@main",
          "with": {
             "image": "ubuntu:20.04",
             "name": "ubuntu-focal",
-            "revision": "${{ needs.ubuntu-focal-build-X64.outputs.revision }}"
+            "revision": "${{ needs.ubuntu-focal-build-X64.outputs.revision }}",
+            "runner": "ubuntu-24.04"
          }
       },
       "ubuntu-jammy-build-ARM64": {
-         "runs-on": "ubuntu-24.04-arm",
          "uses": "fatalbanana/rspamd-packages/.github/workflows/build_packages.yml@main",
          "with": {
             "name": "ubuntu-jammy",
-            "nightly": "${{ inputs.nightly }}"
+            "nightly": "${{ inputs.nightly }}",
+            "runner": "ubuntu-24.04-arm"
          }
       },
       "ubuntu-jammy-build-X64": {
-         "runs-on": "ubuntu-24.04",
          "uses": "fatalbanana/rspamd-packages/.github/workflows/build_packages.yml@main",
          "with": {
             "name": "ubuntu-jammy",
-            "nightly": "${{ inputs.nightly }}"
+            "nightly": "${{ inputs.nightly }}",
+            "runner": "ubuntu-24.04"
          }
       },
       "ubuntu-jammy-test-ARM64": {
@@ -315,12 +315,12 @@
             "image": "ubuntu:22.04"
          },
          "needs": "ubuntu-jammy-build-ARM64",
-         "runs-on": "ubuntu-24.04-arm",
          "uses": "fatalbanana/rspamd-packages/.github/workflows/test_package.yml@main",
          "with": {
             "image": "ubuntu:22.04",
             "name": "ubuntu-jammy",
-            "revision": "${{ needs.ubuntu-jammy-build-X64.outputs.revision }}"
+            "revision": "${{ needs.ubuntu-jammy-build-X64.outputs.revision }}",
+            "runner": "ubuntu-24.04-arm"
          }
       },
       "ubuntu-jammy-test-X64": {
@@ -328,28 +328,28 @@
             "image": "ubuntu:22.04"
          },
          "needs": "ubuntu-jammy-build-X64",
-         "runs-on": "ubuntu-24.04",
          "uses": "fatalbanana/rspamd-packages/.github/workflows/test_package.yml@main",
          "with": {
             "image": "ubuntu:22.04",
             "name": "ubuntu-jammy",
-            "revision": "${{ needs.ubuntu-jammy-build-X64.outputs.revision }}"
+            "revision": "${{ needs.ubuntu-jammy-build-X64.outputs.revision }}",
+            "runner": "ubuntu-24.04"
          }
       },
       "ubuntu-noble-build-ARM64": {
-         "runs-on": "ubuntu-24.04-arm",
          "uses": "fatalbanana/rspamd-packages/.github/workflows/build_packages.yml@main",
          "with": {
             "name": "ubuntu-noble",
-            "nightly": "${{ inputs.nightly }}"
+            "nightly": "${{ inputs.nightly }}",
+            "runner": "ubuntu-24.04-arm"
          }
       },
       "ubuntu-noble-build-X64": {
-         "runs-on": "ubuntu-24.04",
          "uses": "fatalbanana/rspamd-packages/.github/workflows/build_packages.yml@main",
          "with": {
             "name": "ubuntu-noble",
-            "nightly": "${{ inputs.nightly }}"
+            "nightly": "${{ inputs.nightly }}",
+            "runner": "ubuntu-24.04"
          }
       },
       "ubuntu-noble-test-ARM64": {
@@ -357,12 +357,12 @@
             "image": "ubuntu:24.04"
          },
          "needs": "ubuntu-noble-build-ARM64",
-         "runs-on": "ubuntu-24.04-arm",
          "uses": "fatalbanana/rspamd-packages/.github/workflows/test_package.yml@main",
          "with": {
             "image": "ubuntu:24.04",
             "name": "ubuntu-noble",
-            "revision": "${{ needs.ubuntu-noble-build-X64.outputs.revision }}"
+            "revision": "${{ needs.ubuntu-noble-build-X64.outputs.revision }}",
+            "runner": "ubuntu-24.04-arm"
          }
       },
       "ubuntu-noble-test-X64": {
@@ -370,12 +370,12 @@
             "image": "ubuntu:24.04"
          },
          "needs": "ubuntu-noble-build-X64",
-         "runs-on": "ubuntu-24.04",
          "uses": "fatalbanana/rspamd-packages/.github/workflows/test_package.yml@main",
          "with": {
             "image": "ubuntu:24.04",
             "name": "ubuntu-noble",
-            "revision": "${{ needs.ubuntu-noble-build-X64.outputs.revision }}"
+            "revision": "${{ needs.ubuntu-noble-build-X64.outputs.revision }}",
+            "runner": "ubuntu-24.04"
          }
       }
    },
