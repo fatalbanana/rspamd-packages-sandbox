@@ -3,6 +3,10 @@ name: Test package (Reusable)
 on:
   workflow_call:
     inputs:
+      image:
+        required: true
+        type: string
+        description: 'Untampered docker image to use for testing'
       name:
         required: true
         type: string
@@ -19,6 +23,8 @@ on:
 jobs:
   test:
     runs-on: ${{ inputs.platform == 'ARM64' && 'ubuntu-24.04-arm' || 'ubuntu-24.04' }}
+    container:
+      image: ${{ inputs.image }}
 
     steps:
       - name: Download package

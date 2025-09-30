@@ -20,6 +20,7 @@ local platform_jobs(name, image) = {
   },
   local test_with(arch) = {
     name: name,
+    image: image,
     platform: '${{ runner.arch }}',
     revision: '${{ needs.' + name + '-build-' + arch + '.outputs.revision }}',
   },
@@ -32,17 +33,11 @@ local platform_jobs(name, image) = {
     with: build_with('ARM64'),
   },
   [name + '-test-X64']: {
-    container: {
-      image: image,
-    },
     needs: name + '-build-X64',
     uses: 'fatalbanana/rspamd-packages-sandbox/.github/workflows/test_package.yml@main',
     with: test_with('X64'),
   },
   [name + '-test-ARM64']: {
-    container: {
-      image: image,
-    },
     needs: name + '-build-ARM64',
     uses: 'fatalbanana/rspamd-packages-sandbox/.github/workflows/test_package.yml@main',
     with: test_with('ARM64'),
