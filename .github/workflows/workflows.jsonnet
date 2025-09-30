@@ -24,7 +24,6 @@ local platform_jobs(name, image) = {
     revision: '${{ needs.' + name + '-build-' + arch + '.outputs.revision }}',
   },
   [name + '-build-X64']: {
-    id: 'build_packages',
     uses: 'fatalbanana/rspamd-packages-sandbox/.github/workflows/build_packages.yml@main',
     with: build_with('X64'),
   },
