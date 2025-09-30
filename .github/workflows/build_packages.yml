@@ -23,7 +23,7 @@ on:
 
 jobs:
   build:
-    name: 'build (${{ inputs.name }}/${{ runner.arch }})'
+    name: 'build (${{ inputs.name }}/${{ inputs.runner.endsWith('-arm') && 'ARM64' || 'X64' }})'
     runs-on: '${{ inputs.runner }}'
 
     outputs:
