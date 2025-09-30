@@ -5,7 +5,7 @@
          "with": {
             "name": "centos-10",
             "nightly": "${{ inputs.nightly }}",
-            "runner": "ubuntu-24.04-arm"
+            "platform": "ARM64"
          }
       },
       "centos-10-build-X64": {
@@ -13,7 +13,7 @@
          "with": {
             "name": "centos-10",
             "nightly": "${{ inputs.nightly }}",
-            "runner": "ubuntu-24.04"
+            "platform": "X64"
          }
       },
       "centos-10-test-ARM64": {
@@ -41,7 +41,7 @@
          "with": {
             "name": "centos-8",
             "nightly": "${{ inputs.nightly }}",
-            "runner": "ubuntu-24.04-arm"
+            "platform": "ARM64"
          }
       },
       "centos-8-build-X64": {
@@ -49,7 +49,7 @@
          "with": {
             "name": "centos-8",
             "nightly": "${{ inputs.nightly }}",
-            "runner": "ubuntu-24.04"
+            "platform": "X64"
          }
       },
       "centos-8-test-ARM64": {
@@ -77,7 +77,7 @@
          "with": {
             "name": "centos-9",
             "nightly": "${{ inputs.nightly }}",
-            "runner": "ubuntu-24.04-arm"
+            "platform": "ARM64"
          }
       },
       "centos-9-build-X64": {
@@ -85,7 +85,7 @@
          "with": {
             "name": "centos-9",
             "nightly": "${{ inputs.nightly }}",
-            "runner": "ubuntu-24.04"
+            "platform": "X64"
          }
       },
       "centos-9-test-ARM64": {
@@ -113,7 +113,7 @@
          "with": {
             "name": "debian-bookworm",
             "nightly": "${{ inputs.nightly }}",
-            "runner": "ubuntu-24.04-arm"
+            "platform": "ARM64"
          }
       },
       "debian-bookworm-build-X64": {
@@ -121,7 +121,7 @@
          "with": {
             "name": "debian-bookworm",
             "nightly": "${{ inputs.nightly }}",
-            "runner": "ubuntu-24.04"
+            "platform": "X64"
          }
       },
       "debian-bookworm-test-ARM64": {
@@ -149,7 +149,7 @@
          "with": {
             "name": "debian-bullseye",
             "nightly": "${{ inputs.nightly }}",
-            "runner": "ubuntu-24.04-arm"
+            "platform": "ARM64"
          }
       },
       "debian-bullseye-build-X64": {
@@ -157,7 +157,7 @@
          "with": {
             "name": "debian-bullseye",
             "nightly": "${{ inputs.nightly }}",
-            "runner": "ubuntu-24.04"
+            "platform": "X64"
          }
       },
       "debian-bullseye-test-ARM64": {
@@ -185,7 +185,7 @@
          "with": {
             "name": "debian-trixie",
             "nightly": "${{ inputs.nightly }}",
-            "runner": "ubuntu-24.04-arm"
+            "platform": "ARM64"
          }
       },
       "debian-trixie-build-X64": {
@@ -193,7 +193,7 @@
          "with": {
             "name": "debian-trixie",
             "nightly": "${{ inputs.nightly }}",
-            "runner": "ubuntu-24.04"
+            "platform": "X64"
          }
       },
       "debian-trixie-test-ARM64": {
@@ -221,7 +221,7 @@
          "with": {
             "name": "ubuntu-focal",
             "nightly": "${{ inputs.nightly }}",
-            "runner": "ubuntu-24.04-arm"
+            "platform": "ARM64"
          }
       },
       "ubuntu-focal-build-X64": {
@@ -229,7 +229,7 @@
          "with": {
             "name": "ubuntu-focal",
             "nightly": "${{ inputs.nightly }}",
-            "runner": "ubuntu-24.04"
+            "platform": "X64"
          }
       },
       "ubuntu-focal-test-ARM64": {
@@ -257,7 +257,7 @@
          "with": {
             "name": "ubuntu-jammy",
             "nightly": "${{ inputs.nightly }}",
-            "runner": "ubuntu-24.04-arm"
+            "platform": "ARM64"
          }
       },
       "ubuntu-jammy-build-X64": {
@@ -265,7 +265,7 @@
          "with": {
             "name": "ubuntu-jammy",
             "nightly": "${{ inputs.nightly }}",
-            "runner": "ubuntu-24.04"
+            "platform": "X64"
          }
       },
       "ubuntu-jammy-test-ARM64": {
@@ -293,7 +293,7 @@
          "with": {
             "name": "ubuntu-noble",
             "nightly": "${{ inputs.nightly }}",
-            "runner": "ubuntu-24.04-arm"
+            "platform": "ARM64"
          }
       },
       "ubuntu-noble-build-X64": {
@@ -301,7 +301,7 @@
          "with": {
             "name": "ubuntu-noble",
             "nightly": "${{ inputs.nightly }}",
-            "runner": "ubuntu-24.04"
+            "platform": "X64"
          }
       },
       "ubuntu-noble-test-ARM64": {

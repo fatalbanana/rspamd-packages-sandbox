@@ -11,10 +11,10 @@ on:
         required: false
         type: string
         description: 'Set to any value to enable nightly build logic.'
-      runner:
+      platform:
         required: true
         type: string
-        description: 'The runner to use'
+        description: 'The target platform (X64 or ARM64)'
 
     outputs:
       revision:
@@ -23,8 +23,8 @@ on:
 
 jobs:
   build:
-    name: 'build (${{ inputs.name }}/${{ endsWith(inputs.runner, "-arm") && "ARM64" || "X64" }})'
-    runs-on: '${{ inputs.runner }}'
+    name: 'build (${{ inputs.name }}/${{ inputs.platform }}'
+    runs-on: ${{ inputs.platform == 'ARM64' && 'ubuntu-24.04-arm' || 'ubuntu-24.04' }}
 
     outputs:
       revision: ${{ steps.save_commit.outputs.revision }}

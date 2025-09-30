@@ -16,7 +16,7 @@ local platform_jobs(name, image) = {
   local build_with(arch) = {
     name: name,
     nightly: '${{ inputs.nightly }}',
-    runner: if arch == 'ARM64' then 'ubuntu-24.04-arm' else 'ubuntu-24.04',
+    platform: arch,
   },
   local test_with(arch) = {
     name: name,
