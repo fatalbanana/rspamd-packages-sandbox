@@ -23,6 +23,7 @@ on:
 
 jobs:
   build:
+    name: 'build (${{ inputs.name }}/${{ runner.arch }})'
     runs-on: '${{ inputs.runner }}'
 
     outputs:
