@@ -21,7 +21,7 @@ local platform_jobs(name, image) = {
   local test_with(arch) = {
     name: name,
     image: image,
-    platform: '${{ runner.arch }}',
+    platform: arch,
     revision: '${{ needs.' + name + '-build-' + arch + '.outputs.revision }}',
   },
   [name + '-build-X64']: {
