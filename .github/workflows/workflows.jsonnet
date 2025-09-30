@@ -25,21 +25,21 @@ local platform_jobs(name, image) = {
     revision: '${{ needs.' + name + '-build-' + arch + '.outputs.revision }}',
   },
   [name + '-build-X64']: {
-    uses: 'fatalbanana/rspamd-packages-sandbox/.github/workflows/build_packages.yml@main',
+    uses: './.github/workflows/build_packages.yml',
     with: build_with('X64'),
   },
   [name + '-build-ARM64']: {
-    uses: 'fatalbanana/rspamd-packages-sandbox/.github/workflows/build_packages.yml@main',
+    uses: './.github/workflows/build_packages.yml',
     with: build_with('ARM64'),
   },
   [name + '-test-X64']: {
     needs: name + '-build-X64',
-    uses: 'fatalbanana/rspamd-packages-sandbox/.github/workflows/test_package.yml@main',
+    uses: './.github/workflows/test_package.yml',
     with: test_with('X64'),
   },
   [name + '-test-ARM64']: {
     needs: name + '-build-ARM64',
-    uses: 'fatalbanana/rspamd-packages-sandbox/.github/workflows/test_package.yml@main',
+    uses: './.github/workflows/test_package.yml',
     with: test_with('ARM64'),
   },
 };

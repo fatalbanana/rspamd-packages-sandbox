@@ -1,7 +1,7 @@
 {
    "jobs": {
       "centos-10-build-ARM64": {
-         "uses": "fatalbanana/rspamd-packages-sandbox/.github/workflows/build_packages.yml@main",
+         "uses": "./.github/workflows/build_packages.yml",
          "with": {
             "name": "centos-10",
             "nightly": "${{ inputs.nightly }}",
@@ -9,7 +9,7 @@
          }
       },
       "centos-10-build-X64": {
-         "uses": "fatalbanana/rspamd-packages-sandbox/.github/workflows/build_packages.yml@main",
+         "uses": "./.github/workflows/build_packages.yml",
          "with": {
             "name": "centos-10",
             "nightly": "${{ inputs.nightly }}",
@@ -18,7 +18,7 @@
       },
       "centos-10-test-ARM64": {
          "needs": "centos-10-build-ARM64",
-         "uses": "fatalbanana/rspamd-packages-sandbox/.github/workflows/test_package.yml@main",
+         "uses": "./.github/workflows/test_package.yml",
          "with": {
             "image": "oraclelinux:10",
             "name": "centos-10",
@@ -28,7 +28,7 @@
       },
       "centos-10-test-X64": {
          "needs": "centos-10-build-X64",
-         "uses": "fatalbanana/rspamd-packages-sandbox/.github/workflows/test_package.yml@main",
+         "uses": "./.github/workflows/test_package.yml",
          "with": {
             "image": "oraclelinux:10",
             "name": "centos-10",
@@ -37,7 +37,7 @@
          }
       },
       "centos-8-build-ARM64": {
-         "uses": "fatalbanana/rspamd-packages-sandbox/.github/workflows/build_packages.yml@main",
+         "uses": "./.github/workflows/build_packages.yml",
          "with": {
             "name": "centos-8",
             "nightly": "${{ inputs.nightly }}",
@@ -45,7 +45,7 @@
          }
       },
       "centos-8-build-X64": {
-         "uses": "fatalbanana/rspamd-packages-sandbox/.github/workflows/build_packages.yml@main",
+         "uses": "./.github/workflows/build_packages.yml",
          "with": {
             "name": "centos-8",
             "nightly": "${{ inputs.nightly }}",
@@ -54,7 +54,7 @@
       },
       "centos-8-test-ARM64": {
          "needs": "centos-8-build-ARM64",
-         "uses": "fatalbanana/rspamd-packages-sandbox/.github/workflows/test_package.yml@main",
+         "uses": "./.github/workflows/test_package.yml",
          "with": {
             "image": "oraclelinux:8",
             "name": "centos-8",
@@ -64,7 +64,7 @@
       },
       "centos-8-test-X64": {
          "needs": "centos-8-build-X64",
-         "uses": "fatalbanana/rspamd-packages-sandbox/.github/workflows/test_package.yml@main",
+         "uses": "./.github/workflows/test_package.yml",
          "with": {
             "image": "oraclelinux:8",
             "name": "centos-8",
@@ -73,7 +73,7 @@
          }
       },
       "centos-9-build-ARM64": {
-         "uses": "fatalbanana/rspamd-packages-sandbox/.github/workflows/build_packages.yml@main",
+         "uses": "./.github/workflows/build_packages.yml",
          "with": {
             "name": "centos-9",
             "nightly": "${{ inputs.nightly }}",
@@ -81,7 +81,7 @@
          }
       },
       "centos-9-build-X64": {
-         "uses": "fatalbanana/rspamd-packages-sandbox/.github/workflows/build_packages.yml@main",
+         "uses": "./.github/workflows/build_packages.yml",
          "with": {
             "name": "centos-9",
             "nightly": "${{ inputs.nightly }}",
@@ -90,7 +90,7 @@
       },
       "centos-9-test-ARM64": {
          "needs": "centos-9-build-ARM64",
-         "uses": "fatalbanana/rspamd-packages-sandbox/.github/workflows/test_package.yml@main",
+         "uses": "./.github/workflows/test_package.yml",
          "with": {
             "image": "oraclelinux:9",
             "name": "centos-9",
@@ -100,7 +100,7 @@
       },
       "centos-9-test-X64": {
          "needs": "centos-9-build-X64",
-         "uses": "fatalbanana/rspamd-packages-sandbox/.github/workflows/test_package.yml@main",
+         "uses": "./.github/workflows/test_package.yml",
          "with": {
             "image": "oraclelinux:9",
             "name": "centos-9",
@@ -109,7 +109,7 @@
          }
       },
       "debian-bookworm-build-ARM64": {
-         "uses": "fatalbanana/rspamd-packages-sandbox/.github/workflows/build_packages.yml@main",
+         "uses": "./.github/workflows/build_packages.yml",
          "with": {
             "name": "debian-bookworm",
             "nightly": "${{ inputs.nightly }}",
@@ -117,7 +117,7 @@
          }
       },
       "debian-bookworm-build-X64": {
-         "uses": "fatalbanana/rspamd-packages-sandbox/.github/workflows/build_packages.yml@main",
+         "uses": "./.github/workflows/build_packages.yml",
          "with": {
             "name": "debian-bookworm",
             "nightly": "${{ inputs.nightly }}",
@@ -126,7 +126,7 @@
       },
       "debian-bookworm-test-ARM64": {
          "needs": "debian-bookworm-build-ARM64",
-         "uses": "fatalbanana/rspamd-packages-sandbox/.github/workflows/test_package.yml@main",
+         "uses": "./.github/workflows/test_package.yml",
          "with": {
             "image": "debian:bookworm",
             "name": "debian-bookworm",
@@ -136,7 +136,7 @@
       },
       "debian-bookworm-test-X64": {
          "needs": "debian-bookworm-build-X64",
-         "uses": "fatalbanana/rspamd-packages-sandbox/.github/workflows/test_package.yml@main",
+         "uses": "./.github/workflows/test_package.yml",
          "with": {
             "image": "debian:bookworm",
             "name": "debian-bookworm",
@@ -145,7 +145,7 @@
          }
       },
       "debian-bullseye-build-ARM64": {
-         "uses": "fatalbanana/rspamd-packages-sandbox/.github/workflows/build_packages.yml@main",
+         "uses": "./.github/workflows/build_packages.yml",
          "with": {
             "name": "debian-bullseye",
             "nightly": "${{ inputs.nightly }}",
@@ -153,7 +153,7 @@
          }
       },
       "debian-bullseye-build-X64": {
-         "uses": "fatalbanana/rspamd-packages-sandbox/.github/workflows/build_packages.yml@main",
+         "uses": "./.github/workflows/build_packages.yml",
          "with": {
             "name": "debian-bullseye",
             "nightly": "${{ inputs.nightly }}",
@@ -162,7 +162,7 @@
       },
       "debian-bullseye-test-ARM64": {
          "needs": "debian-bullseye-build-ARM64",
-         "uses": "fatalbanana/rspamd-packages-sandbox/.github/workflows/test_package.yml@main",
+         "uses": "./.github/workflows/test_package.yml",
          "with": {
             "image": "debian:bullseye",
             "name": "debian-bullseye",
@@ -172,7 +172,7 @@
       },
       "debian-bullseye-test-X64": {
          "needs": "debian-bullseye-build-X64",
-         "uses": "fatalbanana/rspamd-packages-sandbox/.github/workflows/test_package.yml@main",
+         "uses": "./.github/workflows/test_package.yml",
          "with": {
             "image": "debian:bullseye",
             "name": "debian-bullseye",
@@ -181,7 +181,7 @@
          }
       },
       "debian-trixie-build-ARM64": {
-         "uses": "fatalbanana/rspamd-packages-sandbox/.github/workflows/build_packages.yml@main",
+         "uses": "./.github/workflows/build_packages.yml",
          "with": {
             "name": "debian-trixie",
             "nightly": "${{ inputs.nightly }}",
@@ -189,7 +189,7 @@
          }
       },
       "debian-trixie-build-X64": {
-         "uses": "fatalbanana/rspamd-packages-sandbox/.github/workflows/build_packages.yml@main",
+         "uses": "./.github/workflows/build_packages.yml",
          "with": {
             "name": "debian-trixie",
             "nightly": "${{ inputs.nightly }}",
@@ -198,7 +198,7 @@
       },
       "debian-trixie-test-ARM64": {
          "needs": "debian-trixie-build-ARM64",
-         "uses": "fatalbanana/rspamd-packages-sandbox/.github/workflows/test_package.yml@main",
+         "uses": "./.github/workflows/test_package.yml",
          "with": {
             "image": "debian:trixie",
             "name": "debian-trixie",
@@ -208,7 +208,7 @@
       },
       "debian-trixie-test-X64": {
          "needs": "debian-trixie-build-X64",
-         "uses": "fatalbanana/rspamd-packages-sandbox/.github/workflows/test_package.yml@main",
+         "uses": "./.github/workflows/test_package.yml",
          "with": {
             "image": "debian:trixie",
             "name": "debian-trixie",
@@ -217,7 +217,7 @@
          }
       },
       "ubuntu-focal-build-ARM64": {
-         "uses": "fatalbanana/rspamd-packages-sandbox/.github/workflows/build_packages.yml@main",
+         "uses": "./.github/workflows/build_packages.yml",
          "with": {
             "name": "ubuntu-focal",
             "nightly": "${{ inputs.nightly }}",
@@ -225,7 +225,7 @@
          }
       },
       "ubuntu-focal-build-X64": {
-         "uses": "fatalbanana/rspamd-packages-sandbox/.github/workflows/build_packages.yml@main",
+         "uses": "./.github/workflows/build_packages.yml",
          "with": {
             "name": "ubuntu-focal",
             "nightly": "${{ inputs.nightly }}",
@@ -234,7 +234,7 @@
       },
       "ubuntu-focal-test-ARM64": {
          "needs": "ubuntu-focal-build-ARM64",
-         "uses": "fatalbanana/rspamd-packages-sandbox/.github/workflows/test_package.yml@main",
+         "uses": "./.github/workflows/test_package.yml",
          "with": {
             "image": "ubuntu:20.04",
             "name": "ubuntu-focal",
@@ -244,7 +244,7 @@
       },
       "ubuntu-focal-test-X64": {
          "needs": "ubuntu-focal-build-X64",
-         "uses": "fatalbanana/rspamd-packages-sandbox/.github/workflows/test_package.yml@main",
+         "uses": "./.github/workflows/test_package.yml",
          "with": {
             "image": "ubuntu:20.04",
             "name": "ubuntu-focal",
@@ -253,7 +253,7 @@
          }
       },
       "ubuntu-jammy-build-ARM64": {
-         "uses": "fatalbanana/rspamd-packages-sandbox/.github/workflows/build_packages.yml@main",
+         "uses": "./.github/workflows/build_packages.yml",
          "with": {
             "name": "ubuntu-jammy",
             "nightly": "${{ inputs.nightly }}",
@@ -261,7 +261,7 @@
          }
       },
       "ubuntu-jammy-build-X64": {
-         "uses": "fatalbanana/rspamd-packages-sandbox/.github/workflows/build_packages.yml@main",
+         "uses": "./.github/workflows/build_packages.yml",
          "with": {
             "name": "ubuntu-jammy",
             "nightly": "${{ inputs.nightly }}",
@@ -270,7 +270,7 @@
       },
       "ubuntu-jammy-test-ARM64": {
          "needs": "ubuntu-jammy-build-ARM64",
-         "uses": "fatalbanana/rspamd-packages-sandbox/.github/workflows/test_package.yml@main",
+         "uses": "./.github/workflows/test_package.yml",
          "with": {
             "image": "ubuntu:22.04",
             "name": "ubuntu-jammy",
@@ -280,7 +280,7 @@
       },
       "ubuntu-jammy-test-X64": {
          "needs": "ubuntu-jammy-build-X64",
-         "uses": "fatalbanana/rspamd-packages-sandbox/.github/workflows/test_package.yml@main",
+         "uses": "./.github/workflows/test_package.yml",
          "with": {
             "image": "ubuntu:22.04",
             "name": "ubuntu-jammy",
@@ -289,7 +289,7 @@
          }
       },
       "ubuntu-noble-build-ARM64": {
-         "uses": "fatalbanana/rspamd-packages-sandbox/.github/workflows/build_packages.yml@main",
+         "uses": "./.github/workflows/build_packages.yml",
          "with": {
             "name": "ubuntu-noble",
             "nightly": "${{ inputs.nightly }}",
@@ -297,7 +297,7 @@
          }
       },
       "ubuntu-noble-build-X64": {
-         "uses": "fatalbanana/rspamd-packages-sandbox/.github/workflows/build_packages.yml@main",
+         "uses": "./.github/workflows/build_packages.yml",
          "with": {
             "name": "ubuntu-noble",
             "nightly": "${{ inputs.nightly }}",
@@ -306,7 +306,7 @@
       },
       "ubuntu-noble-test-ARM64": {
          "needs": "ubuntu-noble-build-ARM64",
-         "uses": "fatalbanana/rspamd-packages-sandbox/.github/workflows/test_package.yml@main",
+         "uses": "./.github/workflows/test_package.yml",
          "with": {
             "image": "ubuntu:24.04",
             "name": "ubuntu-noble",
@@ -316,7 +316,7 @@
       },
       "ubuntu-noble-test-X64": {
          "needs": "ubuntu-noble-build-X64",
-         "uses": "fatalbanana/rspamd-packages-sandbox/.github/workflows/test_package.yml@main",
+         "uses": "./.github/workflows/test_package.yml",
          "with": {
             "image": "ubuntu:24.04",
             "name": "ubuntu-noble",
