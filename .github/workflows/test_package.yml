@@ -93,7 +93,7 @@ jobs:
         run: |
           python3 -mvenv $GITHUB_WORKSPACE/venv --system-site-packages
           bash -c "source $GITHUB_WORKSPACE/venv/bin/activate && pip3 install robotframework"
-          
+
           if [[ "${{ inputs.name }}" == centos-* ]]; then
             sed -i s/nogroup/nobody/ $GITHUB_WORKSPACE/rspamd/test/functional/lib/vars.py
           fi
