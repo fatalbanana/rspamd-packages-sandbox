@@ -17,7 +17,7 @@
          }
       },
       "centos-10-test-ARM64": {
-         "if": "${{ !env.SKIP_TESTS && !env.SKIP_TESTS_CENTOS_10 }}",
+         "if": ${{ !env.SKIP_TESTS && !env.SKIP_TESTS_CENTOS_10 }},
          "needs": "centos-10-build-ARM64",
          "uses": "./.github/workflows/test_package.yml",
          "with": {
@@ -28,7 +28,7 @@
          }
       },
       "centos-10-test-X64": {
-         "if": "${{ !env.SKIP_TESTS && !env.SKIP_TESTS_CENTOS_10 }}",
+         "if": ${{ !env.SKIP_TESTS && !env.SKIP_TESTS_CENTOS_10 }},
          "needs": "centos-10-build-X64",
          "uses": "./.github/workflows/test_package.yml",
          "with": {
