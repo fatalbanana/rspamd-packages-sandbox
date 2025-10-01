@@ -132,7 +132,6 @@ jobs:
         run: |
           REGEX="(^|,)""${{ inputs.name }}""(,|$)"
 
-          echo "Evaluating SKIP_TESTS: [$SKIP_TESTS]"
           if [[ "$SKIP_TESTS" == "ALL" ]]; then
             echo Skipping tests for all platforms
             echo "skip_tests=y" >> "$GITHUB_OUTPUT"
