@@ -24,6 +24,16 @@ local platform_jobs(name, image) = {
     platform: arch,
     revision: '${{ needs.' + name + '-build-' + arch + '.outputs.revision }}',
   },
+  local publish_workflow = if std.startsWith(name, 'centos-') then './.github/workflows/publish_rpm.yml' else './.github/workflows/publish_deb.yml',
+  local publish_step(arch) = {
+    'if': '${{ (success() || needs.' + name + '-test-' + arch + '.result == "skipped") && (!vars.SKIP_PUBLISH && !vars.SKIP_PUBLISH_' + std.asciiUpper(std.strReplace(name, '-', '_')) + ') }}',
+    needs: [name + '-test-' + arch],
+    uses: publish_workflow,
+    with: {
+      name: name,
+      platform: arch,
+    },
+  },
   [name + '-build-X64']: {
     uses: './.github/workflows/build_packages.yml',
     with: build_with('X64'),
@@ -44,6 +54,8 @@ local platform_jobs(name, image) = {
     uses: './.github/workflows/test_package.yml',
     with: test_with('ARM64'),
   },
+  [name + '-publish-X64']: publish_step('X64'),
+  [name + '-publish-ARM64']: publish_step('ARM64'),
 };
 
 local all_platform_jobs = {
