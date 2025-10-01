@@ -26,7 +26,7 @@ local platform_jobs(name, image) = {
   },
   local publish_workflow = if std.startsWith(name, 'centos-') then './.github/workflows/publish_rpm.yml' else './.github/workflows/publish_deb.yml',
   local publish_step(arch) = {
-    'if': '${{ (success() || needs.' + name + '-test-' + arch + '.result == "skipped") && (!vars.SKIP_PUBLISH && !vars.SKIP_PUBLISH_' + std.asciiUpper(std.strReplace(name, '-', '_')) + ') }}',
+    'if': "${{ (success() || needs." + name + "-test-" + arch + ".result == 'skipped') && (!vars.SKIP_PUBLISH && !vars.SKIP_PUBLISH_" + std.asciiUpper(std.strReplace(name, '-', '_')) + ") }}",
     needs: [name + '-test-' + arch],
     uses: publish_workflow,
     with: {

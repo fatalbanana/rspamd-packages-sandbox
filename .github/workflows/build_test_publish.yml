@@ -17,7 +17,7 @@
          }
       },
       "centos-10-publish-ARM64": {
-         "if": "${{ (success() || needs.centos-10-test-ARM64.result == \"skipped\") && (!vars.SKIP_PUBLISH && !vars.SKIP_PUBLISH_CENTOS_10) }}",
+         "if": "${{ (success() || needs.centos-10-test-ARM64.result == 'skipped') && (!vars.SKIP_PUBLISH && !vars.SKIP_PUBLISH_CENTOS_10) }}",
          "needs": [
             "centos-10-test-ARM64"
          ],
@@ -28,7 +28,7 @@
          }
       },
       "centos-10-publish-X64": {
-         "if": "${{ (success() || needs.centos-10-test-X64.result == \"skipped\") && (!vars.SKIP_PUBLISH && !vars.SKIP_PUBLISH_CENTOS_10) }}",
+         "if": "${{ (success() || needs.centos-10-test-X64.result == 'skipped') && (!vars.SKIP_PUBLISH && !vars.SKIP_PUBLISH_CENTOS_10) }}",
          "needs": [
             "centos-10-test-X64"
          ],
@@ -77,7 +77,7 @@
          }
       },
       "centos-8-publish-ARM64": {
-         "if": "${{ (success() || needs.centos-8-test-ARM64.result == \"skipped\") && (!vars.SKIP_PUBLISH && !vars.SKIP_PUBLISH_CENTOS_8) }}",
+         "if": "${{ (success() || needs.centos-8-test-ARM64.result == 'skipped') && (!vars.SKIP_PUBLISH && !vars.SKIP_PUBLISH_CENTOS_8) }}",
          "needs": [
             "centos-8-test-ARM64"
          ],
@@ -88,7 +88,7 @@
          }
       },
       "centos-8-publish-X64": {
-         "if": "${{ (success() || needs.centos-8-test-X64.result == \"skipped\") && (!vars.SKIP_PUBLISH && !vars.SKIP_PUBLISH_CENTOS_8) }}",
+         "if": "${{ (success() || needs.centos-8-test-X64.result == 'skipped') && (!vars.SKIP_PUBLISH && !vars.SKIP_PUBLISH_CENTOS_8) }}",
          "needs": [
             "centos-8-test-X64"
          ],
@@ -137,7 +137,7 @@
          }
       },
       "centos-9-publish-ARM64": {
-         "if": "${{ (success() || needs.centos-9-test-ARM64.result == \"skipped\") && (!vars.SKIP_PUBLISH && !vars.SKIP_PUBLISH_CENTOS_9) }}",
+         "if": "${{ (success() || needs.centos-9-test-ARM64.result == 'skipped') && (!vars.SKIP_PUBLISH && !vars.SKIP_PUBLISH_CENTOS_9) }}",
          "needs": [
             "centos-9-test-ARM64"
          ],
@@ -148,7 +148,7 @@
          }
       },
       "centos-9-publish-X64": {
-         "if": "${{ (success() || needs.centos-9-test-X64.result == \"skipped\") && (!vars.SKIP_PUBLISH && !vars.SKIP_PUBLISH_CENTOS_9) }}",
+         "if": "${{ (success() || needs.centos-9-test-X64.result == 'skipped') && (!vars.SKIP_PUBLISH && !vars.SKIP_PUBLISH_CENTOS_9) }}",
          "needs": [
             "centos-9-test-X64"
          ],
@@ -197,7 +197,7 @@
          }
       },
       "debian-bookworm-publish-ARM64": {
-         "if": "${{ (success() || needs.debian-bookworm-test-ARM64.result == \"skipped\") && (!vars.SKIP_PUBLISH && !vars.SKIP_PUBLISH_DEBIAN_BOOKWORM) }}",
+         "if": "${{ (success() || needs.debian-bookworm-test-ARM64.result == 'skipped') && (!vars.SKIP_PUBLISH && !vars.SKIP_PUBLISH_DEBIAN_BOOKWORM) }}",
          "needs": [
             "debian-bookworm-test-ARM64"
          ],
@@ -208,7 +208,7 @@
          }
       },
       "debian-bookworm-publish-X64": {
-         "if": "${{ (success() || needs.debian-bookworm-test-X64.result == \"skipped\") && (!vars.SKIP_PUBLISH && !vars.SKIP_PUBLISH_DEBIAN_BOOKWORM) }}",
+         "if": "${{ (success() || needs.debian-bookworm-test-X64.result == 'skipped') && (!vars.SKIP_PUBLISH && !vars.SKIP_PUBLISH_DEBIAN_BOOKWORM) }}",
          "needs": [
             "debian-bookworm-test-X64"
          ],
@@ -257,7 +257,7 @@
          }
       },
       "debian-bullseye-publish-ARM64": {
-         "if": "${{ (success() || needs.debian-bullseye-test-ARM64.result == \"skipped\") && (!vars.SKIP_PUBLISH && !vars.SKIP_PUBLISH_DEBIAN_BULLSEYE) }}",
+         "if": "${{ (success() || needs.debian-bullseye-test-ARM64.result == 'skipped') && (!vars.SKIP_PUBLISH && !vars.SKIP_PUBLISH_DEBIAN_BULLSEYE) }}",
          "needs": [
             "debian-bullseye-test-ARM64"
          ],
@@ -268,7 +268,7 @@
          }
       },
       "debian-bullseye-publish-X64": {
-         "if": "${{ (success() || needs.debian-bullseye-test-X64.result == \"skipped\") && (!vars.SKIP_PUBLISH && !vars.SKIP_PUBLISH_DEBIAN_BULLSEYE) }}",
+         "if": "${{ (success() || needs.debian-bullseye-test-X64.result == 'skipped') && (!vars.SKIP_PUBLISH && !vars.SKIP_PUBLISH_DEBIAN_BULLSEYE) }}",
          "needs": [
             "debian-bullseye-test-X64"
          ],
@@ -317,7 +317,7 @@
          }
       },
       "debian-trixie-publish-ARM64": {
-         "if": "${{ (success() || needs.debian-trixie-test-ARM64.result == \"skipped\") && (!vars.SKIP_PUBLISH && !vars.SKIP_PUBLISH_DEBIAN_TRIXIE) }}",
+         "if": "${{ (success() || needs.debian-trixie-test-ARM64.result == 'skipped') && (!vars.SKIP_PUBLISH && !vars.SKIP_PUBLISH_DEBIAN_TRIXIE) }}",
          "needs": [
             "debian-trixie-test-ARM64"
          ],
@@ -328,7 +328,7 @@
          }
       },
       "debian-trixie-publish-X64": {
-         "if": "${{ (success() || needs.debian-trixie-test-X64.result == \"skipped\") && (!vars.SKIP_PUBLISH && !vars.SKIP_PUBLISH_DEBIAN_TRIXIE) }}",
+         "if": "${{ (success() || needs.debian-trixie-test-X64.result == 'skipped') && (!vars.SKIP_PUBLISH && !vars.SKIP_PUBLISH_DEBIAN_TRIXIE) }}",
          "needs": [
             "debian-trixie-test-X64"
          ],
@@ -377,7 +377,7 @@
          }
       },
       "ubuntu-focal-publish-ARM64": {
-         "if": "${{ (success() || needs.ubuntu-focal-test-ARM64.result == \"skipped\") && (!vars.SKIP_PUBLISH && !vars.SKIP_PUBLISH_UBUNTU_FOCAL) }}",
+         "if": "${{ (success() || needs.ubuntu-focal-test-ARM64.result == 'skipped') && (!vars.SKIP_PUBLISH && !vars.SKIP_PUBLISH_UBUNTU_FOCAL) }}",
          "needs": [
             "ubuntu-focal-test-ARM64"
          ],
@@ -388,7 +388,7 @@
          }
       },
       "ubuntu-focal-publish-X64": {
-         "if": "${{ (success() || needs.ubuntu-focal-test-X64.result == \"skipped\") && (!vars.SKIP_PUBLISH && !vars.SKIP_PUBLISH_UBUNTU_FOCAL) }}",
+         "if": "${{ (success() || needs.ubuntu-focal-test-X64.result == 'skipped') && (!vars.SKIP_PUBLISH && !vars.SKIP_PUBLISH_UBUNTU_FOCAL) }}",
          "needs": [
             "ubuntu-focal-test-X64"
          ],
@@ -437,7 +437,7 @@
          }
       },
       "ubuntu-jammy-publish-ARM64": {
-         "if": "${{ (success() || needs.ubuntu-jammy-test-ARM64.result == \"skipped\") && (!vars.SKIP_PUBLISH && !vars.SKIP_PUBLISH_UBUNTU_JAMMY) }}",
+         "if": "${{ (success() || needs.ubuntu-jammy-test-ARM64.result == 'skipped') && (!vars.SKIP_PUBLISH && !vars.SKIP_PUBLISH_UBUNTU_JAMMY) }}",
          "needs": [
             "ubuntu-jammy-test-ARM64"
          ],
@@ -448,7 +448,7 @@
          }
       },
       "ubuntu-jammy-publish-X64": {
-         "if": "${{ (success() || needs.ubuntu-jammy-test-X64.result == \"skipped\") && (!vars.SKIP_PUBLISH && !vars.SKIP_PUBLISH_UBUNTU_JAMMY) }}",
+         "if": "${{ (success() || needs.ubuntu-jammy-test-X64.result == 'skipped') && (!vars.SKIP_PUBLISH && !vars.SKIP_PUBLISH_UBUNTU_JAMMY) }}",
          "needs": [
             "ubuntu-jammy-test-X64"
          ],
@@ -497,7 +497,7 @@
          }
       },
       "ubuntu-noble-publish-ARM64": {
-         "if": "${{ (success() || needs.ubuntu-noble-test-ARM64.result == \"skipped\") && (!vars.SKIP_PUBLISH && !vars.SKIP_PUBLISH_UBUNTU_NOBLE) }}",
+         "if": "${{ (success() || needs.ubuntu-noble-test-ARM64.result == 'skipped') && (!vars.SKIP_PUBLISH && !vars.SKIP_PUBLISH_UBUNTU_NOBLE) }}",
          "needs": [
             "ubuntu-noble-test-ARM64"
          ],
@@ -508,7 +508,7 @@
          }
       },
       "ubuntu-noble-publish-X64": {
-         "if": "${{ (success() || needs.ubuntu-noble-test-X64.result == \"skipped\") && (!vars.SKIP_PUBLISH && !vars.SKIP_PUBLISH_UBUNTU_NOBLE) }}",
+         "if": "${{ (success() || needs.ubuntu-noble-test-X64.result == 'skipped') && (!vars.SKIP_PUBLISH && !vars.SKIP_PUBLISH_UBUNTU_NOBLE) }}",
          "needs": [
             "ubuntu-noble-test-X64"
          ],
