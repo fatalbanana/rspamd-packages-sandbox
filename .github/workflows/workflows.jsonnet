@@ -33,11 +33,13 @@ local platform_jobs(name, image) = {
     with: build_with('ARM64'),
   },
   [name + '-test-X64']: {
+    'if': '! ${{ env.SKIP_TESTS || env.SKIP_TESTS_' + name + ' }}',
     needs: name + '-build-X64',
     uses: './.github/workflows/test_package.yml',
     with: test_with('X64'),
   },
   [name + '-test-ARM64']: {
+    'if': '! ${{ env.SKIP_TESTS || env.SKIP_TESTS_' + name + ' }}',
     needs: name + '-build-ARM64',
     uses: './.github/workflows/test_package.yml',
     with: test_with('ARM64'),
