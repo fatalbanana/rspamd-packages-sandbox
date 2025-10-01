@@ -20,9 +20,6 @@ on:
       revision:
         description: "Commit hash of rspamd"
         value: ${{ jobs.build.outputs.revision }}
-      skip_tests:
-        description: "Whether to skip tests"
-        value: ${{ jobs.build.outputs.skip_tests }}
 
 jobs:
   build:
@@ -31,7 +28,6 @@ jobs:
 
     outputs:
       revision: ${{ steps.save_commit.outputs.revision }}
-      skip_tests: ${{ steps.skip_check.outputs.skip_tests }}
 
     steps:
       - name: Set OS-specific variables
@@ -125,20 +121,3 @@ jobs:
             ${{ env.BUILDDIR }}/*.rpm
           retention-days: 1
           compression-level: 0
-
-      - name: Check if tests should be skipped
-        id: skip_check
-        shell: bash
-        run: |
-          REGEX="(^|,)""${{ inputs.name }}""(,|$)"
-
-          if [[ "$SKIP_TESTS" == "ALL" ]]; then
-            echo Skipping tests for all platforms
-            echo "skip_tests=true" >> "$GITHUB_OUTPUT"
-          elif [[ "$SKIP_TESTS" =~ $REGEX ]]; then
-            echo Skipping tests for this platform
-            echo "skip_tests=true" >> "$GITHUB_OUTPUT"
-          else
-            echo Not skipping tests for this platform
-            echo "skip_tests=false" >> "$GITHUB_OUTPUT"
-          fi
