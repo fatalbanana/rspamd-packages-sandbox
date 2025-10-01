@@ -9,5 +9,5 @@ concurrency:
   group: rspamd-packages-release
 
 jobs:
-  build_test_release:
-    uses: ./.github/workflows/build_test_release.yml
+  build_test_publish:
+    uses: ./.github/workflows/build_test_publish.yml

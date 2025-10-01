@@ -1,5 +1,5 @@
-local build_test_release_pipeline = {
-  name: 'build_test_release',
+local build_test_publish_pipeline = {
+  name: 'build_test_publish',
   on: {
     workflow_call: {
       inputs: {
@@ -60,5 +60,5 @@ local all_platform_jobs = {
 };
 
 {
-  'build_test_release.yml': build_test_release_pipeline + all_platform_jobs,
+  'build_test_publish.yml': build_test_publish_pipeline + all_platform_jobs,
 }
