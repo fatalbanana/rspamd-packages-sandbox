@@ -38,7 +38,7 @@
          }
       },
       "centos-10-publish": {
-         "if": "${{ !vars.SKIP_PUBLISH && !vars.SKIP_PUBLISH_CENTOS_10 }}",
+         "if": "${{ !env.SKIP_PUBLISH && !env.SKIP_PUBLISH_CENTOS_10 }}",
          "needs": [
             "centos-10-test-ARM64",
             "centos-10-test-X64"
@@ -50,7 +50,7 @@
       },
       "centos-10-test-ARM64": {
          "needs": "centos-10-build-ARM64",
-         "uses": "${{ (!vars.SKIP_TESTS && !vars.SKIP_TESTS_CENTOS_10) && './.github/workflows/test_package.yml' || './.github/workflows/noop.yml' }}",
+         "uses": "${{ (!env.SKIP_TESTS && !env.SKIP_TESTS_CENTOS_10) && './.github/workflows/test_package.yml' || './.github/workflows/noop.yml' }}",
          "with": {
             "image": "oraclelinux:10",
             "name": "centos-10",
@@ -85,7 +85,7 @@
          }
       },
       "centos-8-publish": {
-         "if": "${{ !vars.SKIP_PUBLISH && !vars.SKIP_PUBLISH_CENTOS_8 }}",
+         "if": "${{ !env.SKIP_PUBLISH && !env.SKIP_PUBLISH_CENTOS_8 }}",
          "needs": [
             "centos-8-test-ARM64",
             "centos-8-test-X64"
@@ -97,7 +97,7 @@
       },
       "centos-8-test-ARM64": {
          "needs": "centos-8-build-ARM64",
-         "uses": "${{ (!vars.SKIP_TESTS && !vars.SKIP_TESTS_CENTOS_8) && './.github/workflows/test_package.yml' || './.github/workflows/noop.yml' }}",
+         "uses": "${{ (!env.SKIP_TESTS && !env.SKIP_TESTS_CENTOS_8) && './.github/workflows/test_package.yml' || './.github/workflows/noop.yml' }}",
          "with": {
             "image": "oraclelinux:8",
             "name": "centos-8",
@@ -132,7 +132,7 @@
          }
       },
       "centos-9-publish": {
-         "if": "${{ !vars.SKIP_PUBLISH && !vars.SKIP_PUBLISH_CENTOS_9 }}",
+         "if": "${{ !env.SKIP_PUBLISH && !env.SKIP_PUBLISH_CENTOS_9 }}",
          "needs": [
             "centos-9-test-ARM64",
             "centos-9-test-X64"
@@ -144,7 +144,7 @@
       },
       "centos-9-test-ARM64": {
          "needs": "centos-9-build-ARM64",
-         "uses": "${{ (!vars.SKIP_TESTS && !vars.SKIP_TESTS_CENTOS_9) && './.github/workflows/test_package.yml' || './.github/workflows/noop.yml' }}",
+         "uses": "${{ (!env.SKIP_TESTS && !env.SKIP_TESTS_CENTOS_9) && './.github/workflows/test_package.yml' || './.github/workflows/noop.yml' }}",
          "with": {
             "image": "oraclelinux:9",
             "name": "centos-9",
@@ -180,7 +180,7 @@
       },
       "debian-bookworm-test-ARM64": {
          "needs": "debian-bookworm-build-ARM64",
-         "uses": "${{ (!vars.SKIP_TESTS && !vars.SKIP_TESTS_DEBIAN_BOOKWORM) && './.github/workflows/test_package.yml' || './.github/workflows/noop.yml' }}",
+         "uses": "${{ (!env.SKIP_TESTS && !env.SKIP_TESTS_DEBIAN_BOOKWORM) && './.github/workflows/test_package.yml' || './.github/workflows/noop.yml' }}",
          "with": {
             "image": "debian:bookworm",
             "name": "debian-bookworm",
@@ -216,7 +216,7 @@
       },
       "debian-bullseye-test-ARM64": {
          "needs": "debian-bullseye-build-ARM64",
-         "uses": "${{ (!vars.SKIP_TESTS && !vars.SKIP_TESTS_DEBIAN_BULLSEYE) && './.github/workflows/test_package.yml' || './.github/workflows/noop.yml' }}",
+         "uses": "${{ (!env.SKIP_TESTS && !env.SKIP_TESTS_DEBIAN_BULLSEYE) && './.github/workflows/test_package.yml' || './.github/workflows/noop.yml' }}",
          "with": {
             "image": "debian:bullseye",
             "name": "debian-bullseye",
@@ -272,7 +272,7 @@
       },
       "debian-trixie-test-ARM64": {
          "needs": "debian-trixie-build-ARM64",
-         "uses": "${{ (!vars.SKIP_TESTS && !vars.SKIP_TESTS_DEBIAN_TRIXIE) && './.github/workflows/test_package.yml' || './.github/workflows/noop.yml' }}",
+         "uses": "${{ (!env.SKIP_TESTS && !env.SKIP_TESTS_DEBIAN_TRIXIE) && './.github/workflows/test_package.yml' || './.github/workflows/noop.yml' }}",
          "with": {
             "image": "debian:trixie",
             "name": "debian-trixie",
@@ -308,7 +308,7 @@
       },
       "ubuntu-focal-test-ARM64": {
          "needs": "ubuntu-focal-build-ARM64",
-         "uses": "${{ (!vars.SKIP_TESTS && !vars.SKIP_TESTS_UBUNTU_FOCAL) && './.github/workflows/test_package.yml' || './.github/workflows/noop.yml' }}",
+         "uses": "${{ (!env.SKIP_TESTS && !env.SKIP_TESTS_UBUNTU_FOCAL) && './.github/workflows/test_package.yml' || './.github/workflows/noop.yml' }}",
          "with": {
             "image": "ubuntu:20.04",
             "name": "ubuntu-focal",
@@ -344,7 +344,7 @@
       },
       "ubuntu-jammy-test-ARM64": {
          "needs": "ubuntu-jammy-build-ARM64",
-         "uses": "${{ (!vars.SKIP_TESTS && !vars.SKIP_TESTS_UBUNTU_JAMMY) && './.github/workflows/test_package.yml' || './.github/workflows/noop.yml' }}",
+         "uses": "${{ (!env.SKIP_TESTS && !env.SKIP_TESTS_UBUNTU_JAMMY) && './.github/workflows/test_package.yml' || './.github/workflows/noop.yml' }}",
          "with": {
             "image": "ubuntu:22.04",
             "name": "ubuntu-jammy",
@@ -380,7 +380,7 @@
       },
       "ubuntu-noble-test-ARM64": {
          "needs": "ubuntu-noble-build-ARM64",
-         "uses": "${{ (!vars.SKIP_TESTS && !vars.SKIP_TESTS_UBUNTU_NOBLE) && './.github/workflows/test_package.yml' || './.github/workflows/noop.yml' }}",
+         "uses": "${{ (!env.SKIP_TESTS && !env.SKIP_TESTS_UBUNTU_NOBLE) && './.github/workflows/test_package.yml' || './.github/workflows/noop.yml' }}",
          "with": {
             "image": "ubuntu:24.04",
             "name": "ubuntu-noble",

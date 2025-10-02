@@ -72,7 +72,7 @@ local build_test_jobs(name, image) = {
   },
   [name + '-test-ARM64']: {
     needs: name + '-build-ARM64',
-    uses: "${{ (!vars.SKIP_TESTS && !vars.SKIP_TESTS_" + std.asciiUpper(std.strReplace(name, '-', '_')) + ") && './.github/workflows/test_package.yml' || './.github/workflows/noop.yml' }}",
+    uses: "${{ (!env.SKIP_TESTS && !env.SKIP_TESTS_" + std.asciiUpper(std.strReplace(name, '-', '_')) + ") && './.github/workflows/test_package.yml' || './.github/workflows/noop.yml' }}",
     with: test_with('ARM64'),
   },
 };
@@ -85,7 +85,7 @@ local distribs_deb_test = [
 
 local publish_debian = {
   'debian-publish': {
-    //'if': "${{ !vars.SKIP_PUBLISH && !vars.SKIP_PUBLISH_" + std.asciiUpper(std.strReplace(name, '-', '_')) + " }}",
+    //'if': "${{ !env.SKIP_PUBLISH && !env.SKIP_PUBLISH_" + std.asciiUpper(std.strReplace(name, '-', '_')) + " }}",
     needs: distribs_deb_test,
     uses: './.github/workflows/publish_deb.yml',
     with: {
@@ -96,7 +96,7 @@ local publish_debian = {
 
 local publish_rpm(name) = {
   [name + '-publish']: {
-    'if': '${{ !vars.SKIP_PUBLISH && !vars.SKIP_PUBLISH_' + std.asciiUpper(std.strReplace(name, '-', '_')) + ' }}',
+    'if': '${{ !env.SKIP_PUBLISH && !env.SKIP_PUBLISH_' + std.asciiUpper(std.strReplace(name, '-', '_')) + ' }}',
     needs: [name + '-test-ARM64', name + '-test-X64'],
     uses: './.github/workflows/publish_rpm.yml',
     with: {
