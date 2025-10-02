@@ -55,15 +55,13 @@ local build_test_jobs(name, image) = {
     with: build_with('ARM64'),
   },
   [name + '-test-X64']: {
-    'if': '${{ !vars.SKIP_TESTS && !vars.SKIP_TESTS_' + std.asciiUpper(std.strReplace(name, '-', '_')) + ' }}',
     needs: name + '-build-X64',
-    uses: './.github/workflows/test_package.yml',
+    uses: '${{ (!vars.SKIP_TESTS && !vars.SKIP_TESTS_' + std.asciiUpper(std.strReplace(name, '-', '_')) + ') && "./.github/workflows/test_package.yml" || "./.github/workflows/noop.yml" }}',
     with: test_with('X64'),
   },
   [name + '-test-ARM64']: {
-    'if': '${{ !vars.SKIP_TESTS && !vars.SKIP_TESTS_' + std.asciiUpper(std.strReplace(name, '-', '_')) + ' }}',
     needs: name + '-build-ARM64',
-    uses: './.github/workflows/test_package.yml',
+    uses: '${{ (!vars.SKIP_TESTS && !vars.SKIP_TESTS_' + std.asciiUpper(std.strReplace(name, '-', '_')) + ') && "./.github/workflows/test_package.yml" || "./.github/workflows/noop.yml" }}',
     with: test_with('ARM64'),
   },
 };

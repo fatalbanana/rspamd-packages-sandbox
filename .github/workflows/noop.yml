@@ -1,0 +1,14 @@
+name: Do nothing
+
+on:
+  workflow_call:
+
+jobs:
+  noop:
+    name: 'doing nothing'
+    runs-on: 'ubuntu-24.04'
+
+    steps:
+      - name: Do nothing
+        run: |
+          echo Doing nothing
