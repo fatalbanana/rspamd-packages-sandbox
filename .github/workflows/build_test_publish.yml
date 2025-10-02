@@ -224,8 +224,24 @@
          }
       },
       "debian-publish": {
+         "needs": [
+            "debian-bookworm-test-X64",
+            "debian-bookworm-test-ARM64",
+            "debian-bullseye-test-X64",
+            "debian-bullseye-test-ARM64",
+            "debian-trixie-test-X64",
+            "debian-trixie-test-ARM64",
+            "ubuntu-focal-test-X64",
+            "ubuntu-focal-test-ARM64",
+            "ubuntu-jammy-test-X64",
+            "ubuntu-jammy-test-ARM64",
+            "ubuntu-noble-test-X64",
+            "ubuntu-noble-test-ARM64"
+         ],
          "uses": "./.github/workflows/publish_rpm.yml",
-         "with": { }
+         "with": {
+            "names": "debian-bookworm,debian-bullseye,debian-trixie,ubuntu-focal,ubuntu-jammy,ubuntu-noble"
+         }
       },
       "debian-trixie-build-ARM64": {
          "uses": "./.github/workflows/build_packages.yml",
