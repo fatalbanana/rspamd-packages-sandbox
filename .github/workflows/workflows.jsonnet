@@ -46,6 +46,33 @@ local build_test_jobs(name, image) = {
     platform: arch,
     revision: '${{ needs.' + name + '-build-' + arch + '.outputs.revision }}',
   },
+  local test_steps(arch) = [
+    {
+      name: 'Check if tests should be skipped',
+      id: 'check_skip',
+      run: |||
+  if [ -z "${{ vars.SKIP_TESTS }}" ] || [ -z "${{ vars.SKIP_TESTS_%s }}" ]; then
+    echo "Skipping tests as per configuration.";
+    echo skip_tests=true >> $GITHUB_OUTPUT
+  else
+    echo "Proceeding with tests.";
+  fi
+||| % std.asciiUpper(std.strReplace(name, '-', '_'))
+    },
+    {
+      name: 'Run tests',
+      'if': "${{ ! steps.check_skip.outputs.skip_tests }}",
+      uses: './.github/workflows/test_package.yml',
+      with: test_with(arch),
+    },
+  ],
+  local maybe_test_job(arch) = {
+    maybe_test: {
+      ['name']: 'maybe skip tests', 
+      ['runs-on']: 'ubuntu-24.04',
+      ['steps']: test_steps(arch),
+    },
+  },
   [name + '-build-X64']: {
     uses: './.github/workflows/build_packages.yml',
     with: build_with('X64'),
@@ -56,13 +83,11 @@ local build_test_jobs(name, image) = {
   },
   [name + '-test-X64']: {
     needs: name + '-build-X64',
-    uses: "${{ (!vars.SKIP_TESTS && !vars.SKIP_TESTS_" + std.asciiUpper(std.strReplace(name, '-', '_')) + ") && './.github/workflows/test_package.yml' || './.github/workflows/noop.yml' }}",
-    with: test_with('X64'),
+    jobs: maybe_test_job('X64'),
   },
   [name + '-test-ARM64']: {
     needs: name + '-build-ARM64',
-    uses: "${{ (!vars.SKIP_TESTS && !vars.SKIP_TESTS_" + std.asciiUpper(std.strReplace(name, '-', '_')) + ") && './.github/workflows/test_package.yml' || './.github/workflows/noop.yml' }}",
-    with: test_with('ARM64'),
+    jobs: maybe_test_job('ARM64'),
   },
 };
 
