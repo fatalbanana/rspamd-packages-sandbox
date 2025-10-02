@@ -67,9 +67,9 @@ local build_test_jobs(name, image) = {
     },
   ],
   local maybe_test_job(arch) = {
-    ['name']: 'maybe skip tests', 
-    ['runs-on']: 'ubuntu-24.04',
     maybe_test: {
+      ['name']: 'maybe skip tests', 
+      ['runs-on']: 'ubuntu-24.04',
       ['steps']: test_steps(arch),
     },
   },
