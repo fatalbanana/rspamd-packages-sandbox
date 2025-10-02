@@ -48,11 +48,11 @@
                      }
                   }
                ]
-            },
-            "name": "maybe skip tests",
-            "runs-on": "ubuntu-24.04"
+            }
          },
-         "needs": "centos-10-build-ARM64"
+         "name": "maybe skip tests",
+         "needs": "centos-10-build-ARM64",
+         "runs-on": "ubuntu-24.04"
       },
       "centos-10-test-X64": {
          "jobs": {
@@ -75,11 +75,11 @@
                      }
                   }
                ]
-            },
-            "name": "maybe skip tests",
-            "runs-on": "ubuntu-24.04"
+            }
          },
-         "needs": "centos-10-build-X64"
+         "name": "maybe skip tests",
+         "needs": "centos-10-build-X64",
+         "runs-on": "ubuntu-24.04"
       },
       "centos-8-build-ARM64": {
          "uses": "./.github/workflows/build_packages.yml",
@@ -129,11 +129,11 @@
                      }
                   }
                ]
-            },
-            "name": "maybe skip tests",
-            "runs-on": "ubuntu-24.04"
+            }
          },
-         "needs": "centos-8-build-ARM64"
+         "name": "maybe skip tests",
+         "needs": "centos-8-build-ARM64",
+         "runs-on": "ubuntu-24.04"
       },
       "centos-8-test-X64": {
          "jobs": {
@@ -156,11 +156,11 @@
                      }
                   }
                ]
-            },
-            "name": "maybe skip tests",
-            "runs-on": "ubuntu-24.04"
+            }
          },
-         "needs": "centos-8-build-X64"
+         "name": "maybe skip tests",
+         "needs": "centos-8-build-X64",
+         "runs-on": "ubuntu-24.04"
       },
       "centos-9-build-ARM64": {
          "uses": "./.github/workflows/build_packages.yml",
@@ -210,11 +210,11 @@
                      }
                   }
                ]
-            },
-            "name": "maybe skip tests",
-            "runs-on": "ubuntu-24.04"
+            }
          },
-         "needs": "centos-9-build-ARM64"
+         "name": "maybe skip tests",
+         "needs": "centos-9-build-ARM64",
+         "runs-on": "ubuntu-24.04"
       },
       "centos-9-test-X64": {
          "jobs": {
@@ -237,11 +237,11 @@
                      }
                   }
                ]
-            },
-            "name": "maybe skip tests",
-            "runs-on": "ubuntu-24.04"
+            }
          },
-         "needs": "centos-9-build-X64"
+         "name": "maybe skip tests",
+         "needs": "centos-9-build-X64",
+         "runs-on": "ubuntu-24.04"
       },
       "debian-bookworm-build-ARM64": {
          "uses": "./.github/workflows/build_packages.yml",
@@ -280,11 +280,11 @@
                      }
                   }
                ]
-            },
-            "name": "maybe skip tests",
-            "runs-on": "ubuntu-24.04"
+            }
          },
-         "needs": "debian-bookworm-build-ARM64"
+         "name": "maybe skip tests",
+         "needs": "debian-bookworm-build-ARM64",
+         "runs-on": "ubuntu-24.04"
       },
       "debian-bookworm-test-X64": {
          "jobs": {
@@ -307,11 +307,11 @@
                      }
                   }
                ]
-            },
-            "name": "maybe skip tests",
-            "runs-on": "ubuntu-24.04"
+            }
          },
-         "needs": "debian-bookworm-build-X64"
+         "name": "maybe skip tests",
+         "needs": "debian-bookworm-build-X64",
+         "runs-on": "ubuntu-24.04"
       },
       "debian-bullseye-build-ARM64": {
          "uses": "./.github/workflows/build_packages.yml",
@@ -350,11 +350,11 @@
                      }
                   }
                ]
-            },
-            "name": "maybe skip tests",
-            "runs-on": "ubuntu-24.04"
+            }
          },
-         "needs": "debian-bullseye-build-ARM64"
+         "name": "maybe skip tests",
+         "needs": "debian-bullseye-build-ARM64",
+         "runs-on": "ubuntu-24.04"
       },
       "debian-bullseye-test-X64": {
          "jobs": {
@@ -377,11 +377,11 @@
                      }
                   }
                ]
-            },
-            "name": "maybe skip tests",
-            "runs-on": "ubuntu-24.04"
+            }
          },
-         "needs": "debian-bullseye-build-X64"
+         "name": "maybe skip tests",
+         "needs": "debian-bullseye-build-X64",
+         "runs-on": "ubuntu-24.04"
       },
       "debian-publish": {
          "needs": [
@@ -440,11 +440,11 @@
                      }
                   }
                ]
-            },
-            "name": "maybe skip tests",
-            "runs-on": "ubuntu-24.04"
+            }
          },
-         "needs": "debian-trixie-build-ARM64"
+         "name": "maybe skip tests",
+         "needs": "debian-trixie-build-ARM64",
+         "runs-on": "ubuntu-24.04"
       },
       "debian-trixie-test-X64": {
          "jobs": {
@@ -467,11 +467,11 @@
                      }
                   }
                ]
-            },
-            "name": "maybe skip tests",
-            "runs-on": "ubuntu-24.04"
+            }
          },
-         "needs": "debian-trixie-build-X64"
+         "name": "maybe skip tests",
+         "needs": "debian-trixie-build-X64",
+         "runs-on": "ubuntu-24.04"
       },
       "ubuntu-focal-build-ARM64": {
          "uses": "./.github/workflows/build_packages.yml",
@@ -510,11 +510,11 @@
                      }
                   }
                ]
-            },
-            "name": "maybe skip tests",
-            "runs-on": "ubuntu-24.04"
+            }
          },
-         "needs": "ubuntu-focal-build-ARM64"
+         "name": "maybe skip tests",
+         "needs": "ubuntu-focal-build-ARM64",
+         "runs-on": "ubuntu-24.04"
       },
       "ubuntu-focal-test-X64": {
          "jobs": {
@@ -537,11 +537,11 @@
                      }
                   }
                ]
-            },
-            "name": "maybe skip tests",
-            "runs-on": "ubuntu-24.04"
+            }
          },
-         "needs": "ubuntu-focal-build-X64"
+         "name": "maybe skip tests",
+         "needs": "ubuntu-focal-build-X64",
+         "runs-on": "ubuntu-24.04"
       },
       "ubuntu-jammy-build-ARM64": {
          "uses": "./.github/workflows/build_packages.yml",
@@ -580,11 +580,11 @@
                      }
                   }
                ]
-            },
-            "name": "maybe skip tests",
-            "runs-on": "ubuntu-24.04"
+            }
          },
-         "needs": "ubuntu-jammy-build-ARM64"
+         "name": "maybe skip tests",
+         "needs": "ubuntu-jammy-build-ARM64",
+         "runs-on": "ubuntu-24.04"
       },
       "ubuntu-jammy-test-X64": {
          "jobs": {
@@ -607,11 +607,11 @@
                      }
                   }
                ]
-            },
-            "name": "maybe skip tests",
-            "runs-on": "ubuntu-24.04"
+            }
          },
-         "needs": "ubuntu-jammy-build-X64"
+         "name": "maybe skip tests",
+         "needs": "ubuntu-jammy-build-X64",
+         "runs-on": "ubuntu-24.04"
       },
       "ubuntu-noble-build-ARM64": {
          "uses": "./.github/workflows/build_packages.yml",
@@ -650,11 +650,11 @@
                      }
                   }
                ]
-            },
-            "name": "maybe skip tests",
-            "runs-on": "ubuntu-24.04"
+            }
          },
-         "needs": "ubuntu-noble-build-ARM64"
+         "name": "maybe skip tests",
+         "needs": "ubuntu-noble-build-ARM64",
+         "runs-on": "ubuntu-24.04"
       },
       "ubuntu-noble-test-X64": {
          "jobs": {
@@ -677,11 +677,11 @@
                      }
                   }
                ]
-            },
-            "name": "maybe skip tests",
-            "runs-on": "ubuntu-24.04"
+            }
          },
-         "needs": "ubuntu-noble-build-X64"
+         "name": "maybe skip tests",
+         "needs": "ubuntu-noble-build-X64",
+         "runs-on": "ubuntu-24.04"
       }
    },
    "name": "build_test_publish",

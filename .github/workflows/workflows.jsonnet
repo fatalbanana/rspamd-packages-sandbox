@@ -67,8 +67,6 @@ local build_test_jobs(name, image) = {
     },
   ],
   local maybe_test_job(arch) = {
-    ['name']: 'maybe skip tests', 
-    ['runs-on']: 'ubuntu-24.04',
     maybe_test: {
       ['steps']: test_steps(arch),
     },
@@ -83,10 +81,14 @@ local build_test_jobs(name, image) = {
   },
   [name + '-test-X64']: {
     needs: name + '-build-X64',
+    ['name']: 'maybe skip tests',
+    ['runs-on']: 'ubuntu-24.04',
     jobs: maybe_test_job('X64'),
   },
   [name + '-test-ARM64']: {
     needs: name + '-build-ARM64',
+    ['name']: 'maybe skip tests',
+    ['runs-on']: 'ubuntu-24.04',
     jobs: maybe_test_job('ARM64'),
   },
 };
