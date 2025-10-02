@@ -1,3 +1,5 @@
+local architectures = ['X64', 'ARM64'];
+
 local imagemap = {
   'centos-8': 'oraclelinux:8',
   'centos-9': 'oraclelinux:9',
@@ -11,13 +13,15 @@ local imagemap = {
 };
 
 local distribs_deb = [
-  key for key in std.objectFields(imagemap)
-  if std.startsWith(key, "debian-") || std.startsWith(key, "ubuntu-")
+  key
+  for key in std.objectFields(imagemap)
+  if std.startsWith(key, 'debian-') || std.startsWith(key, 'ubuntu-')
 ];
 
 local distribs_rpm = [
-  key for key in std.objectFields(imagemap)
-  if std.startsWith(key, "centos-")
+  key
+  for key in std.objectFields(imagemap)
+  if std.startsWith(key, 'centos-')
 ];
 
 local build_test_publish_pipeline = {
@@ -32,17 +36,6 @@ local build_test_publish_pipeline = {
       },
     },
   },
-  env: {
-    SKIP_TESTS: '${{ vars.SKIP_TESTS }}',
-  } + {
-    // Add SKIP_TESTS_<package> for each package to skip tests for that package
-    [ 'SKIP_TESTS_' + std.asciiUpper(std.strReplace(name, '-', '_')) ]: '${{ vars.SKIP_TESTS_' + std.asciiUpper(std.strReplace(name, '-', '_')) + ' }}'
-    for name in std.objectFields(imagemap)
-  } + {
-    // Add SKIP_PUBLISH_<package> for each package to skip publish for that package
-    [ 'SKIP_PUBLISH_' + std.asciiUpper(std.strReplace(name, '-', '_')) ]: '${{ vars.SKIP_PUBLISH_' + std.asciiUpper(std.strReplace(name, '-', '_')) + ' }}'
-    for name in std.objectFields(imagemap)
-  },
 };
 
 local build_test_jobs(name, image) = {
@@ -51,36 +44,30 @@ local build_test_jobs(name, image) = {
     nightly: '${{ inputs.nightly }}',
     platform: arch,
   },
+  [name + '-build-' + arch]: {
+    uses: './.github/workflows/build_packages.yml',
+    with: build_with(arch),
+  }
+  for arch in architectures
+} + {
   local test_with(arch) = {
     name: name,
     image: image,
     platform: arch,
     revision: '${{ needs.' + name + '-build-' + arch + '.outputs.revision }}',
   },
-  [name + '-build-X64']: {
-    uses: './.github/workflows/build_packages.yml',
-    with: build_with('X64'),
-  },
-  [name + '-build-ARM64']: {
-    uses: './.github/workflows/build_packages.yml',
-    with: build_with('ARM64'),
-  },
-  [name + '-test-X64']: {
-    needs: name + '-build-X64',
-    uses: "${{ (!env.SKIP_TESTS && !env.SKIP_TESTS_" + std.asciiUpper(std.strReplace(name, '-', '_')) + ") && './.github/workflows/test_package.yml' || './.github/workflows/noop.yml' }}",
-    with: test_with('X64'),
-  },
-  [name + '-test-ARM64']: {
-    needs: name + '-build-ARM64',
-    uses: "${{ (!env.SKIP_TESTS && !env.SKIP_TESTS_" + std.asciiUpper(std.strReplace(name, '-', '_')) + ") && './.github/workflows/test_package.yml' || './.github/workflows/noop.yml' }}",
-    with: test_with('ARM64'),
-  },
+  [name + '-test-' + arch]: {
+    needs: name + '-build-' + arch,
+    uses: './.github/workflows/test_package.yml',
+    with: test_with(arch),
+  }
+  for arch in architectures
 };
 
 local distribs_deb_test = [
-  "%s-test-%s" % [dist, arch]
+  '%s-test-%s' % [dist, arch]
   for dist in distribs_deb
-  for arch in ["X64", "ARM64"]
+  for arch in ['X64', 'ARM64']
 ];
 
 local publish_debian = {
