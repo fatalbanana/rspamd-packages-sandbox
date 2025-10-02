@@ -30,8 +30,6 @@
       "centos-10-test-ARM64": {
          "jobs": {
             "maybe_test": {
-               "name": "maybe skip tests",
-               "runs-on": "ubuntu-24.04",
                "steps": [
                   {
                      "id": "check_skip",
@@ -50,15 +48,15 @@
                      }
                   }
                ]
-            }
+            },
+            "name": "maybe skip tests",
+            "runs-on": "ubuntu-24.04"
          },
          "needs": "centos-10-build-ARM64"
       },
       "centos-10-test-X64": {
          "jobs": {
             "maybe_test": {
-               "name": "maybe skip tests",
-               "runs-on": "ubuntu-24.04",
                "steps": [
                   {
                      "id": "check_skip",
@@ -77,7 +75,9 @@
                      }
                   }
                ]
-            }
+            },
+            "name": "maybe skip tests",
+            "runs-on": "ubuntu-24.04"
          },
          "needs": "centos-10-build-X64"
       },
@@ -111,8 +111,6 @@
       "centos-8-test-ARM64": {
          "jobs": {
             "maybe_test": {
-               "name": "maybe skip tests",
-               "runs-on": "ubuntu-24.04",
                "steps": [
                   {
                      "id": "check_skip",
@@ -131,15 +129,15 @@
                      }
                   }
                ]
-            }
+            },
+            "name": "maybe skip tests",
+            "runs-on": "ubuntu-24.04"
          },
          "needs": "centos-8-build-ARM64"
       },
       "centos-8-test-X64": {
          "jobs": {
             "maybe_test": {
-               "name": "maybe skip tests",
-               "runs-on": "ubuntu-24.04",
                "steps": [
                   {
                      "id": "check_skip",
@@ -158,7 +156,9 @@
                      }
                   }
                ]
-            }
+            },
+            "name": "maybe skip tests",
+            "runs-on": "ubuntu-24.04"
          },
          "needs": "centos-8-build-X64"
       },
@@ -192,8 +192,6 @@
       "centos-9-test-ARM64": {
          "jobs": {
             "maybe_test": {
-               "name": "maybe skip tests",
-               "runs-on": "ubuntu-24.04",
                "steps": [
                   {
                      "id": "check_skip",
@@ -212,15 +210,15 @@
                      }
                   }
                ]
-            }
+            },
+            "name": "maybe skip tests",
+            "runs-on": "ubuntu-24.04"
          },
          "needs": "centos-9-build-ARM64"
       },
       "centos-9-test-X64": {
          "jobs": {
             "maybe_test": {
-               "name": "maybe skip tests",
-               "runs-on": "ubuntu-24.04",
                "steps": [
                   {
                      "id": "check_skip",
@@ -239,7 +237,9 @@
                      }
                   }
                ]
-            }
+            },
+            "name": "maybe skip tests",
+            "runs-on": "ubuntu-24.04"
          },
          "needs": "centos-9-build-X64"
       },
@@ -262,8 +262,6 @@
       "debian-bookworm-test-ARM64": {
          "jobs": {
             "maybe_test": {
-               "name": "maybe skip tests",
-               "runs-on": "ubuntu-24.04",
                "steps": [
                   {
                      "id": "check_skip",
@@ -282,15 +280,15 @@
                      }
                   }
                ]
-            }
+            },
+            "name": "maybe skip tests",
+            "runs-on": "ubuntu-24.04"
          },
          "needs": "debian-bookworm-build-ARM64"
       },
       "debian-bookworm-test-X64": {
          "jobs": {
             "maybe_test": {
-               "name": "maybe skip tests",
-               "runs-on": "ubuntu-24.04",
                "steps": [
                   {
                      "id": "check_skip",
@@ -309,7 +307,9 @@
                      }
                   }
                ]
-            }
+            },
+            "name": "maybe skip tests",
+            "runs-on": "ubuntu-24.04"
          },
          "needs": "debian-bookworm-build-X64"
       },
@@ -332,8 +332,6 @@
       "debian-bullseye-test-ARM64": {
          "jobs": {
             "maybe_test": {
-               "name": "maybe skip tests",
-               "runs-on": "ubuntu-24.04",
                "steps": [
                   {
                      "id": "check_skip",
@@ -352,15 +350,15 @@
                      }
                   }
                ]
-            }
+            },
+            "name": "maybe skip tests",
+            "runs-on": "ubuntu-24.04"
          },
          "needs": "debian-bullseye-build-ARM64"
       },
       "debian-bullseye-test-X64": {
          "jobs": {
             "maybe_test": {
-               "name": "maybe skip tests",
-               "runs-on": "ubuntu-24.04",
                "steps": [
                   {
                      "id": "check_skip",
@@ -379,7 +377,9 @@
                      }
                   }
                ]
-            }
+            },
+            "name": "maybe skip tests",
+            "runs-on": "ubuntu-24.04"
          },
          "needs": "debian-bullseye-build-X64"
       },
@@ -422,8 +422,6 @@
       "debian-trixie-test-ARM64": {
          "jobs": {
             "maybe_test": {
-               "name": "maybe skip tests",
-               "runs-on": "ubuntu-24.04",
                "steps": [
                   {
                      "id": "check_skip",
@@ -442,15 +440,15 @@
                      }
                   }
                ]
-            }
+            },
+            "name": "maybe skip tests",
+            "runs-on": "ubuntu-24.04"
          },
          "needs": "debian-trixie-build-ARM64"
       },
       "debian-trixie-test-X64": {
          "jobs": {
             "maybe_test": {
-               "name": "maybe skip tests",
-               "runs-on": "ubuntu-24.04",
                "steps": [
                   {
                      "id": "check_skip",
@@ -469,7 +467,9 @@
                      }
                   }
                ]
-            }
+            },
+            "name": "maybe skip tests",
+            "runs-on": "ubuntu-24.04"
          },
          "needs": "debian-trixie-build-X64"
       },
@@ -492,8 +492,6 @@
       "ubuntu-focal-test-ARM64": {
          "jobs": {
             "maybe_test": {
-               "name": "maybe skip tests",
-               "runs-on": "ubuntu-24.04",
                "steps": [
                   {
                      "id": "check_skip",
@@ -512,15 +510,15 @@
                      }
                   }
                ]
-            }
+            },
+            "name": "maybe skip tests",
+            "runs-on": "ubuntu-24.04"
          },
          "needs": "ubuntu-focal-build-ARM64"
       },
       "ubuntu-focal-test-X64": {
          "jobs": {
             "maybe_test": {
-               "name": "maybe skip tests",
-               "runs-on": "ubuntu-24.04",
                "steps": [
                   {
                      "id": "check_skip",
@@ -539,7 +537,9 @@
                      }
                   }
                ]
-            }
+            },
+            "name": "maybe skip tests",
+            "runs-on": "ubuntu-24.04"
          },
          "needs": "ubuntu-focal-build-X64"
       },
@@ -562,8 +562,6 @@
       "ubuntu-jammy-test-ARM64": {
          "jobs": {
             "maybe_test": {
-               "name": "maybe skip tests",
-               "runs-on": "ubuntu-24.04",
                "steps": [
                   {
                      "id": "check_skip",
@@ -582,15 +580,15 @@
                      }
                   }
                ]
-            }
+            },
+            "name": "maybe skip tests",
+            "runs-on": "ubuntu-24.04"
          },
          "needs": "ubuntu-jammy-build-ARM64"
       },
       "ubuntu-jammy-test-X64": {
          "jobs": {
             "maybe_test": {
-               "name": "maybe skip tests",
-               "runs-on": "ubuntu-24.04",
                "steps": [
                   {
                      "id": "check_skip",
@@ -609,7 +607,9 @@
                      }
                   }
                ]
-            }
+            },
+            "name": "maybe skip tests",
+            "runs-on": "ubuntu-24.04"
          },
          "needs": "ubuntu-jammy-build-X64"
       },
@@ -632,8 +632,6 @@
       "ubuntu-noble-test-ARM64": {
          "jobs": {
             "maybe_test": {
-               "name": "maybe skip tests",
-               "runs-on": "ubuntu-24.04",
                "steps": [
                   {
                      "id": "check_skip",
@@ -652,15 +650,15 @@
                      }
                   }
                ]
-            }
+            },
+            "name": "maybe skip tests",
+            "runs-on": "ubuntu-24.04"
          },
          "needs": "ubuntu-noble-build-ARM64"
       },
       "ubuntu-noble-test-X64": {
          "jobs": {
             "maybe_test": {
-               "name": "maybe skip tests",
-               "runs-on": "ubuntu-24.04",
                "steps": [
                   {
                      "id": "check_skip",
@@ -679,7 +677,9 @@
                      }
                   }
                ]
-            }
+            },
+            "name": "maybe skip tests",
+            "runs-on": "ubuntu-24.04"
          },
          "needs": "ubuntu-noble-build-X64"
       }
