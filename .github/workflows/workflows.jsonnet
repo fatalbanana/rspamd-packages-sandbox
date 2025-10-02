@@ -67,12 +67,12 @@ local build_test_jobs(name, image) = {
   },
   [name + '-test-X64']: {
     needs: name + '-build-X64',
-    uses: "${{ (!env.SKIP_TESTS && !env.SKIP_TESTS_" + std.asciiUpper(std.strReplace(name, '-', '_')) + ") && './.github/workflows/test_package.yml' || './.github/workflows/noop.yml' }}",
+    uses: './.github/workflows/test_package.yml',
     with: test_with('X64'),
   },
   [name + '-test-ARM64']: {
     needs: name + '-build-ARM64',
-    uses: "${{ (!vars.SKIP_TESTS && !vars.SKIP_TESTS_" + std.asciiUpper(std.strReplace(name, '-', '_')) + ") && './.github/workflows/test_package.yml' || './.github/workflows/noop.yml' }}",
+    uses: './.github/workflows/test_package.yml',
     with: test_with('ARM64'),
   },
 };
