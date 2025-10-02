@@ -238,7 +238,7 @@
             "ubuntu-noble-test-X64",
             "ubuntu-noble-test-ARM64"
          ],
-         "uses": "./.github/workflows/publish_rpm.yml",
+         "uses": "./.github/workflows/publish_deb.yml",
          "with": {
             "names": "debian-bookworm,debian-bullseye,debian-trixie,ubuntu-focal,ubuntu-jammy,ubuntu-noble"
          }

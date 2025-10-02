@@ -78,7 +78,7 @@ local publish_debian = {
   'debian-publish': {
     //'if': "${{ !vars.SKIP_PUBLISH && !vars.SKIP_PUBLISH_" + std.asciiUpper(std.strReplace(name, '-', '_')) + " }}",
     needs: distribs_deb_test,
-    uses: './.github/workflows/publish_rpm.yml',
+    uses: './.github/workflows/publish_deb.yml',
     with: {
       names: std.join(',', distribs_deb),
     },
