@@ -7,18 +7,13 @@ on:
         required: true
         type: string
         description: 'The target OS/distro name to publish (e.g., ubuntu-jammy, centos-9)'
-      platform:
-        required: true
-        type: string
-        description: 'X64 or ARM64'
 
 jobs:
   test:
-    name: 'publish (${{ inputs.name }}/${{ inputs.platform }})'
-    runs-on: ${{ inputs.platform == 'ARM64' && 'ubuntu-24.04-arm' || 'ubuntu-24.04' }}
+    name: 'publish (${{ inputs.name }})'
+    runs-on: 'ubuntu-24.04'
 
     steps:
       - name: Download package
-        uses: actions/download-artifact@v4
-        with:
-          name: packages-${{ inputs.platform }}-${{ inputs.name }}
+        run: |
+          echo FIXME

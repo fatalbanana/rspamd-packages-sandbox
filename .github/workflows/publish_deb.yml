@@ -3,22 +3,17 @@ name: Publish package (Debian)
 on:
   workflow_call:
     inputs:
-      name:
+      names:
         required: true
         type: string
-        description: 'The target OS/distro name to publish (e.g., ubuntu-jammy, centos-9)'
-      platform:
-        required: true
-        type: string
-        description: 'X64 or ARM64'
+        description: 'The target distro names to publish (e.g. debian-trixie,debian-bookworm)'
 
 jobs:
   test:
-    name: 'publish (${{ inputs.name }}/${{ inputs.platform }})'
-    runs-on: ${{ inputs.platform == 'ARM64' && 'ubuntu-24.04-arm' || 'ubuntu-24.04' }}
+    name: 'publish (debian)'
+    runs-on: 'ubuntu-24.04'
 
     steps:
       - name: Download package
-        uses: actions/download-artifact@v4
-        with:
-          name: packages-${{ inputs.platform }}-${{ inputs.name }}
+        run: |
+          echo FIXME
