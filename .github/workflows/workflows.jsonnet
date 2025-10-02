@@ -32,6 +32,17 @@ local build_test_publish_pipeline = {
       },
     },
   },
+  env: {
+    SKIP_TESTS: '${{ vars.SKIP_TESTS }}',
+  } + {
+    // Add SKIP_TESTS_<package> for each package to skip tests for that package
+    [ 'SKIP_TESTS_' + std.asciiUpper(std.strReplace(name, '-', '_')) ]: '${{ vars.SKIP_TESTS_' + std.asciiUpper(std.strReplace(name, '-', '_')) + ' }}'
+    for name in std.objectFields(imagemap)
+  } + {
+    // Add SKIP_PUBLISH_<package> for each package to skip publish for that package
+    [ 'SKIP_PUBLISH_' + std.asciiUpper(std.strReplace(name, '-', '_')) ]: '${{ vars.SKIP_PUBLISH_' + std.asciiUpper(std.strReplace(name, '-', '_')) + ' }}'
+    for name in std.objectFields(imagemap)
+  },
 };
 
 local build_test_jobs(name, image) = {
@@ -56,7 +67,7 @@ local build_test_jobs(name, image) = {
   },
   [name + '-test-X64']: {
     needs: name + '-build-X64',
-    uses: "${{ (!vars.SKIP_TESTS && !vars.SKIP_TESTS_" + std.asciiUpper(std.strReplace(name, '-', '_')) + ") && './.github/workflows/test_package.yml' || './.github/workflows/noop.yml' }}",
+    uses: "${{ (!env.SKIP_TESTS && !env.SKIP_TESTS_" + std.asciiUpper(std.strReplace(name, '-', '_')) + ") && './.github/workflows/test_package.yml' || './.github/workflows/noop.yml' }}",
     with: test_with('X64'),
   },
   [name + '-test-ARM64']: {
