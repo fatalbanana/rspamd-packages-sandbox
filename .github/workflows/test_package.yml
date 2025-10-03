@@ -19,6 +19,10 @@ on:
         required: true
         type: string
         description: 'The git commit hash of the rspamd repository to check out.'
+      skip_tests:
+        required: false
+        type: string
+        description: 'If nonempty, skip running the tests.'
 
 jobs:
   test:
@@ -29,11 +33,13 @@ jobs:
 
     steps:
       - name: Download package
+        if: ${{ ! inputs.skip_tests }}
         uses: actions/download-artifact@v4
         with:
           name: packages-${{ inputs.platform }}-${{ inputs.name }}
 
       - name: Perform OS-specific steps and install package
+        if: ${{ ! inputs.skip_tests }}
         shell: bash
         run: |
           # Install rspamd
@@ -82,6 +88,7 @@ jobs:
           fi
 
       - name: Check out rspamd source
+        if: ${{ ! inputs.skip_tests }}
         uses: actions/checkout@v4
         with:
           repository: rspamd/rspamd
@@ -89,6 +96,7 @@ jobs:
           ref: "${{ inputs.revision }}"
 
       - name: Set up test environment
+        if: ${{ ! inputs.skip_tests }}
         shell: bash
         run: |
           python3 -mvenv $GITHUB_WORKSPACE/venv --system-site-packages
@@ -99,6 +107,7 @@ jobs:
           fi
 
       - name: Run tests
+        if: ${{ ! inputs.skip_tests }}
         id: run_tests
         continue-on-error: true
         run: |

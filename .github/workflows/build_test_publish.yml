@@ -34,7 +34,8 @@
             "image": "oraclelinux:10",
             "name": "centos-10",
             "platform": "ARM64",
-            "revision": "${{ needs.centos-10-build-ARM64.outputs.revision }}"
+            "revision": "${{ needs.centos-10-build-ARM64.outputs.revision }}",
+            "skip_tests": "${{ !env.SKIP_TESTS && !env.SKIP_TESTS_CENTOS_10 }}"
          }
       },
       "centos-10-test-X64": {
@@ -44,7 +45,8 @@
             "image": "oraclelinux:10",
             "name": "centos-10",
             "platform": "X64",
-            "revision": "${{ needs.centos-10-build-X64.outputs.revision }}"
+            "revision": "${{ needs.centos-10-build-X64.outputs.revision }}",
+            "skip_tests": "${{ !env.SKIP_TESTS && !env.SKIP_TESTS_CENTOS_10 }}"
          }
       },
       "centos-8-build-ARM64": {
@@ -81,7 +83,8 @@
             "image": "oraclelinux:8",
             "name": "centos-8",
             "platform": "ARM64",
-            "revision": "${{ needs.centos-8-build-ARM64.outputs.revision }}"
+            "revision": "${{ needs.centos-8-build-ARM64.outputs.revision }}",
+            "skip_tests": "${{ !env.SKIP_TESTS && !env.SKIP_TESTS_CENTOS_8 }}"
          }
       },
       "centos-8-test-X64": {
@@ -91,7 +94,8 @@
             "image": "oraclelinux:8",
             "name": "centos-8",
             "platform": "X64",
-            "revision": "${{ needs.centos-8-build-X64.outputs.revision }}"
+            "revision": "${{ needs.centos-8-build-X64.outputs.revision }}",
+            "skip_tests": "${{ !env.SKIP_TESTS && !env.SKIP_TESTS_CENTOS_8 }}"
          }
       },
       "centos-9-build-ARM64": {
@@ -128,7 +132,8 @@
             "image": "oraclelinux:9",
             "name": "centos-9",
             "platform": "ARM64",
-            "revision": "${{ needs.centos-9-build-ARM64.outputs.revision }}"
+            "revision": "${{ needs.centos-9-build-ARM64.outputs.revision }}",
+            "skip_tests": "${{ !env.SKIP_TESTS && !env.SKIP_TESTS_CENTOS_9 }}"
          }
       },
       "centos-9-test-X64": {
@@ -138,7 +143,8 @@
             "image": "oraclelinux:9",
             "name": "centos-9",
             "platform": "X64",
-            "revision": "${{ needs.centos-9-build-X64.outputs.revision }}"
+            "revision": "${{ needs.centos-9-build-X64.outputs.revision }}",
+            "skip_tests": "${{ !env.SKIP_TESTS && !env.SKIP_TESTS_CENTOS_9 }}"
          }
       },
       "debian-bookworm-build-ARM64": {
@@ -164,7 +170,8 @@
             "image": "debian:bookworm",
             "name": "debian-bookworm",
             "platform": "ARM64",
-            "revision": "${{ needs.debian-bookworm-build-ARM64.outputs.revision }}"
+            "revision": "${{ needs.debian-bookworm-build-ARM64.outputs.revision }}",
+            "skip_tests": "${{ !env.SKIP_TESTS && !env.SKIP_TESTS_DEBIAN_BOOKWORM }}"
          }
       },
       "debian-bookworm-test-X64": {
@@ -174,7 +181,8 @@
             "image": "debian:bookworm",
             "name": "debian-bookworm",
             "platform": "X64",
-            "revision": "${{ needs.debian-bookworm-build-X64.outputs.revision }}"
+            "revision": "${{ needs.debian-bookworm-build-X64.outputs.revision }}",
+            "skip_tests": "${{ !env.SKIP_TESTS && !env.SKIP_TESTS_DEBIAN_BOOKWORM }}"
          }
       },
       "debian-bullseye-build-ARM64": {
@@ -200,7 +208,8 @@
             "image": "debian:bullseye",
             "name": "debian-bullseye",
             "platform": "ARM64",
-            "revision": "${{ needs.debian-bullseye-build-ARM64.outputs.revision }}"
+            "revision": "${{ needs.debian-bullseye-build-ARM64.outputs.revision }}",
+            "skip_tests": "${{ !env.SKIP_TESTS && !env.SKIP_TESTS_DEBIAN_BULLSEYE }}"
          }
       },
       "debian-bullseye-test-X64": {
@@ -210,7 +219,8 @@
             "image": "debian:bullseye",
             "name": "debian-bullseye",
             "platform": "X64",
-            "revision": "${{ needs.debian-bullseye-build-X64.outputs.revision }}"
+            "revision": "${{ needs.debian-bullseye-build-X64.outputs.revision }}",
+            "skip_tests": "${{ !env.SKIP_TESTS && !env.SKIP_TESTS_DEBIAN_BULLSEYE }}"
          }
       },
       "debian-publish": {
@@ -256,7 +266,8 @@
             "image": "debian:trixie",
             "name": "debian-trixie",
             "platform": "ARM64",
-            "revision": "${{ needs.debian-trixie-build-ARM64.outputs.revision }}"
+            "revision": "${{ needs.debian-trixie-build-ARM64.outputs.revision }}",
+            "skip_tests": "${{ !env.SKIP_TESTS && !env.SKIP_TESTS_DEBIAN_TRIXIE }}"
          }
       },
       "debian-trixie-test-X64": {
@@ -266,7 +277,8 @@
             "image": "debian:trixie",
             "name": "debian-trixie",
             "platform": "X64",
-            "revision": "${{ needs.debian-trixie-build-X64.outputs.revision }}"
+            "revision": "${{ needs.debian-trixie-build-X64.outputs.revision }}",
+            "skip_tests": "${{ !env.SKIP_TESTS && !env.SKIP_TESTS_DEBIAN_TRIXIE }}"
          }
       },
       "ubuntu-focal-build-ARM64": {
@@ -292,7 +304,8 @@
             "image": "ubuntu:20.04",
             "name": "ubuntu-focal",
             "platform": "ARM64",
-            "revision": "${{ needs.ubuntu-focal-build-ARM64.outputs.revision }}"
+            "revision": "${{ needs.ubuntu-focal-build-ARM64.outputs.revision }}",
+            "skip_tests": "${{ !env.SKIP_TESTS && !env.SKIP_TESTS_UBUNTU_FOCAL }}"
          }
       },
       "ubuntu-focal-test-X64": {
@@ -302,7 +315,8 @@
             "image": "ubuntu:20.04",
             "name": "ubuntu-focal",
             "platform": "X64",
-            "revision": "${{ needs.ubuntu-focal-build-X64.outputs.revision }}"
+            "revision": "${{ needs.ubuntu-focal-build-X64.outputs.revision }}",
+            "skip_tests": "${{ !env.SKIP_TESTS && !env.SKIP_TESTS_UBUNTU_FOCAL }}"
          }
       },
       "ubuntu-jammy-build-ARM64": {
@@ -328,7 +342,8 @@
             "image": "ubuntu:22.04",
             "name": "ubuntu-jammy",
             "platform": "ARM64",
-            "revision": "${{ needs.ubuntu-jammy-build-ARM64.outputs.revision }}"
+            "revision": "${{ needs.ubuntu-jammy-build-ARM64.outputs.revision }}",
+            "skip_tests": "${{ !env.SKIP_TESTS && !env.SKIP_TESTS_UBUNTU_JAMMY }}"
          }
       },
       "ubuntu-jammy-test-X64": {
@@ -338,7 +353,8 @@
             "image": "ubuntu:22.04",
             "name": "ubuntu-jammy",
             "platform": "X64",
-            "revision": "${{ needs.ubuntu-jammy-build-X64.outputs.revision }}"
+            "revision": "${{ needs.ubuntu-jammy-build-X64.outputs.revision }}",
+            "skip_tests": "${{ !env.SKIP_TESTS && !env.SKIP_TESTS_UBUNTU_JAMMY }}"
          }
       },
       "ubuntu-noble-build-ARM64": {
@@ -364,7 +380,8 @@
             "image": "ubuntu:24.04",
             "name": "ubuntu-noble",
             "platform": "ARM64",
-            "revision": "${{ needs.ubuntu-noble-build-ARM64.outputs.revision }}"
+            "revision": "${{ needs.ubuntu-noble-build-ARM64.outputs.revision }}",
+            "skip_tests": "${{ !env.SKIP_TESTS && !env.SKIP_TESTS_UBUNTU_NOBLE }}"
          }
       },
       "ubuntu-noble-test-X64": {
@@ -374,7 +391,8 @@
             "image": "ubuntu:24.04",
             "name": "ubuntu-noble",
             "platform": "X64",
-            "revision": "${{ needs.ubuntu-noble-build-X64.outputs.revision }}"
+            "revision": "${{ needs.ubuntu-noble-build-X64.outputs.revision }}",
+            "skip_tests": "${{ !env.SKIP_TESTS && !env.SKIP_TESTS_UBUNTU_NOBLE }}"
          }
       }
    },
