@@ -55,7 +55,7 @@ local build_test_jobs(name, image) = {
     image: image,
     platform: arch,
     revision: '${{ needs.' + name + '-build-' + arch + '.outputs.revision }}',
-    skip_tests: '${{ !vars.SKIP_TESTS && !vars.SKIP_TESTS_' + std.asciiUpper(std.strReplace(name, '-', '_')) + ' }}',
+    skip_tests: '${{ vars.SKIP_TESTS || vars.SKIP_TESTS_' + std.asciiUpper(std.strReplace(name, '-', '_')) + ' }}',
   },
   [name + '-test-' + arch]: {
     needs: name + '-build-' + arch,

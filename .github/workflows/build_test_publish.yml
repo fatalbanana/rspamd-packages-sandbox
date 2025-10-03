@@ -35,7 +35,7 @@
             "name": "centos-10",
             "platform": "ARM64",
             "revision": "${{ needs.centos-10-build-ARM64.outputs.revision }}",
-            "skip_tests": "${{ !vars.SKIP_TESTS && !vars.SKIP_TESTS_CENTOS_10 }}"
+            "skip_tests": "${{ vars.SKIP_TESTS || vars.SKIP_TESTS_CENTOS_10 }}"
          }
       },
       "centos-10-test-X64": {
@@ -46,7 +46,7 @@
             "name": "centos-10",
             "platform": "X64",
             "revision": "${{ needs.centos-10-build-X64.outputs.revision }}",
-            "skip_tests": "${{ !vars.SKIP_TESTS && !vars.SKIP_TESTS_CENTOS_10 }}"
+            "skip_tests": "${{ vars.SKIP_TESTS || vars.SKIP_TESTS_CENTOS_10 }}"
          }
       },
       "centos-8-build-ARM64": {
@@ -84,7 +84,7 @@
             "name": "centos-8",
             "platform": "ARM64",
             "revision": "${{ needs.centos-8-build-ARM64.outputs.revision }}",
-            "skip_tests": "${{ !vars.SKIP_TESTS && !vars.SKIP_TESTS_CENTOS_8 }}"
+            "skip_tests": "${{ vars.SKIP_TESTS || vars.SKIP_TESTS_CENTOS_8 }}"
          }
       },
       "centos-8-test-X64": {
@@ -95,7 +95,7 @@
             "name": "centos-8",
             "platform": "X64",
             "revision": "${{ needs.centos-8-build-X64.outputs.revision }}",
-            "skip_tests": "${{ !vars.SKIP_TESTS && !vars.SKIP_TESTS_CENTOS_8 }}"
+            "skip_tests": "${{ vars.SKIP_TESTS || vars.SKIP_TESTS_CENTOS_8 }}"
          }
       },
       "centos-9-build-ARM64": {
@@ -133,7 +133,7 @@
             "name": "centos-9",
             "platform": "ARM64",
             "revision": "${{ needs.centos-9-build-ARM64.outputs.revision }}",
-            "skip_tests": "${{ !vars.SKIP_TESTS && !vars.SKIP_TESTS_CENTOS_9 }}"
+            "skip_tests": "${{ vars.SKIP_TESTS || vars.SKIP_TESTS_CENTOS_9 }}"
          }
       },
       "centos-9-test-X64": {
@@ -144,7 +144,7 @@
             "name": "centos-9",
             "platform": "X64",
             "revision": "${{ needs.centos-9-build-X64.outputs.revision }}",
-            "skip_tests": "${{ !vars.SKIP_TESTS && !vars.SKIP_TESTS_CENTOS_9 }}"
+            "skip_tests": "${{ vars.SKIP_TESTS || vars.SKIP_TESTS_CENTOS_9 }}"
          }
       },
       "debian-bookworm-build-ARM64": {
@@ -171,7 +171,7 @@
             "name": "debian-bookworm",
             "platform": "ARM64",
             "revision": "${{ needs.debian-bookworm-build-ARM64.outputs.revision }}",
-            "skip_tests": "${{ !vars.SKIP_TESTS && !vars.SKIP_TESTS_DEBIAN_BOOKWORM }}"
+            "skip_tests": "${{ vars.SKIP_TESTS || vars.SKIP_TESTS_DEBIAN_BOOKWORM }}"
          }
       },
       "debian-bookworm-test-X64": {
@@ -182,7 +182,7 @@
             "name": "debian-bookworm",
             "platform": "X64",
             "revision": "${{ needs.debian-bookworm-build-X64.outputs.revision }}",
-            "skip_tests": "${{ !vars.SKIP_TESTS && !vars.SKIP_TESTS_DEBIAN_BOOKWORM }}"
+            "skip_tests": "${{ vars.SKIP_TESTS || vars.SKIP_TESTS_DEBIAN_BOOKWORM }}"
          }
       },
       "debian-bullseye-build-ARM64": {
@@ -209,7 +209,7 @@
             "name": "debian-bullseye",
             "platform": "ARM64",
             "revision": "${{ needs.debian-bullseye-build-ARM64.outputs.revision }}",
-            "skip_tests": "${{ !vars.SKIP_TESTS && !vars.SKIP_TESTS_DEBIAN_BULLSEYE }}"
+            "skip_tests": "${{ vars.SKIP_TESTS || vars.SKIP_TESTS_DEBIAN_BULLSEYE }}"
          }
       },
       "debian-bullseye-test-X64": {
@@ -220,10 +220,11 @@
             "name": "debian-bullseye",
             "platform": "X64",
             "revision": "${{ needs.debian-bullseye-build-X64.outputs.revision }}",
-            "skip_tests": "${{ !vars.SKIP_TESTS && !vars.SKIP_TESTS_DEBIAN_BULLSEYE }}"
+            "skip_tests": "${{ vars.SKIP_TESTS || vars.SKIP_TESTS_DEBIAN_BULLSEYE }}"
          }
       },
       "debian-publish": {
+         "if": "${{ !vars.SKIP_PUBLISH }}",
          "needs": [
             "debian-bookworm-test-X64",
             "debian-bookworm-test-ARM64",
@@ -267,7 +268,7 @@
             "name": "debian-trixie",
             "platform": "ARM64",
             "revision": "${{ needs.debian-trixie-build-ARM64.outputs.revision }}",
-            "skip_tests": "${{ !vars.SKIP_TESTS && !vars.SKIP_TESTS_DEBIAN_TRIXIE }}"
+            "skip_tests": "${{ vars.SKIP_TESTS || vars.SKIP_TESTS_DEBIAN_TRIXIE }}"
          }
       },
       "debian-trixie-test-X64": {
@@ -278,7 +279,7 @@
             "name": "debian-trixie",
             "platform": "X64",
             "revision": "${{ needs.debian-trixie-build-X64.outputs.revision }}",
-            "skip_tests": "${{ !vars.SKIP_TESTS && !vars.SKIP_TESTS_DEBIAN_TRIXIE }}"
+            "skip_tests": "${{ vars.SKIP_TESTS || vars.SKIP_TESTS_DEBIAN_TRIXIE }}"
          }
       },
       "ubuntu-focal-build-ARM64": {
@@ -305,7 +306,7 @@
             "name": "ubuntu-focal",
             "platform": "ARM64",
             "revision": "${{ needs.ubuntu-focal-build-ARM64.outputs.revision }}",
-            "skip_tests": "${{ !vars.SKIP_TESTS && !vars.SKIP_TESTS_UBUNTU_FOCAL }}"
+            "skip_tests": "${{ vars.SKIP_TESTS || vars.SKIP_TESTS_UBUNTU_FOCAL }}"
          }
       },
       "ubuntu-focal-test-X64": {
@@ -316,7 +317,7 @@
             "name": "ubuntu-focal",
             "platform": "X64",
             "revision": "${{ needs.ubuntu-focal-build-X64.outputs.revision }}",
-            "skip_tests": "${{ !vars.SKIP_TESTS && !vars.SKIP_TESTS_UBUNTU_FOCAL }}"
+            "skip_tests": "${{ vars.SKIP_TESTS || vars.SKIP_TESTS_UBUNTU_FOCAL }}"
          }
       },
       "ubuntu-jammy-build-ARM64": {
@@ -343,7 +344,7 @@
             "name": "ubuntu-jammy",
             "platform": "ARM64",
             "revision": "${{ needs.ubuntu-jammy-build-ARM64.outputs.revision }}",
-            "skip_tests": "${{ !vars.SKIP_TESTS && !vars.SKIP_TESTS_UBUNTU_JAMMY }}"
+            "skip_tests": "${{ vars.SKIP_TESTS || vars.SKIP_TESTS_UBUNTU_JAMMY }}"
          }
       },
       "ubuntu-jammy-test-X64": {
@@ -354,7 +355,7 @@
             "name": "ubuntu-jammy",
             "platform": "X64",
             "revision": "${{ needs.ubuntu-jammy-build-X64.outputs.revision }}",
-            "skip_tests": "${{ !vars.SKIP_TESTS && !vars.SKIP_TESTS_UBUNTU_JAMMY }}"
+            "skip_tests": "${{ vars.SKIP_TESTS || vars.SKIP_TESTS_UBUNTU_JAMMY }}"
          }
       },
       "ubuntu-noble-build-ARM64": {
@@ -381,7 +382,7 @@
             "name": "ubuntu-noble",
             "platform": "ARM64",
             "revision": "${{ needs.ubuntu-noble-build-ARM64.outputs.revision }}",
-            "skip_tests": "${{ !vars.SKIP_TESTS && !vars.SKIP_TESTS_UBUNTU_NOBLE }}"
+            "skip_tests": "${{ vars.SKIP_TESTS || vars.SKIP_TESTS_UBUNTU_NOBLE }}"
          }
       },
       "ubuntu-noble-test-X64": {
@@ -392,7 +393,7 @@
             "name": "ubuntu-noble",
             "platform": "X64",
             "revision": "${{ needs.ubuntu-noble-build-X64.outputs.revision }}",
-            "skip_tests": "${{ !vars.SKIP_TESTS && !vars.SKIP_TESTS_UBUNTU_NOBLE }}"
+            "skip_tests": "${{ vars.SKIP_TESTS || vars.SKIP_TESTS_UBUNTU_NOBLE }}"
          }
       }
    },
