@@ -28,6 +28,7 @@
          }
       },
       "centos-10-test-ARM64": {
+         "if": "${{ !vars.SKIP_PUBLISH && !vars.SKIP_TEST }}",
          "needs": "centos-10-build-ARM64",
          "uses": "./.github/workflows/test_package.yml",
          "with": {
@@ -39,6 +40,7 @@
          }
       },
       "centos-10-test-X64": {
+         "if": "${{ !vars.SKIP_PUBLISH && !vars.SKIP_TEST }}",
          "needs": "centos-10-build-X64",
          "uses": "./.github/workflows/test_package.yml",
          "with": {
@@ -77,6 +79,7 @@
          }
       },
       "centos-8-test-ARM64": {
+         "if": "${{ !vars.SKIP_PUBLISH && !vars.SKIP_TEST }}",
          "needs": "centos-8-build-ARM64",
          "uses": "./.github/workflows/test_package.yml",
          "with": {
@@ -88,6 +91,7 @@
          }
       },
       "centos-8-test-X64": {
+         "if": "${{ !vars.SKIP_PUBLISH && !vars.SKIP_TEST }}",
          "needs": "centos-8-build-X64",
          "uses": "./.github/workflows/test_package.yml",
          "with": {
@@ -126,6 +130,7 @@
          }
       },
       "centos-9-test-ARM64": {
+         "if": "${{ !vars.SKIP_PUBLISH && !vars.SKIP_TEST }}",
          "needs": "centos-9-build-ARM64",
          "uses": "./.github/workflows/test_package.yml",
          "with": {
@@ -137,6 +142,7 @@
          }
       },
       "centos-9-test-X64": {
+         "if": "${{ !vars.SKIP_PUBLISH && !vars.SKIP_TEST }}",
          "needs": "centos-9-build-X64",
          "uses": "./.github/workflows/test_package.yml",
          "with": {
@@ -164,6 +170,7 @@
          }
       },
       "debian-bookworm-test-ARM64": {
+         "if": "${{ !vars.SKIP_PUBLISH && !vars.SKIP_TEST }}",
          "needs": "debian-bookworm-build-ARM64",
          "uses": "./.github/workflows/test_package.yml",
          "with": {
@@ -175,6 +182,7 @@
          }
       },
       "debian-bookworm-test-X64": {
+         "if": "${{ !vars.SKIP_PUBLISH && !vars.SKIP_TEST }}",
          "needs": "debian-bookworm-build-X64",
          "uses": "./.github/workflows/test_package.yml",
          "with": {
@@ -202,6 +210,7 @@
          }
       },
       "debian-bullseye-test-ARM64": {
+         "if": "${{ !vars.SKIP_PUBLISH && !vars.SKIP_TEST }}",
          "needs": "debian-bullseye-build-ARM64",
          "uses": "./.github/workflows/test_package.yml",
          "with": {
@@ -213,6 +222,7 @@
          }
       },
       "debian-bullseye-test-X64": {
+         "if": "${{ !vars.SKIP_PUBLISH && !vars.SKIP_TEST }}",
          "needs": "debian-bullseye-build-X64",
          "uses": "./.github/workflows/test_package.yml",
          "with": {
@@ -261,6 +271,7 @@
          }
       },
       "debian-trixie-test-ARM64": {
+         "if": "${{ !vars.SKIP_PUBLISH && !vars.SKIP_TEST }}",
          "needs": "debian-trixie-build-ARM64",
          "uses": "./.github/workflows/test_package.yml",
          "with": {
@@ -272,6 +283,7 @@
          }
       },
       "debian-trixie-test-X64": {
+         "if": "${{ !vars.SKIP_PUBLISH && !vars.SKIP_TEST }}",
          "needs": "debian-trixie-build-X64",
          "uses": "./.github/workflows/test_package.yml",
          "with": {
@@ -299,6 +311,7 @@
          }
       },
       "ubuntu-focal-test-ARM64": {
+         "if": "${{ !vars.SKIP_PUBLISH && !vars.SKIP_TEST }}",
          "needs": "ubuntu-focal-build-ARM64",
          "uses": "./.github/workflows/test_package.yml",
          "with": {
@@ -310,6 +323,7 @@
          }
       },
       "ubuntu-focal-test-X64": {
+         "if": "${{ !vars.SKIP_PUBLISH && !vars.SKIP_TEST }}",
          "needs": "ubuntu-focal-build-X64",
          "uses": "./.github/workflows/test_package.yml",
          "with": {
@@ -337,6 +351,7 @@
          }
       },
       "ubuntu-jammy-test-ARM64": {
+         "if": "${{ !vars.SKIP_PUBLISH && !vars.SKIP_TEST }}",
          "needs": "ubuntu-jammy-build-ARM64",
          "uses": "./.github/workflows/test_package.yml",
          "with": {
@@ -348,6 +363,7 @@
          }
       },
       "ubuntu-jammy-test-X64": {
+         "if": "${{ !vars.SKIP_PUBLISH && !vars.SKIP_TEST }}",
          "needs": "ubuntu-jammy-build-X64",
          "uses": "./.github/workflows/test_package.yml",
          "with": {
@@ -375,6 +391,7 @@
          }
       },
       "ubuntu-noble-test-ARM64": {
+         "if": "${{ !vars.SKIP_PUBLISH && !vars.SKIP_TEST }}",
          "needs": "ubuntu-noble-build-ARM64",
          "uses": "./.github/workflows/test_package.yml",
          "with": {
@@ -386,6 +403,7 @@
          }
       },
       "ubuntu-noble-test-X64": {
+         "if": "${{ !vars.SKIP_PUBLISH && !vars.SKIP_TEST }}",
          "needs": "ubuntu-noble-build-X64",
          "uses": "./.github/workflows/test_package.yml",
          "with": {
