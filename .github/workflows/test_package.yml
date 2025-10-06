@@ -32,11 +32,13 @@ jobs:
       image: ${{ inputs.image }}
 
     steps:
-      - name: Download package
+      - name: Download package(s)
         if: ${{ ! inputs.skip_tests }}
         uses: actions/download-artifact@v4
         with:
-          name: packages-${{ inputs.name }}-${{ inputs.platform }}
+          pattern: packages-${{ inputs.name }}-*
+          path: .
+          merge-multiple: true
 
       - name: Perform OS-specific steps and install package
         if: ${{ ! inputs.skip_tests }}
