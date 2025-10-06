@@ -65,6 +65,7 @@ jobs:
           RSYNC_DELETE: ${{ vars.RSYNC_DELETE || '' }}
           NO_DELETE: ${{ vars.NO_DELETE || '' }}
           GPG_PASSPHRASE: ${{ secrets.GPG_PASSPHRASE }}
+          KEEP_BUILDS: ${{ vars.KEEP_BUILDS || '10' }}
           UPLOAD_HOST_KNOWN_HOSTS: ${{ vars.UPLOAD_HOST_KNOWN_HOSTS }}
         run: |
           set -euo pipefail
@@ -73,7 +74,7 @@ jobs:
           # Export public key for clients
           gpg --armor --output "$REPO_DIR/rspamd.asc" --export "$KEY_FPR"
 
-          # Optionally prefill with existing repo content to preserve older packages
+          # Optionally prefill with existing repo content, but only indices and currently referenced pool files
           if [[ -z "${NO_DELETE:-}" ]]; then
             if [[ -n "${NIGHTLY:-}" ]]; then
               RSYNC_KEY='${{ secrets.SSH_KEY_DEB_UNSTABLE }}'
@@ -92,8 +93,26 @@ jobs:
             fi
             printf '%s\n' "$UPLOAD_HOST_KNOWN_HOSTS" > "$HOME/.ssh/known_hosts"
             chmod 644 "$HOME/.ssh/known_hosts"
-            rsync -e "ssh -i $KEYFILE -o UserKnownHostsFile=$HOME/.ssh/known_hosts -o StrictHostKeyChecking=yes" -rup --ignore-existing \
+            SSH_CMD="ssh -i $KEYFILE -o UserKnownHostsFile=$HOME/.ssh/known_hosts -o StrictHostKeyChecking=yes"
+            # Prefill indices and top-level artifacts only
+            rsync -e "$SSH_CMD" -rup --ignore-existing --include 'dists/***' --include 'rspamd.asc' --exclude '*' \
               "${UPLOAD_HOST}:${UPLOAD_SUFFIX}${TARGET_PATH}/" "$REPO_DIR/" || true
+            # Build list of referenced pool files from downloaded indices
+            PREFILL_LIST="$RUNNER_TEMP/prefill_list.txt"
+            : > "$PREFILL_LIST"
+            if compgen -G "$REPO_DIR/dists/*/*/binary-*/Packages" > /dev/null; then
+              grep -h '^Filename: ' "$REPO_DIR"/dists/*/*/binary-*/Packages | awk '{print $2}' | sort -u >> "$PREFILL_LIST" || true
+            fi
+            if compgen -G "$REPO_DIR/dists/*/*/source/Sources" > /dev/null; then
+              awk '/^Files:/{infiles=1;next} NF==0{infiles=0} infiles && NF>=3{print $3}' \
+                "$REPO_DIR"/dists/*/*/source/Sources | sort -u >> "$PREFILL_LIST" || true
+              awk '/^Checksums-Sha256:/{insha=1;next} NF==0{insha=0} insha && NF>=3{print $3}' \
+                "$REPO_DIR"/dists/*/*/source/Sources | sort -u >> "$PREFILL_LIST" || true
+            fi
+            if [[ -s "$PREFILL_LIST" ]]; then
+              rsync -e "$SSH_CMD" -rup --ignore-existing --files-from="$PREFILL_LIST" \
+                "${UPLOAD_HOST}:${UPLOAD_SUFFIX}${TARGET_PATH}/" "$REPO_DIR/" || true
+            fi
           fi
 
           # Prepare distributions and include packages
@@ -157,12 +176,75 @@ EOD
               dpkg-sig -k "$KEY_FPR" --batch=1 --sign builder "$deb_pkg"
               reprepro  -P extra -S debug -b "$REPO_DIR" -v --keepunreferencedfiles includedeb "$codename" "$deb_pkg"
             done
+
+            # Retention: keep only the last N builds (by version) in indexes
+            keep_count="${KEEP_BUILDS:-10}"
+            if [[ "$keep_count" =~ ^[0-9]+$ ]] && (( keep_count > 0 )); then
+              mapfile -t all_versions < <(reprepro -b "$REPO_DIR" list "$codename" rspamd | awk '{print $NF}' | sort -u)
+              if (( ${#all_versions[@]} > keep_count )); then
+                versions_sorted=()
+                for v in "${all_versions[@]}"; do
+                  inserted=0
+                  for i in "${!versions_sorted[@]}"; do
+                    if dpkg --compare-versions "$v" gt "${versions_sorted[$i]}"; then
+                      versions_sorted=("${versions_sorted[@]:0:$i}" "$v" "${versions_sorted[@]:$i}")
+                      inserted=1
+                      break
+                    fi
+                  done
+                  if [[ $inserted -eq 0 ]]; then
+                    versions_sorted+=("$v")
+                  fi
+                done
+                keep_versions=("${versions_sorted[@]:0:$keep_count}")
+                declare -A keep_map
+                for kv in "${keep_versions[@]}"; do keep_map["$kv"]=1; done
+                mapfile -t pkgs < <(reprepro -b "$REPO_DIR" list "$codename" | sed -E 's/.*: ([^ ]+) .*/\1/' | grep '^rspamd' | sort -u)
+                for pkg in "${pkgs[@]}"; do
+                  mapfile -t pkg_versions < <(reprepro -b "$REPO_DIR" list "$codename" "$pkg" | awk '{print $NF}' | sort -u)
+                  for ver in "${pkg_versions[@]}"; do
+                    if [[ -z "${keep_map[$ver]:-}" ]]; then
+                      reprepro -b "$REPO_DIR" --keepunreferencedfiles removematched "$codename" "Package (== $pkg), Version (== $ver)" || true
+                    fi
+                  done
+                done
+                # Refresh indices after pruning
+                reprepro -b "$REPO_DIR" export "$codename"
+              fi
+            fi
             # Sign Release
             if [[ -f "$REPO_DIR/dists/${codename}/Release" ]]; then
               gpg -u "0x$KEY_FPR" --batch --yes --pinentry-mode loopback --passphrase "$GPG_PASSPHRASE" -sb "$REPO_DIR/dists/${codename}/Release"
               mv "$REPO_DIR/dists/${codename}/Release.sig" "$REPO_DIR/dists/${codename}/Release.gpg"
             fi
           done
+
+          # Build a minimal staging directory containing only indexed files to reduce upload size
+          STAGING_DIR="$GITHUB_WORKSPACE/repos_staging"
+          rm -rf "$STAGING_DIR"
+          mkdir -p "$STAGING_DIR"
+          # Copy indices and top-level artifacts
+          rsync -a "$REPO_DIR/dists/" "$STAGING_DIR/dists/" || true
+          if [[ -f "$REPO_DIR/rspamd.asc" ]]; then cp -f "$REPO_DIR/rspamd.asc" "$STAGING_DIR/"; fi
+          # Collect referenced files from indices
+          REFERENCED_LIST="$RUNNER_TEMP/referenced_list.txt"
+          : > "$REFERENCED_LIST"
+          if compgen -G "$REPO_DIR/dists/*/*/binary-*/Packages" > /dev/null; then
+            grep -h '^Filename: ' "$REPO_DIR"/dists/*/*/binary-*/Packages | awk '{print $2}' | sort -u >> "$REFERENCED_LIST" || true
+          fi
+          if compgen -G "$REPO_DIR/dists/*/*/source/Sources" > /dev/null; then
+            awk '/^Files:/{infiles=1;next} NF==0{infiles=0} infiles && NF>=3{print $3}' \
+              "$REPO_DIR"/dists/*/*/source/Sources | sort -u >> "$REFERENCED_LIST" || true
+            awk '/^Checksums-Sha256:/{insha=1;next} NF==0{insha=0} insha && NF>=3{print $3}' \
+              "$REPO_DIR"/dists/*/*/source/Sources | sort -u >> "$REFERENCED_LIST" || true
+          fi
+          # Copy referenced pool files into staging
+          while IFS= read -r rel; do
+            src="$REPO_DIR/$rel"
+            dest="$STAGING_DIR/$rel"
+            mkdir -p "$(dirname "$dest")"
+            if [[ -f "$src" ]]; then cp -f "$src" "$dest"; fi
+          done < "$REFERENCED_LIST"
 
           # Upload repo
           if [[ -n "${NIGHTLY:-}" ]]; then
@@ -187,7 +269,7 @@ EOD
           printf '%s\n' "$UPLOAD_HOST_KNOWN_HOSTS" > "$HOME/.ssh/known_hosts"
           chmod 644 "$HOME/.ssh/known_hosts"
           rsync -e "ssh -i $KEYFILE -o UserKnownHostsFile=$HOME/.ssh/known_hosts -o StrictHostKeyChecking=yes" $RSYNC_ARGS \
-            "$REPO_DIR/" "${UPLOAD_HOST}:${UPLOAD_SUFFIX}${TARGET_PATH}"
+            "$STAGING_DIR/" "${UPLOAD_HOST}:${UPLOAD_SUFFIX}${TARGET_PATH}"
 
       - name: Done
         run: |

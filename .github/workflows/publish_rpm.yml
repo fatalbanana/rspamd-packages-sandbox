@@ -64,26 +64,90 @@ jobs:
           TARGET_RPM_STABLE: ${{ vars.TARGET_RPM_STABLE || 'rpm-stable' }}
           TARGET_RPM_UNSTABLE: ${{ vars.TARGET_RPM_UNSTABLE || 'rpm' }}
           RSYNC_DELETE: ${{ vars.RSYNC_DELETE || '' }}
+          KEEP_BUILDS: ${{ vars.KEEP_BUILDS || '10' }}
+          UPLOAD_HOST_KNOWN_HOSTS: ${{ vars.UPLOAD_HOST_KNOWN_HOSTS }}
         run: |
           set -euo pipefail
           DIST="${{ inputs.name }}"
           REPO_DIR="$GITHUB_WORKSPACE/rpm/$DIST"
           mkdir -p "$REPO_DIR/x86_64" "$REPO_DIR/aarch64"
 
-          # Copy built artifacts into arch dirs and sign them
+          # Prefill: fetch existing latest RPMs from remote to retain previous builds in index
+          if [[ -n "${NIGHTLY:-}" ]]; then
+            TARGET_PATH="$TARGET_RPM_UNSTABLE/${{ inputs.name }}"
+            RSYNC_KEY='${{ secrets.SSH_KEY_RPM_UNSTABLE }}'
+          else
+            TARGET_PATH="$TARGET_RPM_STABLE/${{ inputs.name }}"
+            RSYNC_KEY='${{ secrets.SSH_KEY_RPM_STABLE }}'
+          fi
+          mkdir -p "$HOME/.ssh" && chmod 700 "$HOME/.ssh"
+          KEYFILE="$HOME/.ssh/gh_publish_key"
+          echo "$RSYNC_KEY" > "$KEYFILE"
+          chmod 600 "$KEYFILE"
+          if [[ -z "${UPLOAD_HOST_KNOWN_HOSTS:-}" ]]; then
+            echo "Missing UPLOAD_HOST_KNOWN_HOSTS GitHub variable" >&2
+            exit 1
+          fi
+          printf '%s\n' "$UPLOAD_HOST_KNOWN_HOSTS" > "$HOME/.ssh/known_hosts"
+          chmod 644 "$HOME/.ssh/known_hosts"
+          SSH_CMD="ssh -i $KEYFILE -o UserKnownHostsFile=$HOME/.ssh/known_hosts -o StrictHostKeyChecking=yes"
+          # Only prefill top-level RPMs for each arch; skip repodata and any archive directory
+          rsync -e "$SSH_CMD" -rup --ignore-existing \
+            --include 'x86_64/*.rpm' --include 'aarch64/*.rpm' --exclude '*' \
+            "${UPLOAD_HOST}:${UPLOAD_SUFFIX}${TARGET_PATH}/" "$REPO_DIR/" || true
+
+          # Copy built artifacts into arch dirs and record newly added files for signing
           shopt -s nullglob
+          COPIED_FILES=()
           for rpm in "$GITHUB_WORKSPACE/packages/out/$DIST/"*x86_64.rpm; do
             cp -f "$rpm" "$REPO_DIR/x86_64/"
+            COPIED_FILES+=("$REPO_DIR/x86_64/$(basename "$rpm")")
           done
           for rpm in "$GITHUB_WORKSPACE/packages/out/$DIST/"*aarch64.rpm; do
             cp -f "$rpm" "$REPO_DIR/aarch64/"
+            COPIED_FILES+=("$REPO_DIR/aarch64/$(basename "$rpm")")
           done
 
+          # Sign only the newly added RPMs to avoid re-signing existing ones
+          for file in "${COPIED_FILES[@]}"; do
+            [[ -f "$file" ]] || continue
+            rpm --addsign "$file"
+          done
+
+          # Retention: keep only the latest N builds (by build time) in index; move older to archive/
+          keep_count="${KEEP_BUILDS:-10}"
+          if [[ "$keep_count" =~ ^[0-9]+$ ]] && (( keep_count > 0 )); then
+            for arch in x86_64 aarch64; do
+              mkdir -p "$REPO_DIR/$arch/archive"
+              # Build map EVR -> max buildtime
+              declare -A evr_btime=()
+              while IFS= read -r -d '' file; do
+                evr=$(rpm -qp --qf '%{EPOCHNUM}:%{VERSION}-%{RELEASE}\n' "$file" 2>/dev/null || echo '')
+                btime=$(rpm -qp --qf '%{BUILDTIME}\n' "$file" 2>/dev/null || echo '0')
+                [[ -n "$evr" ]] || continue
+                if [[ -z "${evr_btime[$evr]:-}" || ${evr_btime[$evr]} -lt $btime ]]; then
+                  evr_btime[$evr]=$btime
+                fi
+              done < <(find "$REPO_DIR/$arch" -maxdepth 1 -type f -name '*.rpm' -print0)
+              # Sort EVRs by buildtime desc and select keep list
+              mapfile -t sorted < <(for k in "${!evr_btime[@]}"; do echo "${evr_btime[$k]} $k"; done | sort -nr | awk '{print $2}')
+              keep_evrs=("${sorted[@]:0:$keep_count}")
+              declare -A keep_map=()
+              for ev in "${keep_evrs[@]}"; do keep_map[$ev]=1; done
+              # Move older RPMs to archive
+              while IFS= read -r -d '' file; do
+                evr=$(rpm -qp --qf '%{EPOCHNUM}:%{VERSION}-%{RELEASE}\n' "$file" 2>/dev/null || echo '')
+                [[ -n "$evr" ]] || continue
+                if [[ -z "${keep_map[$evr]:-}" ]]; then
+                  mv -f "$file" "$REPO_DIR/$arch/archive/" || true
+                fi
+              done < <(find "$REPO_DIR/$arch" -maxdepth 1 -type f -name '*.rpm' -print0)
+            done
+          fi
+
+          # Create repo metadata and sign it for each arch present
           for arch in x86_64 aarch64; do
             if compgen -G "$REPO_DIR/$arch/*.rpm" > /dev/null; then
-              for file in "$REPO_DIR/$arch"/*.rpm; do
-                rpm --addsign "$file"
-              done
               (cd "$REPO_DIR/$arch" && createrepo --compress-type gz .)
               gpg --default-key "$KEY_FPR" --detach-sign --armor "$REPO_DIR/$arch/repodata/repomd.xml"
             fi
@@ -143,6 +207,8 @@ EOD
           if [[ -n "${RSYNC_DELETE:-}" ]]; then
             RSYNC_ARGS="$RSYNC_ARGS --delete --delete-before"
           fi
+          # Do not upload archived RPMs
+          RSYNC_ARGS="$RSYNC_ARGS --exclude archive/**"
           if [[ -z "${UPLOAD_HOST_KNOWN_HOSTS:-}" ]]; then
             echo "Missing UPLOAD_HOST_KNOWN_HOSTS GitHub variable" >&2
             exit 1
