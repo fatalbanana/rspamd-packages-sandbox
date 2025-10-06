@@ -6,14 +6,176 @@ on:
       names:
         required: true
         type: string
-        description: 'The target distro names to publish (e.g. debian-trixie,debian-bookworm)'
+        description: 'Comma-separated target distro names (e.g., debian-trixie,debian-bookworm)'
+      nightly:
+        required: false
+        type: string
+        description: 'Set to any value to enable nightly (unstable) publish logic.'
 
 jobs:
-  test:
+  publish:
     name: 'publish (debian)'
     runs-on: 'ubuntu-24.04'
 
     steps:
-      - name: Download package
+      - name: Install dependencies
+        shell: bash
         run: |
-          echo FIXME
+          sudo apt-get update
+          sudo apt-get install -y devscripts dpkg-sig reprepro gnupg rsync
+
+      - name: Prepare GPG
+        shell: bash
+        env:
+          GPG_PRIVATE_KEY: ${{ secrets.GPG_PRIVATE_KEY }}
+          GPG_PASSPHRASE: ${{ secrets.GPG_PASSPHRASE }}
+          GPG_KEY_ID: ${{ vars.GPG_KEY_ID }}
+        run: |
+          set -euo pipefail
+          mkdir -p "$HOME/.gnupg"
+          chmod 700 "$HOME/.gnupg"
+          echo "$GPG_PRIVATE_KEY" | gpg --batch --import
+          KEY_FPR=${GPG_KEY_ID}
+          if [[ -z "${KEY_FPR}" ]]; then
+            KEY_FPR=$(gpg --list-secret-keys --with-colons | awk -F: '/^fpr:/ {print $10; exit}')
+          fi
+          echo "KEY_FPR=${KEY_FPR}" >> "$GITHUB_ENV"
+          # Configure loopback pinentry for non-interactive signing
+          {
+            echo "use-agent"
+            echo "pinentry-mode loopback"
+          } >> "$HOME/.gnupg/gpg.conf"
+          echo "allow-loopback-pinentry" >> "$HOME/.gnupg/gpg-agent.conf"
+
+      - name: Download all package artifacts
+        uses: actions/download-artifact@v4
+        with:
+          pattern: packages-*
+          path: packages
+          merge-multiple: true
+
+      - name: Build and sign APT repository
+        shell: bash
+        env:
+          NIGHTLY: ${{ inputs.nightly }}
+          UPLOAD_HOST: ${{ secrets.UPLOAD_HOST }}
+          UPLOAD_SUFFIX: ${{ vars.UPLOAD_SUFFIX || 'rspamd.com/dist/' }}
+          TARGET_DEB_STABLE: ${{ vars.TARGET_DEB_STABLE || 'apt-stable' }}
+          TARGET_DEB_UNSTABLE: ${{ vars.TARGET_DEB_UNSTABLE || 'apt' }}
+          RSYNC_DELETE: ${{ vars.RSYNC_DELETE || '' }}
+          NO_DELETE: ${{ vars.NO_DELETE || '' }}
+          GPG_PASSPHRASE: ${{ secrets.GPG_PASSPHRASE }}
+        run: |
+          set -euo pipefail
+          REPO_DIR="$GITHUB_WORKSPACE/repos"
+          mkdir -p "$REPO_DIR/conf"
+          # Export public key for clients
+          gpg --armor --output "$REPO_DIR/rspamd.asc" --export "$KEY_FPR"
+
+          # Optionally prefill with existing repo content to preserve older packages
+          if [[ -z "${NO_DELETE:-}" ]]; then
+            if [[ -n "${NIGHTLY:-}" ]]; then
+              RSYNC_KEY='${{ secrets.SSH_KEY_DEB_UNSTABLE }}'
+              TARGET_PATH="$TARGET_DEB_UNSTABLE"
+            else
+              RSYNC_KEY='${{ secrets.SSH_KEY_DEB_STABLE }}'
+              TARGET_PATH="$TARGET_DEB_STABLE"
+            fi
+            mkdir -p "$HOME/.ssh" && chmod 700 "$HOME/.ssh"
+            KEYFILE="$HOME/.ssh/gh_publish_key"
+            echo "$RSYNC_KEY" > "$KEYFILE"
+            chmod 600 "$KEYFILE"
+            rsync -e "ssh -i $KEYFILE -o StrictHostKeyChecking=no" -rup --ignore-existing \
+              "${UPLOAD_HOST}:${UPLOAD_SUFFIX}${TARGET_PATH}/" "$REPO_DIR/" || true
+          fi
+
+          # Prepare distributions and include packages
+          IFS=',' read -ra DIST_LIST <<< "${{ inputs.names }}"
+          for d in "${DIST_LIST[@]}"; do
+            codename="${d/ubuntu-/}"
+            codename="${codename/debian-/}"
+            ARCHS="source amd64"
+            # Check for ARM64 artifacts by filename in the distro output folder
+            if compgen -G "$GITHUB_WORKSPACE/packages/out/${d}/*arm64*.deb" > /dev/null; then
+              ARCHS="$ARCHS arm64"
+            fi
+            cat >> "$REPO_DIR/conf/distributions" <<EOD
+Origin: Rspamd
+Label: Rspamd
+Codename: ${codename}
+Architectures: ${ARCHS}
+Components: main
+Description: $( [[ -n "${NIGHTLY:-}" ]] && echo "Apt repository for rspamd nightly builds" || echo "Apt repository for rspamd stable builds" )
+SignWith: ${KEY_FPR}
+
+EOD
+            shopt -s nullglob
+            for deb_pkg in "$GITHUB_WORKSPACE"/packages/out/${d}/rspamd_*amd64*.deb; do
+              dpkg-sig -k "$KEY_FPR" --batch=1 --sign builder "$deb_pkg"
+              reprepro  -P extra -S mail -b "$REPO_DIR" -v --keepunreferencedfiles includedeb "$codename" "$deb_pkg"
+            done
+            for deb_pkg in "$GITHUB_WORKSPACE"/packages/out/${d}/rspamd-dbg_*amd64*.deb; do
+              dpkg-sig -k "$KEY_FPR" --batch=1 --sign builder "$deb_pkg"
+              reprepro  -P extra -S debug -b "$REPO_DIR" -v --keepunreferencedfiles includedeb "$codename" "$deb_pkg"
+            done
+            for deb_pkg in "$GITHUB_WORKSPACE"/packages/out/${d}/rspamd-asan_*amd64*.deb; do
+              dpkg-sig -k "$KEY_FPR" --batch=1 --sign builder "$deb_pkg"
+              reprepro  -P extra -S mail -b "$REPO_DIR" -v --keepunreferencedfiles includedeb "$codename" "$deb_pkg"
+            done
+            for deb_pkg in "$GITHUB_WORKSPACE"/packages/out/${d}/rspamd-asan-dbg_*amd64*.deb; do
+              dpkg-sig -k "$KEY_FPR" --batch=1 --sign builder "$deb_pkg"
+              reprepro  -P extra -S debug -b "$REPO_DIR" -v --keepunreferencedfiles includedeb "$codename" "$deb_pkg"
+            done
+            # Include source
+            for deb_dsc in "$GITHUB_WORKSPACE"/packages/out/${d}/rspamd_*.dsc; do
+              reprepro  -P extra -S mail -b "$REPO_DIR" -v --keepunreferencedfiles includedsc "$codename" "$deb_dsc" || true
+            done
+            for changes_file in "$GITHUB_WORKSPACE"/packages/out/${d}/rspamd_*.changes; do
+              debsign --re-sign -k "$KEY_FPR" "$changes_file" || true
+            done
+            # Also include arm64 variants if present
+            for deb_pkg in "$GITHUB_WORKSPACE"/packages/out/${d}/rspamd_*arm64*.deb; do
+              dpkg-sig -k "$KEY_FPR" --batch=1 --sign builder "$deb_pkg"
+              reprepro  -P extra -S mail -b "$REPO_DIR" -v --keepunreferencedfiles includedeb "$codename" "$deb_pkg"
+            done
+            for deb_pkg in "$GITHUB_WORKSPACE"/packages/out/${d}/rspamd-dbg_*arm64*.deb; do
+              dpkg-sig -k "$KEY_FPR" --batch=1 --sign builder "$deb_pkg"
+              reprepro  -P extra -S debug -b "$REPO_DIR" -v --keepunreferencedfiles includedeb "$codename" "$deb_pkg"
+            done
+            for deb_pkg in "$GITHUB_WORKSPACE"/packages/out/${d}/rspamd-asan_*arm64*.deb; do
+              dpkg-sig -k "$KEY_FPR" --batch=1 --sign builder "$deb_pkg"
+              reprepro  -P extra -S mail -b "$REPO_DIR" -v --keepunreferencedfiles includedeb "$codename" "$deb_pkg"
+            done
+            for deb_pkg in "$GITHUB_WORKSPACE"/packages/out/${d}/rspamd-asan-dbg_*arm64*.deb; do
+              dpkg-sig -k "$KEY_FPR" --batch=1 --sign builder "$deb_pkg"
+              reprepro  -P extra -S debug -b "$REPO_DIR" -v --keepunreferencedfiles includedeb "$codename" "$deb_pkg"
+            done
+            # Sign Release
+            if [[ -f "$REPO_DIR/dists/${codename}/Release" ]]; then
+              gpg -u "0x$KEY_FPR" --batch --yes --pinentry-mode loopback --passphrase "$GPG_PASSPHRASE" -sb "$REPO_DIR/dists/${codename}/Release"
+              mv "$REPO_DIR/dists/${codename}/Release.sig" "$REPO_DIR/dists/${codename}/Release.gpg"
+            fi
+          done
+
+          # Upload repo
+          if [[ -n "${NIGHTLY:-}" ]]; then
+            TARGET_PATH="$TARGET_DEB_UNSTABLE"
+            RSYNC_KEY='${{ secrets.SSH_KEY_DEB_UNSTABLE }}'
+          else
+            TARGET_PATH="$TARGET_DEB_STABLE"
+            RSYNC_KEY='${{ secrets.SSH_KEY_DEB_STABLE }}'
+          fi
+          mkdir -p "$HOME/.ssh" && chmod 700 "$HOME/.ssh"
+          KEYFILE="$HOME/.ssh/gh_publish_key"
+          echo "$RSYNC_KEY" > "$KEYFILE"
+          chmod 600 "$KEYFILE"
+          RSYNC_ARGS="-rup"
+          if [[ -n "${RSYNC_DELETE:-}" ]]; then
+            RSYNC_ARGS="$RSYNC_ARGS --delete --delete-before"
+          fi
+          rsync -e "ssh -i $KEYFILE -o StrictHostKeyChecking=no" $RSYNC_ARGS \
+            "$REPO_DIR/" "${UPLOAD_HOST}:${UPLOAD_SUFFIX}${TARGET_PATH}"
+
+      - name: Done
+        run: |
+          echo "Published Debian repos for ${{ inputs.names }}"

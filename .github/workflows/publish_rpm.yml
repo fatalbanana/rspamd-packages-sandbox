@@ -6,14 +6,162 @@ on:
       name:
         required: true
         type: string
-        description: 'The target OS/distro name to publish (e.g., ubuntu-jammy, centos-9)'
+        description: 'The target OS/distro name to publish (e.g., centos-9)'
+      nightly:
+        required: false
+        type: string
+        description: 'Set to any value to enable nightly (unstable) publish logic.'
 
 jobs:
-  test:
+  publish:
     name: 'publish (${{ inputs.name }})'
     runs-on: 'ubuntu-24.04'
 
     steps:
-      - name: Download package
+      - name: Install dependencies
+        shell: bash
         run: |
-          echo FIXME
+          sudo apt-get update
+          sudo apt-get install -y rpm rpm-sign createrepo-c gnupg rsync expect
+
+      - name: Prepare GPG
+        shell: bash
+        env:
+          GPG_PRIVATE_KEY: ${{ secrets.GPG_PRIVATE_KEY }}
+          GPG_PASSPHRASE: ${{ secrets.GPG_PASSPHRASE }}
+          GPG_KEY_ID: ${{ vars.GPG_KEY_ID }}
+        run: |
+          set -euo pipefail
+          mkdir -p "$HOME/.gnupg"
+          chmod 700 "$HOME/.gnupg"
+          echo "$GPG_PRIVATE_KEY" | gpg --batch --import
+          KEY_FPR=${GPG_KEY_ID}
+          if [[ -z "${KEY_FPR}" ]]; then
+            KEY_FPR=$(gpg --list-secret-keys --with-colons | awk -F: '/^fpr:/ {print $10; exit}')
+          fi
+          echo "KEY_FPR=${KEY_FPR}" >> "$GITHUB_ENV"
+          {
+            echo "%_signature gpg"
+            echo "%_gpg_name ${KEY_FPR}"
+            echo "%_gpg_path $HOME/.gnupg"
+            echo "%__gpg /usr/bin/gpg"
+            echo "%__gpg_sign_cmd %{__gpg} gpg --batch --yes --pinentry-mode loopback --passphrase ${GPG_PASSPHRASE} --detach-sign --armor --local-user ${KEY_FPR} --output %{__signature_filename} %{__plaintext_filename}"
+          } >> "$HOME/.rpmmacros"
+
+      - name: Download all package artifacts
+        uses: actions/download-artifact@v4
+        with:
+          pattern: packages-*
+          path: packages
+          merge-multiple: true
+
+      - name: Prepare repo and sign RPMs
+        shell: bash
+        env:
+          NIGHTLY: ${{ inputs.nightly }}
+          UPLOAD_HOST: ${{ secrets.UPLOAD_HOST }}
+          UPLOAD_SUFFIX: ${{ vars.UPLOAD_SUFFIX || 'rspamd.com/dist/' }}
+          TARGET_RPM_STABLE: ${{ vars.TARGET_RPM_STABLE || 'rpm-stable' }}
+          TARGET_RPM_UNSTABLE: ${{ vars.TARGET_RPM_UNSTABLE || 'rpm' }}
+          RSYNC_DELETE: ${{ vars.RSYNC_DELETE || '' }}
+        run: |
+          set -euo pipefail
+          DIST="${{ inputs.name }}"
+          REPO_DIR="$GITHUB_WORKSPACE/rpm/$DIST"
+          mkdir -p "$REPO_DIR/x86_64" "$REPO_DIR/aarch64"
+
+          # Copy built artifacts into arch dirs and sign them
+          shopt -s nullglob
+          for rpm in "$GITHUB_WORKSPACE/packages/out/$DIST/"*x86_64.rpm; do
+            cp -f "$rpm" "$REPO_DIR/x86_64/"
+          done
+          for rpm in "$GITHUB_WORKSPACE/packages/out/$DIST/"*aarch64.rpm; do
+            cp -f "$rpm" "$REPO_DIR/aarch64/"
+          done
+
+          for arch in x86_64 aarch64; do
+            if compgen -G "$REPO_DIR/$arch/*.rpm" > /dev/null; then
+              for file in "$REPO_DIR/$arch"/*.rpm; do
+                rpm --addsign "$file"
+              done
+              (cd "$REPO_DIR/$arch" && createrepo --compress-type gz .)
+              gpg --default-key "$KEY_FPR" --detach-sign --armor "$REPO_DIR/$arch/repodata/repomd.xml"
+            fi
+          done
+
+          # Write repo file for clients
+          if [[ -n "${NIGHTLY:-}" ]]; then
+            cat > "$REPO_DIR/rspamd-experimental.repo" <<EOD
+[rspamd-experimental]
+name=Rspamd experimental repository
+baseurl=http://rspamd.com/rpm/$DIST/\$basearch
+enabled=1
+gpgcheck=1
+repo_gpgcheck=1
+gpgkey=http://rspamd.com/rpm/rspamd.asc
+EOD
+          else
+            cat > "$REPO_DIR/rspamd.repo" <<EOD
+[rspamd]
+name=Rspamd stable repository
+baseurl=http://rspamd.com/rpm-stable/$DIST/\$basearch
+enabled=1
+gpgcheck=1
+repo_gpgcheck=1
+gpgkey=http://rspamd.com/rpm/rspamd.asc
+EOD
+          fi
+
+          # Export public key for clients
+          mkdir -p "$GITHUB_WORKSPACE/rpm"
+          gpg --armor --output "$GITHUB_WORKSPACE/rpm/rspamd.asc" --export "$KEY_FPR"
+
+      - name: Upload repo via rsync
+        shell: bash
+        env:
+          NIGHTLY: ${{ inputs.nightly }}
+          UPLOAD_HOST: ${{ secrets.UPLOAD_HOST }}
+          UPLOAD_SUFFIX: ${{ vars.UPLOAD_SUFFIX || 'rspamd.com/dist/' }}
+          TARGET_RPM_STABLE: ${{ vars.TARGET_RPM_STABLE || 'rpm-stable' }}
+          TARGET_RPM_UNSTABLE: ${{ vars.TARGET_RPM_UNSTABLE || 'rpm' }}
+          RSYNC_DELETE: ${{ vars.RSYNC_DELETE || '' }}
+        run: |
+          set -euo pipefail
+          if [[ -n "${NIGHTLY:-}" ]]; then
+            TARGET_PATH="$TARGET_RPM_UNSTABLE/${{ inputs.name }}"
+            RSYNC_KEY='${{ secrets.SSH_KEY_RPM_UNSTABLE }}'
+          else
+            TARGET_PATH="$TARGET_RPM_STABLE/${{ inputs.name }}"
+            RSYNC_KEY='${{ secrets.SSH_KEY_RPM_STABLE }}'
+          fi
+          mkdir -p "$HOME/.ssh" && chmod 700 "$HOME/.ssh"
+          KEYFILE="$HOME/.ssh/gh_publish_key"
+          echo "$RSYNC_KEY" > "$KEYFILE"
+          chmod 600 "$KEYFILE"
+          RSYNC_ARGS="-rup"
+          if [[ -n "${RSYNC_DELETE:-}" ]]; then
+            RSYNC_ARGS="$RSYNC_ARGS --delete --delete-before"
+          fi
+          rsync -e "ssh -i $KEYFILE -o StrictHostKeyChecking=no" $RSYNC_ARGS \
+            "$GITHUB_WORKSPACE/rpm/${{ inputs.name }}/*" "${UPLOAD_HOST}:${UPLOAD_SUFFIX}${TARGET_PATH}/"
+
+      - name: Upload public key to rpm roots
+        shell: bash
+        env:
+          UPLOAD_HOST: ${{ secrets.UPLOAD_HOST }}
+          UPLOAD_SUFFIX: ${{ vars.UPLOAD_SUFFIX || 'rspamd.com/dist/' }}
+          TARGET_RPM_STABLE: ${{ vars.TARGET_RPM_STABLE || 'rpm-stable' }}
+          TARGET_RPM_UNSTABLE: ${{ vars.TARGET_RPM_UNSTABLE || 'rpm' }}
+        run: |
+          set -euo pipefail
+          mkdir -p "$HOME/.ssh" && chmod 700 "$HOME/.ssh"
+          KEYFILE="$HOME/.ssh/gh_publish_key"
+          echo "${{ secrets.SSH_KEY_RPM_UNSTABLE }}" > "$KEYFILE"
+          chmod 600 "$KEYFILE"
+          rsync -e "ssh -i $KEYFILE -o StrictHostKeyChecking=no" -rup \
+            "$GITHUB_WORKSPACE/rpm/rspamd.asc" "${UPLOAD_HOST}:${UPLOAD_SUFFIX}${TARGET_RPM_UNSTABLE}"
+          rsync -e "ssh -i $KEYFILE -o StrictHostKeyChecking=no" -rup \
+            "$GITHUB_WORKSPACE/rpm/rspamd.asc" "${UPLOAD_HOST}:${UPLOAD_SUFFIX}${TARGET_RPM_STABLE}"
+
+      - name: Done
+        run: echo "Published RPM repo for ${{ inputs.name }}"

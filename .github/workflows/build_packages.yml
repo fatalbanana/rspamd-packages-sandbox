@@ -112,12 +112,19 @@ jobs:
             ../packpack/packpack
           fi
 
+      - name: Collect outputs by distro name
+        run: |
+          set -euo pipefail
+          mkdir -p out/${{ inputs.name }}
+          # Primary outputs from packpack live in rspamd/build
+          if [ -d rspamd/build ]; then
+            cp -f rspamd/build/* out/${{ inputs.name }}/ || true
+          fi
+
       - name: Upload packages
         uses: actions/upload-artifact@v4
         with:
-          name: packages-${{ runner.arch }}-${{ inputs.name }}
-          path: |
-            ${{ env.BUILDDIR }}/*.deb
-            ${{ env.BUILDDIR }}/*.rpm
+          name: packages-${{ inputs.name }}-${{ inputs.platform }}
+          path: out
           retention-days: 1
           compression-level: 0

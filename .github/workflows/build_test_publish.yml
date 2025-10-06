@@ -23,8 +23,10 @@
             "centos-10-test-X64"
          ],
          "uses": "./.github/workflows/publish_rpm.yml",
+        "secrets": "inherit",
          "with": {
-            "name": "centos-10"
+          "name": "centos-10",
+          "nightly": "${{ inputs.nightly }}"
          }
       },
       "centos-10-test-ARM64": {
@@ -74,8 +76,10 @@
             "centos-8-test-X64"
          ],
          "uses": "./.github/workflows/publish_rpm.yml",
+        "secrets": "inherit",
          "with": {
-            "name": "centos-8"
+          "name": "centos-8",
+          "nightly": "${{ inputs.nightly }}"
          }
       },
       "centos-8-test-ARM64": {
@@ -125,8 +129,10 @@
             "centos-9-test-X64"
          ],
          "uses": "./.github/workflows/publish_rpm.yml",
+        "secrets": "inherit",
          "with": {
-            "name": "centos-9"
+          "name": "centos-9",
+          "nightly": "${{ inputs.nightly }}"
          }
       },
       "centos-9-test-ARM64": {
@@ -250,8 +256,10 @@
             "ubuntu-noble-test-ARM64"
          ],
          "uses": "./.github/workflows/publish_deb.yml",
+        "secrets": "inherit",
          "with": {
-            "names": "debian-bookworm,debian-bullseye,debian-trixie,ubuntu-focal,ubuntu-jammy,ubuntu-noble"
+          "names": "debian-bookworm,debian-bullseye,debian-trixie,ubuntu-focal,ubuntu-jammy,ubuntu-noble",
+          "nightly": "${{ inputs.nightly }}"
          }
       },
       "debian-trixie-build-ARM64": {
