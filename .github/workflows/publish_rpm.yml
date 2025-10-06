@@ -153,27 +153,27 @@ jobs:
             fi
           done
 
-          # Write repo file for clients
+          # Write repo file for clients (avoid YAML/heredoc indentation pitfalls)
           if [[ -n "${NIGHTLY:-}" ]]; then
-            cat > "$REPO_DIR/rspamd-experimental.repo" <<EOD
-[rspamd-experimental]
-name=Rspamd experimental repository
-baseurl=http://rspamd.com/rpm/$DIST/\$basearch
-enabled=1
-gpgcheck=1
-repo_gpgcheck=1
-gpgkey=http://rspamd.com/rpm/rspamd.asc
-EOD
+            {
+              printf '%s\n' "[rspamd-experimental]"
+              printf '%s\n' "name=Rspamd experimental repository"
+              printf '%s\n' "baseurl=http://rspamd.com/rpm/$DIST/\\$basearch"
+              printf '%s\n' "enabled=1"
+              printf '%s\n' "gpgcheck=1"
+              printf '%s\n' "repo_gpgcheck=1"
+              printf '%s\n' "gpgkey=http://rspamd.com/rpm/rspamd.asc"
+            } > "$REPO_DIR/rspamd-experimental.repo"
           else
-            cat > "$REPO_DIR/rspamd.repo" <<EOD
-[rspamd]
-name=Rspamd stable repository
-baseurl=http://rspamd.com/rpm-stable/$DIST/\$basearch
-enabled=1
-gpgcheck=1
-repo_gpgcheck=1
-gpgkey=http://rspamd.com/rpm/rspamd.asc
-EOD
+            {
+              printf '%s\n' "[rspamd]"
+              printf '%s\n' "name=Rspamd stable repository"
+              printf '%s\n' "baseurl=http://rspamd.com/rpm-stable/$DIST/\\$basearch"
+              printf '%s\n' "enabled=1"
+              printf '%s\n' "gpgcheck=1"
+              printf '%s\n' "repo_gpgcheck=1"
+              printf '%s\n' "gpgkey=http://rspamd.com/rpm/rspamd.asc"
+            } > "$REPO_DIR/rspamd.repo"
           fi
 
           # Export public key for clients
