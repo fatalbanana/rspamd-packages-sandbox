@@ -125,16 +125,21 @@ jobs:
             if compgen -G "$GITHUB_WORKSPACE/packages/out/${d}/*arm64*.deb" > /dev/null; then
               ARCHS="$ARCHS arm64"
             fi
-            cat >> "$REPO_DIR/conf/distributions" <<EOD
-Origin: Rspamd
-Label: Rspamd
-Codename: ${codename}
-Architectures: ${ARCHS}
-Components: main
-Description: $( [[ -n "${NIGHTLY:-}" ]] && echo "Apt repository for rspamd nightly builds" || echo "Apt repository for rspamd stable builds" )
-SignWith: ${KEY_FPR}
-
-EOD
+            if [[ -n "${NIGHTLY:-}" ]]; then
+              desc="Apt repository for rspamd nightly builds"
+            else
+              desc="Apt repository for rspamd stable builds"
+            fi
+            {
+              printf '%s\n' "Origin: Rspamd"
+              printf '%s\n' "Label: Rspamd"
+              printf '%s\n' "Codename: ${codename}"
+              printf '%s\n' "Architectures: ${ARCHS}"
+              printf '%s\n' "Components: main"
+              printf '%s\n' "Description: ${desc}"
+              printf '%s\n' "SignWith: ${KEY_FPR}"
+              printf '\n'
+            } >> "$REPO_DIR/conf/distributions"
             shopt -s nullglob
             for deb_pkg in "$GITHUB_WORKSPACE"/packages/out/${d}/rspamd_*amd64*.deb; do
               dpkg-sig -k "$KEY_FPR" --batch=1 --sign builder "$deb_pkg"
