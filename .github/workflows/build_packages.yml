@@ -82,7 +82,7 @@ jobs:
       - name: Build packages
         run: |
           export ASAN=0
-          export BUILDDIR=${{ github.workspace }}/build
+          export BUILDDIR=${{ github.workspace }}/rspamd/build
           export DEBIAN=0
           export DOCKER_IMAGE=${{ inputs.name }}
           export DOCKER_REPO=ghcr.io/rspamd/rspamd-build-docker
@@ -93,7 +93,7 @@ jobs:
           export RPM=0
           export VERSION=$RSPAMD_VERSION
 
-          mkdir $BUILDDIR
+          mkdir -p "$BUILDDIR"
           echo "BUILDDIR=${BUILDDIR}" >> "$GITHUB_ENV"
 
           if [[ "${{ env.PKG_TYPE }}" == "deb" ]]; then
@@ -117,8 +117,19 @@ jobs:
           set -euo pipefail
           mkdir -p out/${{ inputs.name }}
           # Primary outputs from packpack live in rspamd/build
+          found_any=0
           if [ -d rspamd/build ]; then
-            cp -f rspamd/build/* out/${{ inputs.name }}/ || true
+            # Copy both files and nested directories (e.g., debs split by arch)
+            rsync -a rspamd/build/ out/${{ inputs.name }}/ && found_any=1 || true
+          fi
+          # Also copy RPM artifacts produced to repo location (for RPM workflows)
+          if compgen -G "*.rpm" > /dev/null; then
+            cp -f *.rpm out/${{ inputs.name }}/ && found_any=1 || true
+          fi
+          # Ensure we fail early if nothing was produced
+          if [ "$found_any" -eq 0 ]; then
+            echo "No build artifacts found for ${{ inputs.name }}" >&2
+            exit 1
           fi
 
       - name: Upload packages
@@ -126,5 +137,6 @@ jobs:
         with:
           name: packages-${{ inputs.name }}-${{ inputs.platform }}
           path: out
+          if-no-files-found: error
           retention-days: 1
           compression-level: 0
