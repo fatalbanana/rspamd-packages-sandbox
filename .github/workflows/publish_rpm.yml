@@ -125,6 +125,7 @@ EOD
           TARGET_RPM_STABLE: ${{ vars.TARGET_RPM_STABLE || 'rpm-stable' }}
           TARGET_RPM_UNSTABLE: ${{ vars.TARGET_RPM_UNSTABLE || 'rpm' }}
           RSYNC_DELETE: ${{ vars.RSYNC_DELETE || '' }}
+          UPLOAD_HOST_KNOWN_HOSTS: ${{ vars.UPLOAD_HOST_KNOWN_HOSTS }}
         run: |
           set -euo pipefail
           if [[ -n "${NIGHTLY:-}" ]]; then
@@ -142,7 +143,13 @@ EOD
           if [[ -n "${RSYNC_DELETE:-}" ]]; then
             RSYNC_ARGS="$RSYNC_ARGS --delete --delete-before"
           fi
-          rsync -e "ssh -i $KEYFILE -o StrictHostKeyChecking=no" $RSYNC_ARGS \
+          if [[ -z "${UPLOAD_HOST_KNOWN_HOSTS:-}" ]]; then
+            echo "Missing UPLOAD_HOST_KNOWN_HOSTS GitHub variable" >&2
+            exit 1
+          fi
+          printf '%s\n' "$UPLOAD_HOST_KNOWN_HOSTS" > "$HOME/.ssh/known_hosts"
+          chmod 644 "$HOME/.ssh/known_hosts"
+          rsync -e "ssh -i $KEYFILE -o UserKnownHostsFile=$HOME/.ssh/known_hosts -o StrictHostKeyChecking=yes" $RSYNC_ARGS \
             "$GITHUB_WORKSPACE/rpm/${{ inputs.name }}/*" "${UPLOAD_HOST}:${UPLOAD_SUFFIX}${TARGET_PATH}/"
 
       - name: Upload public key to rpm roots
@@ -152,15 +159,22 @@ EOD
           UPLOAD_SUFFIX: ${{ vars.UPLOAD_SUFFIX || 'rspamd.com/dist/' }}
           TARGET_RPM_STABLE: ${{ vars.TARGET_RPM_STABLE || 'rpm-stable' }}
           TARGET_RPM_UNSTABLE: ${{ vars.TARGET_RPM_UNSTABLE || 'rpm' }}
+          UPLOAD_HOST_KNOWN_HOSTS: ${{ vars.UPLOAD_HOST_KNOWN_HOSTS }}
         run: |
           set -euo pipefail
           mkdir -p "$HOME/.ssh" && chmod 700 "$HOME/.ssh"
           KEYFILE="$HOME/.ssh/gh_publish_key"
           echo "${{ secrets.SSH_KEY_RPM_UNSTABLE }}" > "$KEYFILE"
           chmod 600 "$KEYFILE"
-          rsync -e "ssh -i $KEYFILE -o StrictHostKeyChecking=no" -rup \
+          if [[ -z "${UPLOAD_HOST_KNOWN_HOSTS:-}" ]]; then
+            echo "Missing UPLOAD_HOST_KNOWN_HOSTS GitHub variable" >&2
+            exit 1
+          fi
+          printf '%s\n' "$UPLOAD_HOST_KNOWN_HOSTS" > "$HOME/.ssh/known_hosts"
+          chmod 644 "$HOME/.ssh/known_hosts"
+          rsync -e "ssh -i $KEYFILE -o UserKnownHostsFile=$HOME/.ssh/known_hosts -o StrictHostKeyChecking=yes" -rup \
             "$GITHUB_WORKSPACE/rpm/rspamd.asc" "${UPLOAD_HOST}:${UPLOAD_SUFFIX}${TARGET_RPM_UNSTABLE}"
-          rsync -e "ssh -i $KEYFILE -o StrictHostKeyChecking=no" -rup \
+          rsync -e "ssh -i $KEYFILE -o UserKnownHostsFile=$HOME/.ssh/known_hosts -o StrictHostKeyChecking=yes" -rup \
             "$GITHUB_WORKSPACE/rpm/rspamd.asc" "${UPLOAD_HOST}:${UPLOAD_SUFFIX}${TARGET_RPM_STABLE}"
 
       - name: Done

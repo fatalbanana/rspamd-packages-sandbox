@@ -65,6 +65,7 @@ jobs:
           RSYNC_DELETE: ${{ vars.RSYNC_DELETE || '' }}
           NO_DELETE: ${{ vars.NO_DELETE || '' }}
           GPG_PASSPHRASE: ${{ secrets.GPG_PASSPHRASE }}
+          UPLOAD_HOST_KNOWN_HOSTS: ${{ vars.UPLOAD_HOST_KNOWN_HOSTS }}
         run: |
           set -euo pipefail
           REPO_DIR="$GITHUB_WORKSPACE/repos"
@@ -85,7 +86,13 @@ jobs:
             KEYFILE="$HOME/.ssh/gh_publish_key"
             echo "$RSYNC_KEY" > "$KEYFILE"
             chmod 600 "$KEYFILE"
-            rsync -e "ssh -i $KEYFILE -o StrictHostKeyChecking=no" -rup --ignore-existing \
+            if [[ -z "${UPLOAD_HOST_KNOWN_HOSTS:-}" ]]; then
+              echo "Missing UPLOAD_HOST_KNOWN_HOSTS GitHub variable" >&2
+              exit 1
+            fi
+            printf '%s\n' "$UPLOAD_HOST_KNOWN_HOSTS" > "$HOME/.ssh/known_hosts"
+            chmod 644 "$HOME/.ssh/known_hosts"
+            rsync -e "ssh -i $KEYFILE -o UserKnownHostsFile=$HOME/.ssh/known_hosts -o StrictHostKeyChecking=yes" -rup --ignore-existing \
               "${UPLOAD_HOST}:${UPLOAD_SUFFIX}${TARGET_PATH}/" "$REPO_DIR/" || true
           fi
 
@@ -173,7 +180,13 @@ EOD
           if [[ -n "${RSYNC_DELETE:-}" ]]; then
             RSYNC_ARGS="$RSYNC_ARGS --delete --delete-before"
           fi
-          rsync -e "ssh -i $KEYFILE -o StrictHostKeyChecking=no" $RSYNC_ARGS \
+          if [[ -z "${UPLOAD_HOST_KNOWN_HOSTS:-}" ]]; then
+            echo "Missing UPLOAD_HOST_KNOWN_HOSTS GitHub variable" >&2
+            exit 1
+          fi
+          printf '%s\n' "$UPLOAD_HOST_KNOWN_HOSTS" > "$HOME/.ssh/known_hosts"
+          chmod 644 "$HOME/.ssh/known_hosts"
+          rsync -e "ssh -i $KEYFILE -o UserKnownHostsFile=$HOME/.ssh/known_hosts -o StrictHostKeyChecking=yes" $RSYNC_ARGS \
             "$REPO_DIR/" "${UPLOAD_HOST}:${UPLOAD_SUFFIX}${TARGET_PATH}"
 
       - name: Done
