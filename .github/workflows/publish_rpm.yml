@@ -79,7 +79,7 @@ jobs:
       - name: Download all package artifacts
         uses: actions/download-artifact@v4
         with:
-          pattern: packages-*
+          pattern: packages-centos-*
           path: packages
           merge-multiple: true
 

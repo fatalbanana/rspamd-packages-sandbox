@@ -69,10 +69,17 @@ jobs:
           } >> "$HOME/.gnupg/gpg.conf"
           echo "allow-loopback-pinentry" >> "$HOME/.gnupg/gpg-agent.conf"
 
-      - name: Download all package artifacts
+      - name: Download all debian package artifacts
         uses: actions/download-artifact@v4
         with:
-          pattern: packages-*
+          pattern: packages-debian-*
+          path: packages
+          merge-multiple: true
+
+      - name: Download all ubuntu package artifacts
+        uses: actions/download-artifact@v4
+        with:
+          pattern: packages-ubuntu-*
           path: packages
           merge-multiple: true
 
