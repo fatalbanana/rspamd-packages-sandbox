@@ -14,3 +14,4 @@ jobs:
     uses: ./.github/workflows/build_test_publish.yml
     with:
       nightly: "y"
+    secrets: inherit

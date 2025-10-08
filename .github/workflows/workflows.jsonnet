@@ -77,8 +77,10 @@ local publish_debian = {
     'if': '${{ !vars.SKIP_PUBLISH }}',
     needs: distribs_deb_test,
     uses: './.github/workflows/publish_deb.yml',
+    secrets: 'inherit',
     with: {
       names: std.join(',', distribs_deb),
+      nightly: '${{ inputs.nightly }}',
     },
   },
 };
@@ -90,7 +92,9 @@ local publish_rpm(name) = {
     uses: './.github/workflows/publish_rpm.yml',
     with: {
       name: name,
+      nightly: '${{ inputs.nightly }}',
     },
+    secrets: 'inherit',
   },
 };
 
