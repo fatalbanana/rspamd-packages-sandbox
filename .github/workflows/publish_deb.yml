@@ -34,7 +34,29 @@ jobs:
           set -euo pipefail
           mkdir -p "$HOME/.gnupg"
           chmod 700 "$HOME/.gnupg"
-          echo "$GPG_PRIVATE_KEY" | gpg --batch --import
+          # Import private key, handling raw, escaped \n, or base64-encoded formats
+          if [[ -z "${GPG_PRIVATE_KEY:-}" ]]; then
+            echo "GPG_PRIVATE_KEY is empty or not set" >&2
+            exit 1
+          fi
+          KEY_TMP="$RUNNER_TEMP/privkey.asc"
+          rm -f "$KEY_TMP"
+          # Try direct content first
+          printf '%s\n' "$GPG_PRIVATE_KEY" > "$KEY_TMP"
+          if ! grep -q "BEGIN PGP" "$KEY_TMP"; then
+            # Try un-escaping literal \n sequences
+            printf '%b' "${GPG_PRIVATE_KEY//\\n/$'\n'}" > "$KEY_TMP"
+          fi
+          if ! grep -q "BEGIN PGP" "$KEY_TMP"; then
+            # Try base64 decoding to ASCII-armored key
+            echo "$GPG_PRIVATE_KEY" | base64 -d > "$KEY_TMP" 2>/dev/null || true
+          fi
+          if ! grep -q "BEGIN PGP" "$KEY_TMP"; then
+            echo "Failed to reconstruct OpenPGP private key from secret" >&2
+            exit 1
+          fi
+          gpg --batch --import "$KEY_TMP"
+          rm -f "$KEY_TMP"
           KEY_FPR=${GPG_KEY_ID}
           if [[ -z "${KEY_FPR}" ]]; then
             KEY_FPR=$(gpg --list-secret-keys --with-colons | awk -F: '/^fpr:/ {print $10; exit}')
