@@ -243,7 +243,7 @@ jobs:
           fi
           printf '%s\n' "$UPLOAD_HOST_KNOWN_HOSTS" > "$HOME/.ssh/known_hosts"
           chmod 644 "$HOME/.ssh/known_hosts"
-          rsync -e "ssh -i $KEYFILE -o UserKnownHostsFile=$HOME/.ssh/known_hosts -o StrictHostKeyChecking=yes" $RSYNC_ARGS \
+          rsync -e "ssh -l root -i $KEYFILE -o UserKnownHostsFile=$HOME/.ssh/known_hosts -o StrictHostKeyChecking=yes" $RSYNC_ARGS \
             "$GITHUB_WORKSPACE/rpm/${{ inputs.name }}/*" "${UPLOAD_HOST}:${UPLOAD_SUFFIX}${TARGET_PATH}/"
 
       - name: Upload public key to rpm roots
@@ -266,9 +266,9 @@ jobs:
           fi
           printf '%s\n' "$UPLOAD_HOST_KNOWN_HOSTS" > "$HOME/.ssh/known_hosts"
           chmod 644 "$HOME/.ssh/known_hosts"
-          rsync -e "ssh -i $KEYFILE -o UserKnownHostsFile=$HOME/.ssh/known_hosts -o StrictHostKeyChecking=yes" -rup \
+          rsync -e "ssh -l root -i $KEYFILE -o UserKnownHostsFile=$HOME/.ssh/known_hosts -o StrictHostKeyChecking=yes" -rup \
             "$GITHUB_WORKSPACE/rpm/rspamd.asc" "${UPLOAD_HOST}:${UPLOAD_SUFFIX}${TARGET_RPM_UNSTABLE}"
-          rsync -e "ssh -i $KEYFILE -o UserKnownHostsFile=$HOME/.ssh/known_hosts -o StrictHostKeyChecking=yes" -rup \
+          rsync -e "ssh -l root -i $KEYFILE -o UserKnownHostsFile=$HOME/.ssh/known_hosts -o StrictHostKeyChecking=yes" -rup \
             "$GITHUB_WORKSPACE/rpm/rspamd.asc" "${UPLOAD_HOST}:${UPLOAD_SUFFIX}${TARGET_RPM_STABLE}"
 
       - name: Done
