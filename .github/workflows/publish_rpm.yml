@@ -86,14 +86,14 @@ jobs:
       - name: Prepare repo and sign RPMs
         shell: bash
         env:
+          KEEP_BUILDS: ${{ vars.KEEP_BUILDS || '10' }}
           NIGHTLY: ${{ inputs.nightly }}
-          UPLOAD_HOST: ${{ secrets.UPLOAD_HOST }}
-          UPLOAD_SUFFIX: ${{ vars.UPLOAD_SUFFIX || 'rspamd.com/dist/' }}
+          RSYNC_DELETE: ${{ vars.RSYNC_DELETE || '' }}
           TARGET_RPM_STABLE: ${{ vars.TARGET_RPM_STABLE || 'rpm-stable' }}
           TARGET_RPM_UNSTABLE: ${{ vars.TARGET_RPM_UNSTABLE || 'rpm' }}
-          RSYNC_DELETE: ${{ vars.RSYNC_DELETE || '' }}
-          KEEP_BUILDS: ${{ vars.KEEP_BUILDS || '10' }}
+          UPLOAD_HOST: ${{ secrets.UPLOAD_HOST }}
           UPLOAD_HOST_KNOWN_HOSTS: ${{ vars.UPLOAD_HOST_KNOWN_HOSTS }}
+          UPLOAD_SUFFIX: ${{ vars.UPLOAD_SUFFIX || 'rspamd.com/dist/' }}
         run: |
           set -euo pipefail
           DIST="${{ inputs.name }}"
@@ -118,7 +118,7 @@ jobs:
           fi
           printf '%s\n' "$UPLOAD_HOST_KNOWN_HOSTS" > "$HOME/.ssh/known_hosts"
           chmod 644 "$HOME/.ssh/known_hosts"
-          SSH_CMD="ssh -l root -i $KEYFILE -o UserKnownHostsFile=$HOME/.ssh/known_hosts -o StrictHostKeyChecking=yes"
+          SSH_CMD="ssh -l ${{ secrets.SSH_USERNAME }} -i $KEYFILE -o UserKnownHostsFile=$HOME/.ssh/known_hosts -o StrictHostKeyChecking=yes"
           # Only prefill top-level RPMs for each arch; skip repodata and any archive directory
           rsync -e "$SSH_CMD" -rup --ignore-existing \
             --include 'x86_64/*.rpm' --include 'aarch64/*.rpm' --exclude '*' \
@@ -243,17 +243,17 @@ jobs:
           fi
           printf '%s\n' "$UPLOAD_HOST_KNOWN_HOSTS" > "$HOME/.ssh/known_hosts"
           chmod 644 "$HOME/.ssh/known_hosts"
-          rsync -e "ssh -l root -i $KEYFILE -o UserKnownHostsFile=$HOME/.ssh/known_hosts -o StrictHostKeyChecking=yes" $RSYNC_ARGS \
+          rsync -e "ssh -l ${{ secrets.SSH_USERNAME }} -i $KEYFILE -o UserKnownHostsFile=$HOME/.ssh/known_hosts -o StrictHostKeyChecking=yes" $RSYNC_ARGS \
             "$GITHUB_WORKSPACE/rpm/${{ inputs.name }}/*" "${UPLOAD_HOST}:${UPLOAD_SUFFIX}${TARGET_PATH}/"
 
       - name: Upload public key to rpm roots
         shell: bash
         env:
-          UPLOAD_HOST: ${{ secrets.UPLOAD_HOST }}
-          UPLOAD_SUFFIX: ${{ vars.UPLOAD_SUFFIX || 'rspamd.com/dist/' }}
           TARGET_RPM_STABLE: ${{ vars.TARGET_RPM_STABLE || 'rpm-stable' }}
           TARGET_RPM_UNSTABLE: ${{ vars.TARGET_RPM_UNSTABLE || 'rpm' }}
+          UPLOAD_HOST: ${{ secrets.UPLOAD_HOST }}
           UPLOAD_HOST_KNOWN_HOSTS: ${{ vars.UPLOAD_HOST_KNOWN_HOSTS }}
+          UPLOAD_SUFFIX: ${{ vars.UPLOAD_SUFFIX || 'rspamd.com/dist/' }}
         run: |
           set -euo pipefail
           mkdir -p "$HOME/.ssh" && chmod 700 "$HOME/.ssh"
@@ -266,9 +266,9 @@ jobs:
           fi
           printf '%s\n' "$UPLOAD_HOST_KNOWN_HOSTS" > "$HOME/.ssh/known_hosts"
           chmod 644 "$HOME/.ssh/known_hosts"
-          rsync -e "ssh -l root -i $KEYFILE -o UserKnownHostsFile=$HOME/.ssh/known_hosts -o StrictHostKeyChecking=yes" -rup \
+          rsync -e "ssh -l ${{ secrets.SSH_USERNAME }} -i $KEYFILE -o UserKnownHostsFile=$HOME/.ssh/known_hosts -o StrictHostKeyChecking=yes" -rup \
             "$GITHUB_WORKSPACE/rpm/rspamd.asc" "${UPLOAD_HOST}:${UPLOAD_SUFFIX}${TARGET_RPM_UNSTABLE}"
-          rsync -e "ssh -l root -i $KEYFILE -o UserKnownHostsFile=$HOME/.ssh/known_hosts -o StrictHostKeyChecking=yes" -rup \
+          rsync -e "ssh -l ${{ secrets.SSH_USERNAME }} -i $KEYFILE -o UserKnownHostsFile=$HOME/.ssh/known_hosts -o StrictHostKeyChecking=yes" -rup \
             "$GITHUB_WORKSPACE/rpm/rspamd.asc" "${UPLOAD_HOST}:${UPLOAD_SUFFIX}${TARGET_RPM_STABLE}"
 
       - name: Done
