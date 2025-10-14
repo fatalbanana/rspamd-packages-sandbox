@@ -128,7 +128,7 @@ jobs:
             chmod 644 "$HOME/.ssh/known_hosts"
             SSH_CMD="ssh -l ${{ secrets.SSH_USERNAME }} -i $KEYFILE -o UserKnownHostsFile=$HOME/.ssh/known_hosts -o StrictHostKeyChecking=yes"
             # Prefill indices and top-level artifacts only
-            rsync -e "$SSH_CMD" -rup --ignore-existing --include 'dists/***' --include 'rspamd.asc' --exclude '*' \
+            rsync -e "$SSH_CMD" -ru --ignore-existing --include 'dists/***' --include 'rspamd.asc' --exclude '*' \
               "${UPLOAD_HOST}:${UPLOAD_SUFFIX}${TARGET_PATH}/" "$REPO_DIR/" || true
             # Build list of referenced pool files from downloaded indices
             PREFILL_LIST="$RUNNER_TEMP/prefill_list.txt"
@@ -143,7 +143,7 @@ jobs:
                 "$REPO_DIR"/dists/*/*/source/Sources | sort -u >> "$PREFILL_LIST" || true
             fi
             if [[ -s "$PREFILL_LIST" ]]; then
-              rsync -e "$SSH_CMD" -rup --ignore-existing --files-from="$PREFILL_LIST" \
+              rsync -e "$SSH_CMD" -ru --ignore-existing --files-from="$PREFILL_LIST" \
                 "${UPLOAD_HOST}:${UPLOAD_SUFFIX}${TARGET_PATH}/" "$REPO_DIR/" || true
             fi
           fi
@@ -296,7 +296,7 @@ jobs:
           KEYFILE="$HOME/.ssh/gh_publish_key"
           echo "$RSYNC_KEY" > "$KEYFILE"
           chmod 600 "$KEYFILE"
-          RSYNC_ARGS="-rup"
+          RSYNC_ARGS="-ru"
           if [[ -n "${RSYNC_DELETE:-}" ]]; then
             RSYNC_ARGS="$RSYNC_ARGS --delete --delete-before"
           fi

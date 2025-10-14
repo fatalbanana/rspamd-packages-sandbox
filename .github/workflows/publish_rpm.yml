@@ -124,7 +124,7 @@ jobs:
           chmod 644 "$HOME/.ssh/known_hosts"
           SSH_CMD="ssh -l ${{ secrets.SSH_USERNAME }} -i $KEYFILE -o UserKnownHostsFile=$HOME/.ssh/known_hosts -o StrictHostKeyChecking=yes"
           # Only prefill top-level RPMs for each arch; skip repodata and any archive directory
-          rsync -e "$SSH_CMD" -rup --ignore-existing \
+          rsync -e "$SSH_CMD" -ru --ignore-existing \
             --include 'x86_64/*.rpm' --include 'aarch64/*.rpm' --exclude '*' \
             "${UPLOAD_HOST}:${UPLOAD_SUFFIX}${TARGET_PATH}/" "$REPO_DIR/" || true
 
@@ -235,7 +235,7 @@ jobs:
           KEYFILE="$HOME/.ssh/gh_publish_key"
           echo "$RSYNC_KEY" > "$KEYFILE"
           chmod 600 "$KEYFILE"
-          RSYNC_ARGS="-rup"
+          RSYNC_ARGS="-ru"
           if [[ -n "${RSYNC_DELETE:-}" ]]; then
             RSYNC_ARGS="$RSYNC_ARGS --delete --delete-before"
           fi
@@ -270,9 +270,9 @@ jobs:
           fi
           printf '%s\n' "$UPLOAD_HOST_KNOWN_HOSTS" > "$HOME/.ssh/known_hosts"
           chmod 644 "$HOME/.ssh/known_hosts"
-          rsync -e "ssh -l ${{ secrets.SSH_USERNAME }} -i $KEYFILE -o UserKnownHostsFile=$HOME/.ssh/known_hosts -o StrictHostKeyChecking=yes" -rup \
+          rsync -e "ssh -l ${{ secrets.SSH_USERNAME }} -i $KEYFILE -o UserKnownHostsFile=$HOME/.ssh/known_hosts -o StrictHostKeyChecking=yes" -ru \
             "$GITHUB_WORKSPACE/rpm/rspamd.asc" "${UPLOAD_HOST}:${UPLOAD_SUFFIX}${TARGET_RPM_UNSTABLE}"
-          rsync -e "ssh -l ${{ secrets.SSH_USERNAME }} -i $KEYFILE -o UserKnownHostsFile=$HOME/.ssh/known_hosts -o StrictHostKeyChecking=yes" -rup \
+          rsync -e "ssh -l ${{ secrets.SSH_USERNAME }} -i $KEYFILE -o UserKnownHostsFile=$HOME/.ssh/known_hosts -o StrictHostKeyChecking=yes" -ru \
             "$GITHUB_WORKSPACE/rpm/rspamd.asc" "${UPLOAD_HOST}:${UPLOAD_SUFFIX}${TARGET_RPM_STABLE}"
 
       - name: Done
