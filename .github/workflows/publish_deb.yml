@@ -83,6 +83,9 @@ jobs:
           path: packages
           merge-multiple: true
 
+      - name: Inspect
+        run: ls -lR packages
+
       - name: Build and sign APT repository
         shell: bash
         env:
