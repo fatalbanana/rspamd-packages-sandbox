@@ -136,11 +136,20 @@ jobs:
             if compgen -G "$REPO_DIR/dists/*/*/binary-*/Packages" > /dev/null; then
               grep -h '^Filename: ' "$REPO_DIR"/dists/*/*/binary-*/Packages | awk '{print $2}' | sort -u >> "$PREFILL_LIST" || true
             fi
+            if compgen -G "$REPO_DIR/dists/*/*/binary-*/Packages.gz" > /dev/null; then
+              zgrep -h '^Filename: ' "$REPO_DIR"/dists/*/*/binary-*/Packages.gz | awk '{print $2}' | sort -u >> "$PREFILL_LIST" || true
+            fi
             if compgen -G "$REPO_DIR/dists/*/*/source/Sources" > /dev/null; then
               awk '/^Files:/{infiles=1;next} NF==0{infiles=0} infiles && NF>=3{print $3}' \
                 "$REPO_DIR"/dists/*/*/source/Sources | sort -u >> "$PREFILL_LIST" || true
               awk '/^Checksums-Sha256:/{insha=1;next} NF==0{insha=0} insha && NF>=3{print $3}' \
                 "$REPO_DIR"/dists/*/*/source/Sources | sort -u >> "$PREFILL_LIST" || true
+            fi
+            if compgen -G "$REPO_DIR/dists/*/*/source/Sources.gz" > /dev/null; then
+              zcat "$REPO_DIR"/dists/*/*/source/Sources.gz | \
+                awk '/^Files:/{infiles=1;next} NF==0{infiles=0} infiles && NF>=3{print $3}' | sort -u >> "$PREFILL_LIST" || true
+              zcat "$REPO_DIR"/dists/*/*/source/Sources.gz | \
+                awk '/^Checksums-Sha256:/{insha=1;next} NF==0{insha=0} insha && NF>=3{print $3}' | sort -u >> "$PREFILL_LIST" || true
             fi
             if [[ -s "$PREFILL_LIST" ]]; then
               rsync -e "$SSH_CMD" -ru --ignore-existing --files-from="$PREFILL_LIST" \
@@ -270,11 +279,20 @@ jobs:
           if compgen -G "$REPO_DIR/dists/*/*/binary-*/Packages" > /dev/null; then
             grep -h '^Filename: ' "$REPO_DIR"/dists/*/*/binary-*/Packages | awk '{print $2}' | sort -u >> "$REFERENCED_LIST" || true
           fi
+          if compgen -G "$REPO_DIR/dists/*/*/binary-*/Packages.gz" > /dev/null; then
+            zgrep -h '^Filename: ' "$REPO_DIR"/dists/*/*/binary-*/Packages.gz | awk '{print $2}' | sort -u >> "$REFERENCED_LIST" || true
+          fi
           if compgen -G "$REPO_DIR/dists/*/*/source/Sources" > /dev/null; then
             awk '/^Files:/{infiles=1;next} NF==0{infiles=0} infiles && NF>=3{print $3}' \
               "$REPO_DIR"/dists/*/*/source/Sources | sort -u >> "$REFERENCED_LIST" || true
             awk '/^Checksums-Sha256:/{insha=1;next} NF==0{insha=0} insha && NF>=3{print $3}' \
               "$REPO_DIR"/dists/*/*/source/Sources | sort -u >> "$REFERENCED_LIST" || true
+          fi
+          if compgen -G "$REPO_DIR/dists/*/*/source/Sources.gz" > /dev/null; then
+            zcat "$REPO_DIR"/dists/*/*/source/Sources.gz | \
+              awk '/^Files:/{infiles=1;next} NF==0{infiles=0} infiles && NF>=3{print $3}' | sort -u >> "$REFERENCED_LIST" || true
+            zcat "$REPO_DIR"/dists/*/*/source/Sources.gz | \
+              awk '/^Checksums-Sha256:/{insha=1;next} NF==0{insha=0} insha && NF>=3{print $3}' | sort -u >> "$REFERENCED_LIST" || true
           fi
           # Copy referenced pool files into staging
           while IFS= read -r rel; do
