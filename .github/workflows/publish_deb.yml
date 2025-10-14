@@ -100,6 +100,7 @@ jobs:
           KEEP_BUILDS: ${{ vars.KEEP_BUILDS || '10' }}
           UPLOAD_HOST_KNOWN_HOSTS: ${{ vars.UPLOAD_HOST_KNOWN_HOSTS }}
         run: |
+          set -x
           set -euo pipefail
           REPO_DIR="$GITHUB_WORKSPACE/repos"
           mkdir -p "$REPO_DIR/conf"

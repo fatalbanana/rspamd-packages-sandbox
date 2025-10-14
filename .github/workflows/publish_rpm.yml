@@ -98,6 +98,7 @@ jobs:
           UPLOAD_HOST_KNOWN_HOSTS: ${{ vars.UPLOAD_HOST_KNOWN_HOSTS }}
           UPLOAD_SUFFIX: ${{ vars.UPLOAD_SUFFIX || 'rspamd.com/dist/' }}
         run: |
+          set -x
           set -euo pipefail
           DIST="${{ inputs.name }}"
           REPO_DIR="$GITHUB_WORKSPACE/rpm/$DIST"
