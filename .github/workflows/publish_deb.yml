@@ -68,6 +68,9 @@ jobs:
             echo "pinentry-mode loopback"
           } >> "$HOME/.gnupg/gpg.conf"
           echo "allow-loopback-pinentry" >> "$HOME/.gnupg/gpg-agent.conf"
+          # Restart agent to apply settings and prime with passphrase
+          gpg-connect-agent reloadagent /bye
+          echo "${GPG_PASSPHRASE}" | gpg --pinentry-mode loopback --passphrase-fd 0 -u "$KEY_FPR" --batch --sign -o /dev/null /dev/null
 
       - name: Download all debian package artifacts
         uses: actions/download-artifact@v4
