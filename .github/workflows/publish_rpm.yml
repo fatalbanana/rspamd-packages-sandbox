@@ -131,11 +131,11 @@ jobs:
           # Copy built artifacts into arch dirs and record newly added files for signing
           shopt -s nullglob
           COPIED_FILES=()
-          for rpm in "$GITHUB_WORKSPACE/packages/out/$DIST/"*x86_64.rpm; do
+          for rpm in "$GITHUB_WORKSPACE/packages/$DIST/"*x86_64.rpm; do
             cp -f "$rpm" "$REPO_DIR/x86_64/"
             COPIED_FILES+=("$REPO_DIR/x86_64/$(basename "$rpm")")
           done
-          for rpm in "$GITHUB_WORKSPACE/packages/out/$DIST/"*aarch64.rpm; do
+          for rpm in "$GITHUB_WORKSPACE/packages/$DIST/"*aarch64.rpm; do
             cp -f "$rpm" "$REPO_DIR/aarch64/"
             COPIED_FILES+=("$REPO_DIR/aarch64/$(basename "$rpm")")
           done
