@@ -73,7 +73,7 @@ jobs:
             echo "%_gpg_name ${KEY_FPR}"
             echo "%_gpg_path $HOME/.gnupg"
             echo "%__gpg /usr/bin/gpg"
-            echo "%__gpg_sign_cmd %{__gpg} gpg --batch --yes --pinentry-mode loopback --detach-sign --armor --local-user ${KEY_FPR} --output %{__signature_filename} %{__plaintext_filename}"
+            echo "%__gpg_sign_cmd %{__gpg} gpg --batch --yes --pinentry-mode loopback --detach-sign --local-user ${KEY_FPR} --output %{__signature_filename} %{__plaintext_filename}"
           } >> "$HOME/.rpmmacros"
 
           # Restart agent to apply settings and prime with passphrase
