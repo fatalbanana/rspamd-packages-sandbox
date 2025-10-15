@@ -73,8 +73,12 @@ jobs:
             echo "%_gpg_name ${KEY_FPR}"
             echo "%_gpg_path $HOME/.gnupg"
             echo "%__gpg /usr/bin/gpg"
-            echo "%__gpg_sign_cmd %{__gpg} gpg --batch --yes --pinentry-mode loopback --passphrase ${GPG_PASSPHRASE} --detach-sign --armor --local-user ${KEY_FPR} --output %{__signature_filename} %{__plaintext_filename}"
+            echo "%__gpg_sign_cmd %{__gpg} gpg --batch --yes --pinentry-mode loopback --detach-sign --armor --local-user ${KEY_FPR} --output %{__signature_filename} %{__plaintext_filename}"
           } >> "$HOME/.rpmmacros"
+
+          # Restart agent to apply settings and prime with passphrase
+          gpg-connect-agent reloadagent /bye
+          echo "${GPG_PASSPHRASE}" | gpg --pinentry-mode loopback --passphrase-fd 0 -u "$KEY_FPR" --batch --sign -o /dev/null /dev/null
 
       - name: Download all package artifacts
         uses: actions/download-artifact@v4
