@@ -184,7 +184,7 @@ jobs:
           # Create repo metadata and sign it for each arch present
           for arch in x86_64 aarch64; do
             if compgen -G "$REPO_DIR/$arch/*.rpm" > /dev/null; then
-              (cd "$REPO_DIR/$arch" && createrepo --compress-type gz .)
+              (cd "$REPO_DIR/$arch" && createrepo_c --compress-type gz .)
               gpg --default-key "$KEY_FPR" --detach-sign --armor "$REPO_DIR/$arch/repodata/repomd.xml"
             fi
           done
