@@ -36,9 +36,8 @@ jobs:
         if: ${{ ! inputs.skip_tests }}
         uses: actions/download-artifact@v4
         with:
-          pattern: packages-${{ inputs.name }}-*
+          name: packages-${{ inputs.name }}-${{ inputs.platform }}
           path: out
-          merge-multiple: true
 
       - name: Perform OS-specific steps and install package
         if: ${{ ! inputs.skip_tests }}
@@ -48,14 +47,7 @@ jobs:
           if [[ "${{ inputs.name }}" == ubuntu-* || "${{ inputs.name }}" == debian-* ]]; then
             echo "Installing DEB packages..."
             apt-get update
-            shopt -s nullglob
-            if [[ "${{ inputs.platform }}" == "ARM64" ]]; then arch=arm64; else arch=amd64; fi
-            debs=( out/${{ inputs.name }}/rspamd_*_${arch}.deb out/${{ inputs.name }}/rspamd-dbg_*_${arch}.deb )
-            if (( ${#debs[@]} == 0 )); then
-              echo "No DEB files found for arch $arch under out/${{ inputs.name }}" >&2
-              exit 1
-            fi
-            dpkg -i "${debs[@]}" || apt-get install -f -y
+            apt-get install -f -y out/${{ inputs.name }}/rspamd_*_amd64.deb out/${{ inputs.name }}/rspamd-dbg_*_amd64.deb || apt-get install -f -y out/${{ inputs.name }}/rspamd_*_arm64.deb out/${{ inputs.name }}/rspamd-dbg_*_arm64.deb
           elif [[ "${{ inputs.name }}" == centos-10 ]] ; then
             echo "Setting up CentOS/Oracle Linux 10 repositories..."
             dnf config-manager --set-enabled ol10_codeready_builder
@@ -75,18 +67,7 @@ jobs:
 
           if [[ "${{ inputs.name }}" == centos-* ]]; then
             echo "Installing RPM packages..."
-            # Avoid installing source RPMs; select only current arch artifacts
-            shopt -s nullglob
-            arch=$(rpm -E %_arch)
-            rpms=(
-              out/${{ inputs.name }}/rspamd-[0-9]*.${arch}.rpm
-              out/${{ inputs.name }}/rspamd-debuginfo-[0-9]*.${arch}.rpm
-            )
-            if (( ${#rpms[@]} == 0 )); then
-              echo "No RPM files found for arch $arch under out/${{ inputs.name }}" >&2
-              exit 1
-            fi
-            dnf install -y "${rpms[@]}"
+            dnf install -y out/${{ inputs.name }}/rspamd-[0-9]*.rpm out/${{ inputs.name }}/rspamd-debuginfo-[0-9]*.rpm
           fi
 
           # Install test dependencies
