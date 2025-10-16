@@ -215,13 +215,12 @@ jobs:
             # Retention: keep only the last N builds (by version) in indexes
             keep_count="${KEEP_BUILDS:-10}"
             if [[ "$keep_count" =~ ^[0-9]+$ ]] && (( keep_count > 0 )); then
-              mapfile -t pkgs < <(reprepro -b "$REPO_DIR" list "$codename" | sed -E 's/.*: ([^ ]+) .*/\1/' | grep '^rspamd' | sort -u)
-              pruned=0
-              for pkg in "${pkgs[@]}"; do
-                mapfile -t all_versions < <(reprepro -b "$REPO_DIR" list "$codename" "$pkg" | awk '{print $NF}' | sort -u)
-                if (( ${#all_versions[@]} <= keep_count )); then
-                  continue
-                fi
+              declare -A versions_to_keep=()
+              base_packages=("rspamd" "rspamd-asan")
+
+              for pkg in "${base_packages[@]}"; do
+                mapfile -t all_versions < <(reprepro -b "$REPO_DIR" list "$codename" "$pkg" 2>/dev/null | awk '{print $NF}' | sort -u)
+                if (( ${#all_versions[@]} == 0 )); then continue; fi
 
                 versions_sorted=()
                 for v in "${all_versions[@]}"; do
@@ -238,12 +237,25 @@ jobs:
                   fi
                 done
 
-                versions_to_remove=("${versions_sorted[@]:$keep_count}")
-                for ver in "${versions_to_remove[@]}"; do
-                  reprepro -b "$REPO_DIR" --keepunreferencedfiles removematched "$codename" "Package (== $pkg), Version (== $ver)" || true
-                  pruned=1
+                for i in $(seq 0 $(($keep_count-1))); do
+                  if [[ -n "${versions_sorted[$i]}" ]]; then
+                    versions_to_keep["${versions_sorted[$i]}"]=1
+                  fi
                 done
               done
+
+              mapfile -t all_pkgs < <(reprepro -b "$REPO_DIR" list "$codename" 2>/dev/null | sed -E 's/.*: ([^ ]+) .*/\1/' | grep '^rspamd' | sort -u)
+              pruned=0
+              for pkg in "${all_pkgs[@]}"; do
+                mapfile -t pkg_versions < <(reprepro -b "$REPO_DIR" list "$codename" "$pkg" 2>/dev/null | awk '{print $NF}' | sort -u)
+                for ver in "${pkg_versions[@]}"; do
+                  if [[ -z "${versions_to_keep[$ver]:-}" ]]; then
+                    reprepro -b "$REPO_DIR" --keepunreferencedfiles removematched "$codename" "Package (== $pkg), Version (== $ver)" || true
+                    pruned=1
+                  fi
+                done
+              done
+
               if [[ "$pruned" -eq 1 ]]; then
                 # Refresh indices after pruning
                 reprepro -b "$REPO_DIR" export "$codename"

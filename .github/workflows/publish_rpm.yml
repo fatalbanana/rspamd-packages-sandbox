@@ -154,26 +154,36 @@ jobs:
           if [[ "$keep_count" =~ ^[0-9]+$ ]] && (( keep_count > 0 )); then
             for arch in x86_64 aarch64; do
               mkdir -p "$REPO_DIR/$arch/archive"
-              # Build map NAME:EVR -> max buildtime
+              # Build map BASE_NAME:EVR -> max buildtime
               declare -A evr_btime=()
               while IFS= read -r -d '' file; do
-                evr=$(rpm -qp --qf '%{NAME}:%{EPOCHNUM}:%{VERSION}-%{RELEASE}\n' "$file" 2>/dev/null || echo '')
-                btime=$(rpm -qp --qf '%{BUILDTIME}\n' "$file" 2>/dev/null || echo '0')
+                pkg_name=$(rpm -qp --qf '%{NAME}\n' "$file" 2>/dev/null || echo '')
+                [[ -n "$pkg_name" ]] || continue
+                base_name="${pkg_name%-debuginfo}"
+                base_name="${base_name%-debugsource}"
+                evr=$(rpm -qp --qf '%{EPOCHNUM}:%{VERSION}-%{RELEASE}\n' "$file" 2>/dev/null || echo '')
                 [[ -n "$evr" ]] || continue
-                if [[ -z "${evr_btime[$evr]:-}" || ${evr_btime[$evr]} -lt $btime ]]; then
-                  evr_btime[$evr]=$btime
+                key="$base_name:$evr"
+                btime=$(rpm -qp --qf '%{BUILDTIME}\n' "$file" 2>/dev/null || echo '0')
+                if [[ -z "${evr_btime[$key]:-}" || ${evr_btime[$key]} -lt $btime ]]; then
+                  evr_btime[$key]=$btime
                 fi
               done < <(find "$REPO_DIR/$arch" -maxdepth 1 -type f -name '*.rpm' -print0)
-              # Sort EVRs by buildtime desc and select keep list
+              # Sort keys by buildtime desc and select keep list
               mapfile -t sorted < <(for k in "${!evr_btime[@]}"; do echo "${evr_btime[$k]} $k"; done | sort -nr | awk '{print $2}')
-              keep_evrs=("${sorted[@]:0:$keep_count}")
+              keep_keys=("${sorted[@]:0:$keep_count}")
               declare -A keep_map=()
-              for ev in "${keep_evrs[@]}"; do keep_map[$ev]=1; done
+              for k in "${keep_keys[@]}"; do keep_map[$k]=1; done
               # Move older RPMs to archive
               while IFS= read -r -d '' file; do
-                evr=$(rpm -qp --qf '%{NAME}:%{EPOCHNUM}:%{VERSION}-%{RELEASE}\n' "$file" 2>/dev/null || echo '')
+                pkg_name=$(rpm -qp --qf '%{NAME}\n' "$file" 2>/dev/null || echo '')
+                [[ -n "$pkg_name" ]] || continue
+                base_name="${pkg_name%-debuginfo}"
+                base_name="${base_name%-debugsource}"
+                evr=$(rpm -qp --qf '%{EPOCHNUM}:%{VERSION}-%{RELEASE}\n' "$file" 2>/dev/null || echo '')
                 [[ -n "$evr" ]] || continue
-                if [[ -z "${keep_map[$evr]:-}" ]]; then
+                key="$base_name:$evr"
+                if [[ -z "${keep_map[$key]:-}" ]]; then
                   mv -f "$file" "$REPO_DIR/$arch/archive/" || true
                 fi
               done < <(find "$REPO_DIR/$arch" -maxdepth 1 -type f -name '*.rpm' -print0)
