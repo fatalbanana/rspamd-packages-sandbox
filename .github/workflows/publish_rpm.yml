@@ -271,4 +271,3 @@ jobs:
             "$GITHUB_WORKSPACE/rpm/rspamd.asc" "${UPLOAD_HOST}:${UPLOAD_SUFFIX}${TARGET_RPM_UNSTABLE}"
           rsync -e "ssh -l ${{ secrets.SSH_USERNAME }} -i $KEYFILE -o UserKnownHostsFile=$HOME/.ssh/known_hosts -o StrictHostKeyChecking=yes" -ru \
             "$GITHUB_WORKSPACE/rpm/rspamd.asc" "${UPLOAD_HOST}:${UPLOAD_SUFFIX}${TARGET_RPM_STABLE}"
-PACE/rpm/rspamd.asc" "${UPLOAD_HOST}:${UPLOAD_SUFFIX}${TARGET_RPM_STABLE}"
