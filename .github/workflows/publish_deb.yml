@@ -237,10 +237,9 @@ jobs:
                   fi
                 done
 
-                for i in $(seq 0 $(($keep_count-1))); do
-                  if [[ -n "${versions_sorted[$i]}" ]]; then
-                    versions_to_keep["${versions_sorted[$i]}"]=1
-                  fi
+                top_versions=("${versions_sorted[@]:0:$keep_count}")
+                for v in "${top_versions[@]}"; do
+                  versions_to_keep["$v"]=1
                 done
               done
 
