@@ -71,8 +71,7 @@ jobs:
             export PACKAGE_VERSION="${PATCH_VERSION}~${GIT_VERSION}~${CODENAME}"
           elif [[ "${{ inputs.name }}" == centos-* ]] ; then
             echo "PKG_TYPE=rpm" >> "$GITHUB_ENV"
-            export CODENAME="el$(echo "${{ inputs.name }}" | cut -d'-' -f2)"
-            export PACKAGE_VERSION="${PATCH_VERSION}.${CODENAME}"
+            export PACKAGE_VERSION="${PATCH_VERSION}"
           else
             echo "Bad inputs.name: ${{ inputs.name }}"
             exit 1
