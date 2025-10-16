@@ -36,7 +36,7 @@ jobs:
         if: ${{ ! inputs.skip_tests }}
         uses: actions/download-artifact@v4
         with:
-          pattern: packages-${{ inputs.name }}-*
+          pattern: packages-${{ inputs.name }}-${{ inputs.platform }}
           path: out
           merge-multiple: true
 
