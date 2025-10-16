@@ -215,11 +215,22 @@ jobs:
             # Retention: keep only the last N builds (by version) in indexes
             keep_count="${KEEP_BUILDS:-10}"
             if [[ "$keep_count" =~ ^[0-9]+$ ]] && (( keep_count > 0 )); then
-              declare -A versions_to_keep=()
-              base_packages=("rspamd" "rspamd-asan")
+              # Build a map of base_name -> list of versions
+              declare -A base_name_versions=()
+              mapfile -t all_packages < <(reprepro -b "$REPO_DIR" --list-format '${package} ${version}\n' list "$codename" 2>/dev/null | grep '^rspamd')
+              for pkg_ver_line in "${all_packages[@]}"; do
+                pkg_name="${pkg_ver_line%% *}"
+                ver="${pkg_ver_line#* }"
+                base_name="${pkg_name%-dbg}"
+                # Add version to list for this base_name, if not already present
+                if [[ ! " ${base_name_versions[$base_name]} " =~ " $ver " ]]; then
+                  base_name_versions["$base_name"]+="$ver "
+                fi
+              done
 
-              for pkg in "${base_packages[@]}"; do
-                mapfile -t all_versions < <(reprepro -b "$REPO_DIR" list "$codename" "$pkg" 2>/dev/null | awk '{print $NF}' | sort -u)
+              declare -A versions_to_keep=()
+              for base_name in "${!base_name_versions[@]}"; do
+                mapfile -t all_versions < <(echo "${base_name_versions[$base_name]}" | tr ' ' '\n' | sort -u)
                 if (( ${#all_versions[@]} == 0 )); then continue; fi
 
                 versions_sorted=()
@@ -243,13 +254,14 @@ jobs:
                 done
               done
 
+              # Pruning logic
               mapfile -t all_pkgs < <(reprepro -b "$REPO_DIR" list "$codename" 2>/dev/null | sed -E 's/.*: ([^ ]+) .*/\1/' | grep '^rspamd' | sort -u)
               pruned=0
               for pkg in "${all_pkgs[@]}"; do
                 mapfile -t pkg_versions < <(reprepro -b "$REPO_DIR" list "$codename" "$pkg" 2>/dev/null | awk '{print $NF}' | sort -u)
                 for ver in "${pkg_versions[@]}"; do
                   if [[ -z "${versions_to_keep[$ver]:-}" ]]; then
-                    reprepro -b "$REPO_DIR" --keepunreferencedfiles removematched "$codename" "Package (== $pkg), Version (== $ver)" || true
+                    reprepro -b "$REPO_DIR" removematched "$codename" "Package (== $pkg), Version (== $ver)" || true
                     pruned=1
                   fi
                 done
@@ -310,7 +322,7 @@ jobs:
           KEYFILE="$HOME/.ssh/gh_publish_key"
           echo "$RSYNC_KEY" > "$KEYFILE"
           chmod 600 "$KEYFILE"
-          RSYNC_ARGS="-ru"
+          RSYNC_ARGS="-ru --delete"
           if [[ -z "${UPLOAD_HOST_KNOWN_HOSTS:-}" ]]; then
             echo "Missing UPLOAD_HOST_KNOWN_HOSTS GitHub variable" >&2
             exit 1
