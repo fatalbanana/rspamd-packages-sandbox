@@ -154,10 +154,10 @@ jobs:
           if [[ "$keep_count" =~ ^[0-9]+$ ]] && (( keep_count > 0 )); then
             for arch in x86_64 aarch64; do
               mkdir -p "$REPO_DIR/$arch/archive"
-              # Build map EVR -> max buildtime
+              # Build map NAME:EVR -> max buildtime
               declare -A evr_btime=()
               while IFS= read -r -d '' file; do
-                evr=$(rpm -qp --qf '%{EPOCHNUM}:%{VERSION}-%{RELEASE}\n' "$file" 2>/dev/null || echo '')
+                evr=$(rpm -qp --qf '%{NAME}:%{EPOCHNUM}:%{VERSION}-%{RELEASE}\n' "$file" 2>/dev/null || echo '')
                 btime=$(rpm -qp --qf '%{BUILDTIME}\n' "$file" 2>/dev/null || echo '0')
                 [[ -n "$evr" ]] || continue
                 if [[ -z "${evr_btime[$evr]:-}" || ${evr_btime[$evr]} -lt $btime ]]; then
@@ -171,7 +171,7 @@ jobs:
               for ev in "${keep_evrs[@]}"; do keep_map[$ev]=1; done
               # Move older RPMs to archive
               while IFS= read -r -d '' file; do
-                evr=$(rpm -qp --qf '%{EPOCHNUM}:%{VERSION}-%{RELEASE}\n' "$file" 2>/dev/null || echo '')
+                evr=$(rpm -qp --qf '%{NAME}:%{EPOCHNUM}:%{VERSION}-%{RELEASE}\n' "$file" 2>/dev/null || echo '')
                 [[ -n "$evr" ]] || continue
                 if [[ -z "${keep_map[$evr]:-}" ]]; then
                   mv -f "$file" "$REPO_DIR/$arch/archive/" || true
@@ -237,9 +237,7 @@ jobs:
           KEYFILE="$HOME/.ssh/gh_publish_key"
           echo "$RSYNC_KEY" > "$KEYFILE"
           chmod 600 "$KEYFILE"
-          RSYNC_ARGS="-ru"
-          # Do not upload archived RPMs
-          RSYNC_ARGS="$RSYNC_ARGS --exclude archive/**"
+          RSYNC_ARGS="-ru --delete"
           if [[ -z "${UPLOAD_HOST_KNOWN_HOSTS:-}" ]]; then
             echo "Missing UPLOAD_HOST_KNOWN_HOSTS GitHub variable" >&2
             exit 1
@@ -273,3 +271,4 @@ jobs:
             "$GITHUB_WORKSPACE/rpm/rspamd.asc" "${UPLOAD_HOST}:${UPLOAD_SUFFIX}${TARGET_RPM_UNSTABLE}"
           rsync -e "ssh -l ${{ secrets.SSH_USERNAME }} -i $KEYFILE -o UserKnownHostsFile=$HOME/.ssh/known_hosts -o StrictHostKeyChecking=yes" -ru \
             "$GITHUB_WORKSPACE/rpm/rspamd.asc" "${UPLOAD_HOST}:${UPLOAD_SUFFIX}${TARGET_RPM_STABLE}"
+PACE/rpm/rspamd.asc" "${UPLOAD_HOST}:${UPLOAD_SUFFIX}${TARGET_RPM_STABLE}"
