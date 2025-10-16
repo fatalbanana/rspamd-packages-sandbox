@@ -215,8 +215,14 @@ jobs:
             # Retention: keep only the last N builds (by version) in indexes
             keep_count="${KEEP_BUILDS:-10}"
             if [[ "$keep_count" =~ ^[0-9]+$ ]] && (( keep_count > 0 )); then
-              mapfile -t all_versions < <(reprepro -b "$REPO_DIR" list "$codename" rspamd | awk '{print $NF}' | sort -u)
-              if (( ${#all_versions[@]} > keep_count )); then
+              mapfile -t pkgs < <(reprepro -b "$REPO_DIR" list "$codename" | sed -E 's/.*: ([^ ]+) .*/\1/' | grep '^rspamd' | sort -u)
+              pruned=0
+              for pkg in "${pkgs[@]}"; do
+                mapfile -t all_versions < <(reprepro -b "$REPO_DIR" list "$codename" "$pkg" | awk '{print $NF}' | sort -u)
+                if (( ${#all_versions[@]} <= keep_count )); then
+                  continue
+                fi
+
                 versions_sorted=()
                 for v in "${all_versions[@]}"; do
                   inserted=0
@@ -231,18 +237,14 @@ jobs:
                     versions_sorted+=("$v")
                   fi
                 done
-                keep_versions=("${versions_sorted[@]:0:$keep_count}")
-                declare -A keep_map
-                for kv in "${keep_versions[@]}"; do keep_map["$kv"]=1; done
-                mapfile -t pkgs < <(reprepro -b "$REPO_DIR" list "$codename" | sed -E 's/.*: ([^ ]+) .*/\1/' | grep '^rspamd' | sort -u)
-                for pkg in "${pkgs[@]}"; do
-                  mapfile -t pkg_versions < <(reprepro -b "$REPO_DIR" list "$codename" "$pkg" | awk '{print $NF}' | sort -u)
-                  for ver in "${pkg_versions[@]}"; do
-                    if [[ -z "${keep_map[$ver]:-}" ]]; then
-                      reprepro -b "$REPO_DIR" --keepunreferencedfiles removematched "$codename" "Package (== $pkg), Version (== $ver)" || true
-                    fi
-                  done
+
+                versions_to_remove=("${versions_sorted[@]:$keep_count}")
+                for ver in "${versions_to_remove[@]}"; do
+                  reprepro -b "$REPO_DIR" --keepunreferencedfiles removematched "$codename" "Package (== $pkg), Version (== $ver)" || true
+                  pruned=1
                 done
+              done
+              if [[ "$pruned" -eq 1 ]]; then
                 # Refresh indices after pruning
                 reprepro -b "$REPO_DIR" export "$codename"
               fi
@@ -305,4 +307,6 @@ jobs:
           printf '%s\n' "$UPLOAD_HOST_KNOWN_HOSTS" > "$HOME/.ssh/known_hosts"
           chmod 644 "$HOME/.ssh/known_hosts"
           rsync -e "ssh -l ${{ secrets.SSH_USERNAME }} -i $KEYFILE -o UserKnownHostsFile=$HOME/.ssh/known_hosts -o StrictHostKeyChecking=yes" $RSYNC_ARGS \
+            "$STAGING_DIR/" "${UPLOAD_HOST}:${UPLOAD_SUFFIX}${TARGET_PATH}"
+RNAME }} -i $KEYFILE -o UserKnownHostsFile=$HOME/.ssh/known_hosts -o StrictHostKeyChecking=yes" $RSYNC_ARGS \
             "$STAGING_DIR/" "${UPLOAD_HOST}:${UPLOAD_SUFFIX}${TARGET_PATH}"
