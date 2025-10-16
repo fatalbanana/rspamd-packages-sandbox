@@ -95,7 +95,6 @@ jobs:
         env:
           KEEP_BUILDS: ${{ vars.KEEP_BUILDS || '10' }}
           NIGHTLY: ${{ inputs.nightly }}
-          RSYNC_DELETE: ${{ vars.RSYNC_DELETE || '' }}
           TARGET_RPM_STABLE: ${{ vars.TARGET_RPM_STABLE || 'rpm-stable' }}
           TARGET_RPM_UNSTABLE: ${{ vars.TARGET_RPM_UNSTABLE || 'rpm' }}
           UPLOAD_HOST: ${{ secrets.UPLOAD_HOST }}
@@ -224,7 +223,6 @@ jobs:
           UPLOAD_SUFFIX: ${{ vars.UPLOAD_SUFFIX || 'rspamd.com/dist/' }}
           TARGET_RPM_STABLE: ${{ vars.TARGET_RPM_STABLE || 'rpm-stable' }}
           TARGET_RPM_UNSTABLE: ${{ vars.TARGET_RPM_UNSTABLE || 'rpm' }}
-          RSYNC_DELETE: ${{ vars.RSYNC_DELETE || '' }}
           UPLOAD_HOST_KNOWN_HOSTS: ${{ vars.UPLOAD_HOST_KNOWN_HOSTS }}
         run: |
           set -euo pipefail
@@ -240,9 +238,6 @@ jobs:
           echo "$RSYNC_KEY" > "$KEYFILE"
           chmod 600 "$KEYFILE"
           RSYNC_ARGS="-ru"
-          if [[ -n "${RSYNC_DELETE:-}" ]]; then
-            RSYNC_ARGS="$RSYNC_ARGS --delete --delete-before"
-          fi
           # Do not upload archived RPMs
           RSYNC_ARGS="$RSYNC_ARGS --exclude archive/**"
           if [[ -z "${UPLOAD_HOST_KNOWN_HOSTS:-}" ]]; then
@@ -278,6 +273,3 @@ jobs:
             "$GITHUB_WORKSPACE/rpm/rspamd.asc" "${UPLOAD_HOST}:${UPLOAD_SUFFIX}${TARGET_RPM_UNSTABLE}"
           rsync -e "ssh -l ${{ secrets.SSH_USERNAME }} -i $KEYFILE -o UserKnownHostsFile=$HOME/.ssh/known_hosts -o StrictHostKeyChecking=yes" -ru \
             "$GITHUB_WORKSPACE/rpm/rspamd.asc" "${UPLOAD_HOST}:${UPLOAD_SUFFIX}${TARGET_RPM_STABLE}"
-
-      - name: Done
-        run: echo "Published RPM repo for ${{ inputs.name }}"

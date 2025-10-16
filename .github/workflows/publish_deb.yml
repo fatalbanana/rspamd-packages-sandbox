@@ -97,8 +97,6 @@ jobs:
           UPLOAD_SUFFIX: ${{ vars.UPLOAD_SUFFIX || 'rspamd.com/dist/' }}
           TARGET_DEB_STABLE: ${{ vars.TARGET_DEB_STABLE || 'apt-stable' }}
           TARGET_DEB_UNSTABLE: ${{ vars.TARGET_DEB_UNSTABLE || 'apt' }}
-          RSYNC_DELETE: ${{ vars.RSYNC_DELETE || '' }}
-          NO_DELETE: ${{ vars.NO_DELETE || '' }}
           GPG_PASSPHRASE: ${{ secrets.GPG_PASSPHRASE }}
           KEEP_BUILDS: ${{ vars.KEEP_BUILDS || '10' }}
           UPLOAD_HOST_KNOWN_HOSTS: ${{ vars.UPLOAD_HOST_KNOWN_HOSTS }}
@@ -111,53 +109,51 @@ jobs:
           gpg --armor --output "$REPO_DIR/rspamd.asc" --export "$KEY_FPR"
 
           # Optionally prefill with existing repo content, but only indices and currently referenced pool files
-          if [[ -z "${NO_DELETE:-}" ]]; then
-            if [[ -n "${NIGHTLY:-}" ]]; then
-              RSYNC_KEY='${{ secrets.SSH_KEY_DEB_UNSTABLE }}'
-              TARGET_PATH="$TARGET_DEB_UNSTABLE"
-            else
-              RSYNC_KEY='${{ secrets.SSH_KEY_DEB_STABLE }}'
-              TARGET_PATH="$TARGET_DEB_STABLE"
-            fi
-            mkdir -p "$HOME/.ssh" && chmod 700 "$HOME/.ssh"
-            KEYFILE="$HOME/.ssh/gh_publish_key"
-            echo "$RSYNC_KEY" > "$KEYFILE"
-            chmod 600 "$KEYFILE"
-            if [[ -z "${UPLOAD_HOST_KNOWN_HOSTS:-}" ]]; then
-              echo "Missing UPLOAD_HOST_KNOWN_HOSTS GitHub variable" >&2
-              exit 1
-            fi
-            printf '%s\n' "$UPLOAD_HOST_KNOWN_HOSTS" > "$HOME/.ssh/known_hosts"
-            chmod 644 "$HOME/.ssh/known_hosts"
-            SSH_CMD="ssh -l ${{ secrets.SSH_USERNAME }} -i $KEYFILE -o UserKnownHostsFile=$HOME/.ssh/known_hosts -o StrictHostKeyChecking=yes"
-            # Prefill indices and top-level artifacts only
-            rsync -e "$SSH_CMD" -ru --ignore-existing --include 'dists/***' --include 'rspamd.asc' --exclude '*' \
+          if [[ -n "${NIGHTLY:-}" ]]; then
+            RSYNC_KEY='${{ secrets.SSH_KEY_DEB_UNSTABLE }}'
+            TARGET_PATH="$TARGET_DEB_UNSTABLE"
+          else
+            RSYNC_KEY='${{ secrets.SSH_KEY_DEB_STABLE }}'
+            TARGET_PATH="$TARGET_DEB_STABLE"
+          fi
+          mkdir -p "$HOME/.ssh" && chmod 700 "$HOME/.ssh"
+          KEYFILE="$HOME/.ssh/gh_publish_key"
+          echo "$RSYNC_KEY" > "$KEYFILE"
+          chmod 600 "$KEYFILE"
+          if [[ -z "${UPLOAD_HOST_KNOWN_HOSTS:-}" ]]; then
+            echo "Missing UPLOAD_HOST_KNOWN_HOSTS GitHub variable" >&2
+            exit 1
+          fi
+          printf '%s\n' "$UPLOAD_HOST_KNOWN_HOSTS" > "$HOME/.ssh/known_hosts"
+          chmod 644 "$HOME/.ssh/known_hosts"
+          SSH_CMD="ssh -l ${{ secrets.SSH_USERNAME }} -i $KEYFILE -o UserKnownHostsFile=$HOME/.ssh/known_hosts -o StrictHostKeyChecking=yes"
+          # Prefill indices and top-level artifacts only
+          rsync -e "$SSH_CMD" -ru --ignore-existing --include 'dists/***' --include 'rspamd.asc' --exclude '*' \
+            "${UPLOAD_HOST}:${UPLOAD_SUFFIX}${TARGET_PATH}/" "$REPO_DIR/" || true
+          # Build list of referenced pool files from downloaded indices
+          PREFILL_LIST="$RUNNER_TEMP/prefill_list.txt"
+          : > "$PREFILL_LIST"
+          if compgen -G "$REPO_DIR/dists/*/*/binary-*/Packages" > /dev/null; then
+            grep -h '^Filename: ' "$REPO_DIR"/dists/*/*/binary-*/Packages | awk '{print $2}' | sort -u >> "$PREFILL_LIST" || true
+          fi
+          if compgen -G "$REPO_DIR/dists/*/*/binary-*/Packages.gz" > /dev/null; then
+            zgrep -h '^Filename: ' "$REPO_DIR"/dists/*/*/binary-*/Packages.gz | awk '{print $2}' | sort -u >> "$PREFILL_LIST" || true
+          fi
+          if compgen -G "$REPO_DIR/dists/*/*/source/Sources" > /dev/null; then
+            awk 'BEGIN{infiles=0} /^Files:/{infiles=1;next} NF==0{infiles=0} infiles && NF>=3{print $3}' \
+              "$REPO_DIR"/dists/*/*/source/Sources | sort -u >> "$PREFILL_LIST" || true
+            awk 'BEGIN{insha=0} /^Checksums-Sha256:/{insha=1;next} NF==0{insha=0} insha && NF>=3{print $3}' \
+              "$REPO_DIR"/dists/*/*/source/Sources | sort -u >> "$PREFILL_LIST" || true
+          fi
+          if compgen -G "$REPO_DIR/dists/*/*/source/Sources.gz" > /dev/null; then
+            zcat "$REPO_DIR"/dists/*/*/source/Sources.gz | \
+              awk 'BEGIN{infiles=0} /^Files:/{infiles=1;next} NF==0{infiles=0} infiles && NF>=3{print $3}' | sort -u >> "$PREFILL_LIST" || true
+            zcat "$REPO_DIR"/dists/*/*/source/Sources.gz | \
+              awk 'BEGIN{insha=0} /^Checksums-Sha256:/{insha=1;next} NF==0{insha=0} insha && NF>=3{print $3}' | sort -u >> "$PREFILL_LIST" || true
+          fi
+          if [[ -s "$PREFILL_LIST" ]]; then
+            rsync -e "$SSH_CMD" -ru --ignore-existing --files-from="$PREFILL_LIST" \
               "${UPLOAD_HOST}:${UPLOAD_SUFFIX}${TARGET_PATH}/" "$REPO_DIR/" || true
-            # Build list of referenced pool files from downloaded indices
-            PREFILL_LIST="$RUNNER_TEMP/prefill_list.txt"
-            : > "$PREFILL_LIST"
-            if compgen -G "$REPO_DIR/dists/*/*/binary-*/Packages" > /dev/null; then
-              grep -h '^Filename: ' "$REPO_DIR"/dists/*/*/binary-*/Packages | awk '{print $2}' | sort -u >> "$PREFILL_LIST" || true
-            fi
-            if compgen -G "$REPO_DIR/dists/*/*/binary-*/Packages.gz" > /dev/null; then
-              zgrep -h '^Filename: ' "$REPO_DIR"/dists/*/*/binary-*/Packages.gz | awk '{print $2}' | sort -u >> "$PREFILL_LIST" || true
-            fi
-            if compgen -G "$REPO_DIR/dists/*/*/source/Sources" > /dev/null; then
-              awk '/^Files:/{infiles=1;next} NF==0{infiles=0} infiles && NF>=3{print $3}' \
-                "$REPO_DIR"/dists/*/*/source/Sources | sort -u >> "$PREFILL_LIST" || true
-              awk '/^Checksums-Sha256:/{insha=1;next} NF==0{insha=0} insha && NF>=3{print $3}' \
-                "$REPO_DIR"/dists/*/*/source/Sources | sort -u >> "$PREFILL_LIST" || true
-            fi
-            if compgen -G "$REPO_DIR/dists/*/*/source/Sources.gz" > /dev/null; then
-              zcat "$REPO_DIR"/dists/*/*/source/Sources.gz | \
-                awk '/^Files:/{infiles=1;next} NF==0{infiles=0} infiles && NF>=3{print $3}' | sort -u >> "$PREFILL_LIST" || true
-              zcat "$REPO_DIR"/dists/*/*/source/Sources.gz | \
-                awk '/^Checksums-Sha256:/{insha=1;next} NF==0{insha=0} insha && NF>=3{print $3}' | sort -u >> "$PREFILL_LIST" || true
-            fi
-            if [[ -s "$PREFILL_LIST" ]]; then
-              rsync -e "$SSH_CMD" -ru --ignore-existing --files-from="$PREFILL_LIST" \
-                "${UPLOAD_HOST}:${UPLOAD_SUFFIX}${TARGET_PATH}/" "$REPO_DIR/" || true
-            fi
           fi
 
           # Prepare distributions and include packages
@@ -302,9 +298,6 @@ jobs:
           echo "$RSYNC_KEY" > "$KEYFILE"
           chmod 600 "$KEYFILE"
           RSYNC_ARGS="-ru"
-          if [[ -n "${RSYNC_DELETE:-}" ]]; then
-            RSYNC_ARGS="$RSYNC_ARGS --delete --delete-before"
-          fi
           if [[ -z "${UPLOAD_HOST_KNOWN_HOSTS:-}" ]]; then
             echo "Missing UPLOAD_HOST_KNOWN_HOSTS GitHub variable" >&2
             exit 1
@@ -313,7 +306,3 @@ jobs:
           chmod 644 "$HOME/.ssh/known_hosts"
           rsync -e "ssh -l ${{ secrets.SSH_USERNAME }} -i $KEYFILE -o UserKnownHostsFile=$HOME/.ssh/known_hosts -o StrictHostKeyChecking=yes" $RSYNC_ARGS \
             "$STAGING_DIR/" "${UPLOAD_HOST}:${UPLOAD_SUFFIX}${TARGET_PATH}"
-
-      - name: Done
-        run: |
-          echo "Published Debian repos for ${{ inputs.names }}"
