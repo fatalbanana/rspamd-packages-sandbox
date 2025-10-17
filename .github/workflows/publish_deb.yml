@@ -175,16 +175,16 @@ jobs:
             codename="${codename/debian-/}"
             shopt -s nullglob
             for deb_pkg in "$GITHUB_WORKSPACE"/packages/${d}/rspamd_*amd64*.deb; do
-              reprepro  -P extra -S mail -b "$REPO_DIR" -v includedeb "$codename" "$deb_pkg"
+              reprepro  -P extra -S mail -b "$REPO_DIR" -v --keepunreferencedfiles includedeb "$codename" "$deb_pkg"
             done
             for deb_pkg in "$GITHUB_WORKSPACE"/packages/${d}/rspamd-dbg_*amd64*.deb; do
-              reprepro  -P extra -S debug -b "$REPO_DIR" -v includedeb "$codename" "$deb_pkg"
+              reprepro  -P extra -S debug -b "$REPO_DIR" -v --keepunreferencedfiles includedeb "$codename" "$deb_pkg"
             done
             for deb_pkg in "$GITHUB_WORKSPACE"/packages/${d}/rspamd-asan_*amd64*.deb; do
-              reprepro  -P extra -S mail -b "$REPO_DIR" -v includedeb "$codename" "$deb_pkg"
+              reprepro  -P extra -S mail -b "$REPO_DIR" -v --keepunreferencedfiles includedeb "$codename" "$deb_pkg"
             done
             for deb_pkg in "$GITHUB_WORKSPACE"/packages/${d}/rspamd-asan-dbg_*amd64*.deb; do
-              reprepro  -P extra -S debug -b "$REPO_DIR" -v includedeb "$codename" "$deb_pkg"
+              reprepro  -P extra -S debug -b "$REPO_DIR" -v --keepunreferencedfiles includedeb "$codename" "$deb_pkg"
             done
             # Also include arm64 variants if present
             for deb_pkg in "$GITHUB_WORKSPACE"/packages/${d}/rspamd_*arm64*.deb; do
@@ -203,62 +203,19 @@ jobs:
             # Retention: keep only the last N builds (by version) in indexes
             keep_count="${KEEP_BUILDS:-10}"
             if [[ "$keep_count" =~ ^[0-9]+$ ]] && (( keep_count > 0 )); then
-              # Build a map of base_name -> list of versions
-              declare -A base_name_versions=()
-              mapfile -t all_packages < <(reprepro -b "$REPO_DIR" --list-format '${package} ${version}\n' list "$codename" 2>/dev/null | grep '^rspamd')
-              for pkg_ver_line in "${all_packages[@]}"; do
-                pkg_name="${pkg_ver_line%% *}"
-                ver="${pkg_ver_line#* }"
+              # Get a list of all unreferenced files, group them by package name, and for each group, delete the oldest ones
+              reprepro -b "$REPO_DIR" dumpunreferenced | grep \.deb$ | awk '{print $4}' | sort | while read -r file; do
+                pkg_name=$(dpkg-deb -f "$file" Package)
                 base_name="${pkg_name%-dbg}"
-                # Add version to list for this base_name, if not already present
-                if [[ ! " ${base_name_versions[$base_name]:-} " =~ " $ver " ]]; then
-                  base_name_versions["$base_name"]="${base_name_versions[$base_name]:-}$ver "
+                echo "$file" >> "/tmp/reprepro-prune-${base_name}.list"
+              done
+
+              find /tmp -type f -name 'reprepro-prune-*.list' | while read -r list_file; do
+                count=$(wc -l < "$list_file")
+                if [ "$count" -gt "$keep_count" ]; then
+                  head -n "$(($count - $keep_count))" "$list_file" | xargs -r rm -v
                 fi
               done
-
-              declare -A versions_to_keep=()
-              for base_name in "${!base_name_versions[@]}"; do
-                mapfile -t all_versions < <(echo "${base_name_versions[$base_name]}" | tr ' ' '\n' | grep . | sort -u || true)
-                if (( ${#all_versions[@]} == 0 )); then continue; fi
-
-                versions_sorted=()
-                for v in "${all_versions[@]}"; do
-                  inserted=0
-                  for i in "${!versions_sorted[@]}"; do
-                    if dpkg --compare-versions "$v" gt "${versions_sorted[$i]}"; then
-                      versions_sorted=("${versions_sorted[@]:0:$i}" "$v" "${versions_sorted[@]:$i}")
-                      inserted=1
-                      break
-                    fi
-                  done
-                  if [[ $inserted -eq 0 ]]; then
-                    versions_sorted+=("$v")
-                  fi
-                done
-
-                top_versions=("${versions_sorted[@]:0:$keep_count}")
-                for v in "${top_versions[@]}"; do
-                  versions_to_keep["$v"]=1
-                done
-              done
-
-              # Pruning logic
-              mapfile -t all_pkgs < <(reprepro -b "$REPO_DIR" list "$codename" 2>/dev/null | sed -E 's/.*: ([^ ]+) .*/\1/' | grep '^rspamd' | sort -u)
-              pruned=0
-              for pkg in "${all_pkgs[@]}"; do
-                mapfile -t pkg_versions < <(reprepro -b "$REPO_DIR" list "$codename" "$pkg" 2>/dev/null | awk '{print $NF}' | sort -u)
-                for ver in "${pkg_versions[@]}"; do
-                  if [[ -z "${versions_to_keep[$ver]:-}" ]]; then
-                    reprepro -b "$REPO_DIR" removematched "$codename" "Package (== $pkg), Version (== $ver)"
-                    pruned=1
-                  fi
-                done
-              done
-
-              if [[ "$pruned" -eq 1 ]]; then
-                # Refresh indices after pruning
-                reprepro -b "$REPO_DIR" export "$codename"
-              fi
             fi
           done
 
