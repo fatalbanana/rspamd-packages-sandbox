@@ -131,6 +131,8 @@ jobs:
           # Prefill with all existing repo content
           rsync -e "$SSH_CMD" -ru \
             "${UPLOAD_HOST}:${UPLOAD_SUFFIX}${TARGET_PATH}/" "$REPO_DIR/"
+          echo "--- Listing pre-filled repository content ---"
+          ls -lR "$REPO_DIR"
 
           # Prepare distributions and include packages
           # First, create a fresh distributions file for this run to ensure consistency
@@ -183,7 +185,7 @@ jobs:
             done
             # Include source
             for deb_dsc in "$GITHUB_WORKSPACE"/packages/${d}/rspamd_*.dsc; do
-              reprepro  -P extra -S mail -b "$REPO_DIR" -v --keepunreferencedfiles includedsc "$codename" "$deb_dsc" || true
+              reprepro  -P extra -S mail -b "$REPO_DIR" -v --keepunreferencedfiles includedsc "$codename" "$deb_dsc"
             done
             # Also include arm64 variants if present
             for deb_pkg in "$GITHUB_WORKSPACE"/packages/${d}/rspamd_*arm64*.deb; do
