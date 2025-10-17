@@ -166,6 +166,9 @@ jobs:
           # Clean up database from distributions that are no longer in conf/distributions
           reprepro -b "$REPO_DIR" clearvanished
 
+          # Re-index all packages in the pool to ensure a consistent state
+          find "$REPO_DIR/pool" -type f -name '*.deb' -print0 | xargs -0 -r reprepro -b "$REPO_DIR" --ignore=wrongdistribution includedeb "$codename"
+
           # Now, include packages for the current distributions
           for d in "${DIST_LIST[@]}"; do
             codename="${d/ubuntu-/}"
@@ -183,22 +186,18 @@ jobs:
             for deb_pkg in "$GITHUB_WORKSPACE"/packages/${d}/rspamd-asan-dbg_*amd64*.deb; do
               reprepro  -P extra -S debug -b "$REPO_DIR" -v includedeb "$codename" "$deb_pkg"
             done
-            # Include source
-            #for deb_dsc in "$GITHUB_WORKSPACE"/packages/${d}/rspamd_*.dsc; do
-            #  reprepro  -P extra -S mail -b "$REPO_DIR" -v --keepunreferencedfiles includedsc "$codename" "$deb_dsc"
-            #done
             # Also include arm64 variants if present
             for deb_pkg in "$GITHUB_WORKSPACE"/packages/${d}/rspamd_*arm64*.deb; do
-              reprepro  -P extra -S mail -b "$REPO_DIR" -v --keepunreferencedfiles includedeb "$codename" "$deb_pkg"
+              reprepro  -P extra -S mail -b "$REPO_DIR" -v includedeb "$codename" "$deb_pkg"
             done
             for deb_pkg in "$GITHUB_WORKSPACE"/packages/${d}/rspamd-dbg_*arm64*.deb; do
-              reprepro  -P extra -S debug -b "$REPO_DIR" -v --keepunreferencedfiles includedeb "$codename" "$deb_pkg"
+              reprepro  -P extra -S debug -b "$REPO_DIR" -v includedeb "$codename" "$deb_pkg"
             done
             for deb_pkg in "$GITHUB_WORKSPACE"/packages/${d}/rspamd-asan_*arm64*.deb; do
-              reprepro  -P extra -S mail -b "$REPO_DIR" -v --keepunreferencedfiles includedeb "$codename" "$deb_pkg"
+              reprepro  -P extra -S mail -b "$REPO_DIR" -v includedeb "$codename" "$deb_pkg"
             done
             for deb_pkg in "$GITHUB_WORKSPACE"/packages/${d}/rspamd-asan-dbg_*arm64*.deb; do
-              reprepro  -P extra -S debug -b "$REPO_DIR" -v --keepunreferencedfiles includedeb "$codename" "$deb_pkg"
+              reprepro  -P extra -S debug -b "$REPO_DIR" -v includedeb "$codename" "$deb_pkg"
             done
 
             # Retention: keep only the last N builds (by version) in indexes
@@ -244,15 +243,13 @@ jobs:
               done
 
               # Pruning logic
-              find "$REPO_DIR/pool" -type f -name '*.deb' -print0 | xargs -0 -r reprepro -b "$REPO_DIR" --ignore=wrongdistribution includedeb "$codename"
-
               mapfile -t all_pkgs < <(reprepro -b "$REPO_DIR" list "$codename" 2>/dev/null | sed -E 's/.*: ([^ ]+) .*/\1/' | grep '^rspamd' | sort -u)
               pruned=0
               for pkg in "${all_pkgs[@]}"; do
                 mapfile -t pkg_versions < <(reprepro -b "$REPO_DIR" list "$codename" "$pkg" 2>/dev/null | awk '{print $NF}' | sort -u)
                 for ver in "${pkg_versions[@]}"; do
                   if [[ -z "${versions_to_keep[$ver]:-}" ]]; then
-                    reprepro -b "$REPO_DIR" --keepunreferencedfiles removematched "$codename" "Package (== $pkg), Version (== $ver)" || true
+                    reprepro -b "$REPO_DIR" removematched "$codename" "Package (== $pkg), Version (== $ver)"
                     pruned=1
                   fi
                 done
