@@ -29,16 +29,16 @@ The retention behavior is controlled by the `KEEP_BUILDS` GitHub variable:
 With `KEEP_BUILDS=3`:
 ```
 Before retention:
-  rspamd-3.10.0-1 (built 2025-01-10)
-  rspamd-3.9.0-1  (built 2025-01-05)
-  rspamd-3.8.0-1  (built 2024-12-20)
-  rspamd-3.7.0-1  (built 2024-12-10)
+  rspamd-3.10.0-1 (BUILDTIME: 1736467200)
+  rspamd-3.9.0-1  (BUILDTIME: 1736035200)
+  rspamd-3.8.0-1  (BUILDTIME: 1703030400)
+  rspamd-3.7.0-1  (BUILDTIME: 1702166400)
   rspamd-debuginfo-3.10.0-1
   rspamd-debuginfo-3.9.0-1
   rspamd-debuginfo-3.8.0-1
   rspamd-debuginfo-3.7.0-1
 
-After retention:
+After retention (sorted by BUILDTIME, keeping 3 newest):
   rspamd-3.10.0-1 ✓
   rspamd-3.9.0-1 ✓
   rspamd-3.8.0-1 ✓
@@ -100,7 +100,7 @@ After retention:
   rspamd-asan-dbg 3.8.0-1 ✓
 ```
 
-Note: Since rspamd and rspamd-asan are built from the same source with synchronized version numbers, even though they're separate groups, they effectively keep the same N versions.
+Note: In typical usage, rspamd and rspamd-asan are built from the same source with the same version numbers. When versions are synchronized across package groups, the global versions_to_keep map ensures consistent retention across all related packages.
 
 ## Key Similarities
 
@@ -127,9 +127,12 @@ These differences are appropriate for the respective package formats and reposit
 The retention logic can be tested using the `test_retention.yml` workflow, which:
 1. Downloads pre-built packages from a previous workflow run
 2. Publishes them using the publish_rpm.yml and publish_deb.yml workflows
-3. Verifies that retention is applied correctly
+3. Exercises the retention code paths during the publish process
 
-To test retention:
-1. Run a build workflow multiple times to create several versions
-2. Trigger the test_retention workflow with a run_id
-3. Verify that only the newest N versions are retained in the repository
+To verify retention behavior:
+1. Run build workflows multiple times to create several versions
+2. Trigger the test_retention workflow with a run_id from a build
+3. After publishing, inspect the remote repository to confirm only the newest N versions are present
+4. Compare the repository contents before and after to verify older versions were removed
+
+Note: The workflow executes the retention logic but does not automatically verify the results. Manual inspection of the published repository is needed to confirm correct retention behavior.
