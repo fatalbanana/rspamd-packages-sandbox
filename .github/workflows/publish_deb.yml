@@ -133,6 +133,8 @@ jobs:
             "${UPLOAD_HOST}:${UPLOAD_SUFFIX}${TARGET_PATH}/" "$REPO_DIR/"
 
           # Prepare distributions and include packages
+          # First, create a fresh distributions file for this run to ensure consistency
+          rm -f "$REPO_DIR/conf/distributions"
           IFS=',' read -ra DIST_LIST <<< "${{ inputs.names }}"
           for d in "${DIST_LIST[@]}"; do
             codename="${d/ubuntu-/}"
@@ -157,6 +159,15 @@ jobs:
               printf '%s\n' "SignWith: ${KEY_FPR}"
               printf '\n'
             } >> "$REPO_DIR/conf/distributions"
+          done
+
+          # Clean up database from distributions that are no longer in conf/distributions
+          reprepro -b "$REPO_DIR" clearvanished
+
+          # Now, include packages for the current distributions
+          for d in "${DIST_LIST[@]}"; do
+            codename="${d/ubuntu-/}"
+            codename="${codename/debian-/}"
             shopt -s nullglob
             for deb_pkg in "$GITHUB_WORKSPACE"/packages/${d}/rspamd_*amd64*.deb; do
               reprepro  -P extra -S mail -b "$REPO_DIR" -v --keepunreferencedfiles includedeb "$codename" "$deb_pkg"
