@@ -149,12 +149,12 @@ jobs:
             rpm --addsign "$file"
           done
 
-          # Retention: keep only the latest N builds and remove the rest
+          # Retention: keep only the latest N builds per package group and remove the rest
           keep_count="${KEEP_BUILDS:-10}"
           if [[ "$keep_count" =~ ^[0-9]+$ ]] && (( keep_count > 0 )); then
             for arch in x86_64 aarch64; do
-              # Build map BASE_NAME:EVR -> max buildtime
-              declare -A evr_btime=()
+              # Map base_name to a string containing "BTIME EVR\n" lines
+              declare -A base_name_builds_str=()
               while IFS= read -r -d '' file; do
                 pkg_name=$(rpm -qp --qf '%{NAME}\n' "$file" 2>/dev/null || echo '')
                 [[ -n "$pkg_name" ]] || continue
@@ -162,17 +162,21 @@ jobs:
                 base_name="${base_name%-debugsource}"
                 evr=$(rpm -qp --qf '%{EPOCHNUM}:%{VERSION}-%{RELEASE}\n' "$file" 2>/dev/null || echo '')
                 [[ -n "$evr" ]] || continue
-                key="$base_name:$evr"
                 btime=$(rpm -qp --qf '%{BUILDTIME}\n' "$file" 2>/dev/null || echo '0')
-                if [[ -z "${evr_btime[$key]:-}" || ${evr_btime[$key]} -lt $btime ]]; then
-                  evr_btime[$key]=$btime
-                fi
+                base_name_builds_str["$base_name"]+="$btime $evr\n"
               done < <(find "$REPO_DIR/$arch" -maxdepth 1 -type f -name '*.rpm' -print0)
-              # Sort keys by buildtime desc and select keep list
-              mapfile -t sorted < <(for k in "${!evr_btime[@]}"; do echo "${evr_btime[$k]} $k"; done | sort -nr | awk '{print $2}')
-              keep_keys=("${sorted[@]:0:$keep_count}")
+
               declare -A keep_map=()
-              for k in "${keep_keys[@]}"; do keep_map[$k]=1; done
+              for base_name in "${!base_name_builds_str[@]}"; do
+                # For each base_name, sort its builds by buildtime and keep top N EVRs
+                mapfile -t sorted_evrs < <(echo -e "${base_name_builds_str[$base_name]}" | sort -k1,1nr -k2,2 | awk '{print $2}' | uniq)
+                
+                top_evrs=("${sorted_evrs[@]:0:$keep_count}")
+                for evr in "${top_evrs[@]}"; do
+                  keep_map["$base_name:$evr"]=1
+                done
+              done
+
               # Remove older RPMs
               while IFS= read -r -d '' file; do
                 pkg_name=$(rpm -qp --qf '%{NAME}\n' "$file" 2>/dev/null || echo '')
