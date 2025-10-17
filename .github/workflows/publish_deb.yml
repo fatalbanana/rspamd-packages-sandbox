@@ -244,13 +244,17 @@ jobs:
               done
 
               # Pruning logic
+              reprepro -b "$REPO_DIR" dumpunreferenced | while read -r comp arch pkg file; do
+                reprepro -b "$REPO_DIR" --ignore=wrongdistribution includedeb "$codename" "$REPO_DIR/$file"
+              done
+
               mapfile -t all_pkgs < <(reprepro -b "$REPO_DIR" list "$codename" 2>/dev/null | sed -E 's/.*: ([^ ]+) .*/\1/' | grep '^rspamd' | sort -u)
               pruned=0
               for pkg in "${all_pkgs[@]}"; do
                 mapfile -t pkg_versions < <(reprepro -b "$REPO_DIR" list "$codename" "$pkg" 2>/dev/null | awk '{print $NF}' | sort -u)
                 for ver in "${pkg_versions[@]}"; do
                   if [[ -z "${versions_to_keep[$ver]:-}" ]]; then
-                    reprepro -b "$REPO_DIR" removematched "$codename" "Package (== $pkg), Version (== $ver)" || true
+                    reprepro -b "$REPO_DIR" --keepunreferencedfiles removematched "$codename" "Package (== $pkg), Version (== $ver)" || true
                     pruned=1
                   fi
                 done
