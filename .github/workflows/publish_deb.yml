@@ -108,6 +108,26 @@ jobs:
           # Export public key for clients
           gpg --armor --output "$REPO_DIR/rspamd.asc" --export "$KEY_FPR"
 
+          # Setup SSH and rsync parameters
+          if [[ -n "${NIGHTLY:-}" ]]; then
+            RSYNC_KEY='${{ secrets.SSH_KEY_DEB_UNSTABLE }}'
+            TARGET_PATH="$TARGET_DEB_UNSTABLE"
+          else
+            RSYNC_KEY='${{ secrets.SSH_KEY_DEB_STABLE }}'
+            TARGET_PATH="$TARGET_DEB_STABLE"
+          fi
+          mkdir -p "$HOME/.ssh" && chmod 700 "$HOME/.ssh"
+          KEYFILE="$HOME/.ssh/gh_publish_key"
+          echo "$RSYNC_KEY" > "$KEYFILE"
+          chmod 600 "$KEYFILE"
+          if [[ -z "${UPLOAD_HOST_KNOWN_HOSTS:-}" ]]; then
+            echo "Missing UPLOAD_HOST_KNOWN_HOSTS GitHub variable" >&2
+            exit 1
+          fi
+          printf '%s\n' "$UPLOAD_HOST_KNOWN_HOSTS" > "$HOME/.ssh/known_hosts"
+          chmod 644 "$HOME/.ssh/known_hosts"
+          SSH_CMD="ssh -l ${{ secrets.SSH_USERNAME }} -i $KEYFILE -o UserKnownHostsFile=$HOME/.ssh/known_hosts -o StrictHostKeyChecking=yes"
+
           # Prefill with all existing repo content
           rsync -e "$SSH_CMD" -ru --delete \
             "${UPLOAD_HOST}:${UPLOAD_SUFFIX}${TARGET_PATH}/" "$REPO_DIR/" || true
