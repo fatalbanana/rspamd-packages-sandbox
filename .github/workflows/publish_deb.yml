@@ -166,58 +166,11 @@ jobs:
           # Clean up database from distributions that are no longer in conf/distributions
           reprepro -b "$REPO_DIR" clearvanished
 
-          # Re-index all packages in the pool to ensure a consistent state
-          find "$REPO_DIR/pool" -type f -name '*.deb' -print0 | xargs -0 -r reprepro -b "$REPO_DIR" --ignore=wrongdistribution includedeb "$codename"
+          # Include all new packages
+          find "$GITHUB_WORKSPACE/packages" -type f -name '*.deb' -print0 | xargs -0 -r reprepro -b "$REPO_DIR" --keepunreferencedfiles --ignore=wrongdistribution includedeb bookworm
 
-          # Now, include packages for the current distributions
-          for d in "${DIST_LIST[@]}"; do
-            codename="${d/ubuntu-/}"
-            codename="${codename/debian-/}"
-            shopt -s nullglob
-            for deb_pkg in "$GITHUB_WORKSPACE"/packages/${d}/rspamd_*amd64*.deb; do
-              reprepro  -P extra -S mail -b "$REPO_DIR" -v --keepunreferencedfiles includedeb "$codename" "$deb_pkg"
-            done
-            for deb_pkg in "$GITHUB_WORKSPACE"/packages/${d}/rspamd-dbg_*amd64*.deb; do
-              reprepro  -P extra -S debug -b "$REPO_DIR" -v --keepunreferencedfiles includedeb "$codename" "$deb_pkg"
-            done
-            for deb_pkg in "$GITHUB_WORKSPACE"/packages/${d}/rspamd-asan_*amd64*.deb; do
-              reprepro  -P extra -S mail -b "$REPO_DIR" -v --keepunreferencedfiles includedeb "$codename" "$deb_pkg"
-            done
-            for deb_pkg in "$GITHUB_WORKSPACE"/packages/${d}/rspamd-asan-dbg_*amd64*.deb; do
-              reprepro  -P extra -S debug -b "$REPO_DIR" -v --keepunreferencedfiles includedeb "$codename" "$deb_pkg"
-            done
-            # Also include arm64 variants if present
-            for deb_pkg in "$GITHUB_WORKSPACE"/packages/${d}/rspamd_*arm64*.deb; do
-              reprepro  -P extra -S mail -b "$REPO_DIR" -v includedeb "$codename" "$deb_pkg"
-            done
-            for deb_pkg in "$GITHUB_WORKSPACE"/packages/${d}/rspamd-dbg_*arm64*.deb; do
-              reprepro  -P extra -S debug -b "$REPO_DIR" -v includedeb "$codename" "$deb_pkg"
-            done
-            for deb_pkg in "$GITHUB_WORKSPACE"/packages/${d}/rspamd-asan_*arm64*.deb; do
-              reprepro  -P extra -S mail -b "$REPO_DIR" -v includedeb "$codename" "$deb_pkg"
-            done
-            for deb_pkg in "$GITHUB_WORKSPACE"/packages/${d}/rspamd-asan-dbg_*arm64*.deb; do
-              reprepro  -P extra -S debug -b "$REPO_DIR" -v includedeb "$codename" "$deb_pkg"
-            done
-
-            # Retention: keep only the last N builds (by version) in indexes
-            keep_count="${KEEP_BUILDS:-10}"
-            if [[ "$keep_count" =~ ^[0-9]+$ ]] && (( keep_count > 0 )); then
-              # Get a list of all unreferenced files, group them by package name, and for each group, delete the oldest ones
-              reprepro -b "$REPO_DIR" dumpunreferenced | grep \.deb$ | awk '{print $4}' | sort | while read -r file; do
-                pkg_name=$(dpkg-deb -f "$file" Package)
-                base_name="${pkg_name%-dbg}"
-                echo "$file" >> "/tmp/reprepro-prune-${base_name}.list"
-              done
-
-              find /tmp -type f -name 'reprepro-prune-*.list' | while read -r list_file; do
-                count=$(wc -l < "$list_file")
-                if [ "$count" -gt "$keep_count" ]; then
-                  head -n "$(($count - $keep_count))" "$list_file" | xargs -r rm -v
-                fi
-              done
-            fi
-          done
+          # Remove all unreferenced packages
+          reprepro -b "$REPO_DIR" deleteunreferenced
 
           # Build a minimal staging directory containing only indexed files to reduce upload size
           STAGING_DIR="$GITHUB_WORKSPACE/repos_staging"
