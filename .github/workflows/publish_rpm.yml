@@ -126,10 +126,9 @@ jobs:
           printf '%s\n' "$UPLOAD_HOST_KNOWN_HOSTS" > "$HOME/.ssh/known_hosts"
           chmod 644 "$HOME/.ssh/known_hosts"
           SSH_CMD="ssh -l ${{ secrets.SSH_USERNAME }} -i $KEYFILE -o UserKnownHostsFile=$HOME/.ssh/known_hosts -o StrictHostKeyChecking=yes"
-          # Only prefill top-level RPMs for each arch; skip repodata and any archive directory
-          rsync -e "$SSH_CMD" -ru --ignore-existing \
-            --include 'x86_64/*.rpm' --include 'aarch64/*.rpm' --exclude '*' \
-            "${UPLOAD_HOST}:${UPLOAD_SUFFIX}${TARGET_PATH}/" "$REPO_DIR/"
+          # Prefill with all existing repo content
+          rsync -e "$SSH_CMD" -ru --delete \
+            "${UPLOAD_HOST}:${UPLOAD_SUFFIX}${TARGET_PATH}/" "$REPO_DIR/" || true
 
           # Copy built artifacts into arch dirs and record newly added files for signing
           shopt -s nullglob
