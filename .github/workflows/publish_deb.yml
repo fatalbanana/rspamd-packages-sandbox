@@ -230,7 +230,7 @@ jobs:
 
               declare -A versions_to_keep=()
               for base_name in "${!base_name_versions[@]}"; do
-                mapfile -t all_versions < <(echo "${base_name_versions[$base_name]}" | tr ' ' '\n' | sort -u)
+                mapfile -t all_versions < <(echo "${base_name_versions[$base_name]}" | tr ' ' '\n' | grep . | sort -u || true)
                 if (( ${#all_versions[@]} == 0 )); then continue; fi
 
                 versions_sorted=()
