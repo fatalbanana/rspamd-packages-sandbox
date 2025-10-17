@@ -127,8 +127,8 @@ jobs:
           chmod 644 "$HOME/.ssh/known_hosts"
           SSH_CMD="ssh -l ${{ secrets.SSH_USERNAME }} -i $KEYFILE -o UserKnownHostsFile=$HOME/.ssh/known_hosts -o StrictHostKeyChecking=yes"
           # Prefill with all existing repo content
-          rsync -e "$SSH_CMD" -ru --delete \
-            "${UPLOAD_HOST}:${UPLOAD_SUFFIX}${TARGET_PATH}/" "$REPO_DIR/" || true
+          rsync -e "$SSH_CMD" -ru \
+            "${UPLOAD_HOST}:${UPLOAD_SUFFIX}${TARGET_PATH}/" "$REPO_DIR/"
 
           # Copy built artifacts into arch dirs and record newly added files for signing
           shopt -s nullglob

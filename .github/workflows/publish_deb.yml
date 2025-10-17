@@ -130,7 +130,7 @@ jobs:
 
           # Prefill with all existing repo content
           rsync -e "$SSH_CMD" -ru \
-            "${UPLOAD_HOST}:${UPLOAD_SUFFIX}${TARGET_PATH}/" "$REPO_DIR/" || true
+            "${UPLOAD_HOST}:${UPLOAD_SUFFIX}${TARGET_PATH}/" "$REPO_DIR/"
 
           # Prepare distributions and include packages
           IFS=',' read -ra DIST_LIST <<< "${{ inputs.names }}"
@@ -256,6 +256,7 @@ jobs:
           mkdir -p "$STAGING_DIR"
           # Copy indices and top-level artifacts
           rsync -a "$REPO_DIR/dists/" "$STAGING_DIR/dists/" || true
+          if [ -d "$REPO_DIR/db" ]; then rsync -a "$REPO_DIR/db/" "$STAGING_DIR/db/"; fi
           if [[ -f "$REPO_DIR/rspamd.asc" ]]; then cp -f "$REPO_DIR/rspamd.asc" "$STAGING_DIR/"; fi
           # Collect referenced files from indices
           REFERENCED_LIST="$RUNNER_TEMP/referenced_list.txt"
