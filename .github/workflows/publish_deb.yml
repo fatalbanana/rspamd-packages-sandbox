@@ -244,9 +244,7 @@ jobs:
               done
 
               # Pruning logic
-              reprepro -b "$REPO_DIR" dumpunreferenced | grep \.deb$ | while read -r comp arch pkg file; do
-                reprepro -b "$REPO_DIR" --ignore=wrongdistribution includedeb "$codename" "$file"
-              done
+              find "$REPO_DIR/pool" -type f -name '*.deb' -print0 | xargs -0 -r reprepro -b "$REPO_DIR" --ignore=wrongdistribution includedeb "$codename"
 
               mapfile -t all_pkgs < <(reprepro -b "$REPO_DIR" list "$codename" 2>/dev/null | sed -E 's/.*: ([^ ]+) .*/\1/' | grep '^rspamd' | sort -u)
               pruned=0
