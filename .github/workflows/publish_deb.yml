@@ -129,7 +129,7 @@ jobs:
           SSH_CMD="ssh -l ${{ secrets.SSH_USERNAME }} -i $KEYFILE -o UserKnownHostsFile=$HOME/.ssh/known_hosts -o StrictHostKeyChecking=yes"
 
           # Prefill with all existing repo content
-          rsync -e "$SSH_CMD" -ru --delete \
+          rsync -e "$SSH_CMD" -ru \
             "${UPLOAD_HOST}:${UPLOAD_SUFFIX}${TARGET_PATH}/" "$REPO_DIR/" || true
 
           # Prepare distributions and include packages
