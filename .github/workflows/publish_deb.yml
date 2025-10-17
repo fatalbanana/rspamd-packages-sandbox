@@ -223,8 +223,8 @@ jobs:
                 ver="${pkg_ver_line#* }"
                 base_name="${pkg_name%-dbg}"
                 # Add version to list for this base_name, if not already present
-                if [[ ! " ${base_name_versions[$base_name]} " =~ " $ver " ]]; then
-                  base_name_versions["$base_name"]+="$ver "
+                if [[ ! " ${base_name_versions[$base_name]:-} " =~ " $ver " ]]; then
+                  base_name_versions["$base_name"]="${base_name_versions[$base_name]:-}$ver "
                 fi
               done
 
