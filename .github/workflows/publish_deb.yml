@@ -172,16 +172,16 @@ jobs:
             codename="${codename/debian-/}"
             shopt -s nullglob
             for deb_pkg in "$GITHUB_WORKSPACE"/packages/${d}/rspamd_*amd64*.deb; do
-              reprepro  -P extra -S mail -b "$REPO_DIR" -v --keepunreferencedfiles includedeb "$codename" "$deb_pkg"
+              reprepro  -P extra -S mail -b "$REPO_DIR" -v includedeb "$codename" "$deb_pkg"
             done
             for deb_pkg in "$GITHUB_WORKSPACE"/packages/${d}/rspamd-dbg_*amd64*.deb; do
-              reprepro  -P extra -S debug -b "$REPO_DIR" -v --keepunreferencedfiles includedeb "$codename" "$deb_pkg"
+              reprepro  -P extra -S debug -b "$REPO_DIR" -v includedeb "$codename" "$deb_pkg"
             done
             for deb_pkg in "$GITHUB_WORKSPACE"/packages/${d}/rspamd-asan_*amd64*.deb; do
-              reprepro  -P extra -S mail -b "$REPO_DIR" -v --keepunreferencedfiles includedeb "$codename" "$deb_pkg"
+              reprepro  -P extra -S mail -b "$REPO_DIR" -v includedeb "$codename" "$deb_pkg"
             done
             for deb_pkg in "$GITHUB_WORKSPACE"/packages/${d}/rspamd-asan-dbg_*amd64*.deb; do
-              reprepro  -P extra -S debug -b "$REPO_DIR" -v --keepunreferencedfiles includedeb "$codename" "$deb_pkg"
+              reprepro  -P extra -S debug -b "$REPO_DIR" -v includedeb "$codename" "$deb_pkg"
             done
             # Include source
             #for deb_dsc in "$GITHUB_WORKSPACE"/packages/${d}/rspamd_*.dsc; do
