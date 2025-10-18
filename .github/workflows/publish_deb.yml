@@ -86,10 +86,13 @@ jobs:
           path: packages
           merge-multiple: true
 
-      - name: Inspect
-        run: ls -lR packages
 
-      - name: Build and sign APT repository
+      - name: Build Docker image with reprepro 5.4.7+
+        run: |
+          docker build -t reprepro-builder -f .github/workflows/Dockerfile.publish-deb .github/workflows/
+          docker run --rm reprepro-builder reprepro --version
+
+      - name: Build and sign APT repository in Docker
         shell: bash
         env:
           NIGHTLY: ${{ inputs.nightly }}
@@ -100,176 +103,42 @@ jobs:
           GPG_PASSPHRASE: ${{ secrets.GPG_PASSPHRASE }}
           KEEP_BUILDS: ${{ vars.KEEP_BUILDS || '10' }}
           UPLOAD_HOST_KNOWN_HOSTS: ${{ vars.UPLOAD_HOST_KNOWN_HOSTS }}
+          DIST_NAMES: ${{ inputs.names }}
+          SSH_USERNAME: ${{ secrets.SSH_USERNAME }}
         run: |
           set -x
           set -euo pipefail
-          REPO_DIR="$GITHUB_WORKSPACE/repos"
-          mkdir -p "$REPO_DIR/conf"
-          # Export public key for clients
-          gpg --armor --output "$REPO_DIR/rspamd.asc" --export "$KEY_FPR"
-
-          # Setup SSH and rsync parameters
+          
+          # Export GPG keys
+          mkdir -p "$RUNNER_TEMP/gpg"
+          gpg --armor --export "$KEY_FPR" > "$RUNNER_TEMP/gpg/pubkey.asc"
+          gpg --armor --export-secret-keys "$KEY_FPR" > "$RUNNER_TEMP/gpg/seckey.asc"
+          echo "$GPG_PASSPHRASE" > "$RUNNER_TEMP/gpg/passphrase.txt"
+          
+          # Setup SSH keys
+          mkdir -p "$RUNNER_TEMP/ssh"
+          chmod 700 "$RUNNER_TEMP/ssh"
           if [[ -n "${NIGHTLY:-}" ]]; then
-            RSYNC_KEY='${{ secrets.SSH_KEY_DEB_UNSTABLE }}'
+            echo '${{ secrets.SSH_KEY_DEB_UNSTABLE }}' > "$RUNNER_TEMP/ssh/id_rsa"
             TARGET_PATH="$TARGET_DEB_UNSTABLE"
           else
-            RSYNC_KEY='${{ secrets.SSH_KEY_DEB_STABLE }}'
+            echo '${{ secrets.SSH_KEY_DEB_STABLE }}' > "$RUNNER_TEMP/ssh/id_rsa"
             TARGET_PATH="$TARGET_DEB_STABLE"
           fi
-          mkdir -p "$HOME/.ssh" && chmod 700 "$HOME/.ssh"
-          KEYFILE="$HOME/.ssh/gh_publish_key"
-          echo "$RSYNC_KEY" > "$KEYFILE"
-          chmod 600 "$KEYFILE"
-          if [[ -z "${UPLOAD_HOST_KNOWN_HOSTS:-}" ]]; then
-            echo "Missing UPLOAD_HOST_KNOWN_HOSTS GitHub variable" >&2
-            exit 1
-          fi
-          printf '%s\n' "$UPLOAD_HOST_KNOWN_HOSTS" > "$HOME/.ssh/known_hosts"
-          chmod 644 "$HOME/.ssh/known_hosts"
-          SSH_CMD="ssh -l ${{ secrets.SSH_USERNAME }} -i $KEYFILE -o UserKnownHostsFile=$HOME/.ssh/known_hosts -o StrictHostKeyChecking=yes"
-
-          # Prefill with all existing repo content
-          rsync -e "$SSH_CMD" -ru \
-            "${UPLOAD_HOST}:${UPLOAD_SUFFIX}${TARGET_PATH}/" "$REPO_DIR/"
-          echo "--- Listing pre-filled repository content ---"
-          ls -lR "$REPO_DIR"
-
-          # Prepare distributions and include packages
-          # Update distributions file for codenames being published in this run
-          # Don't delete existing distributions to preserve packages from other codenames
-          IFS=',' read -ra DIST_LIST <<< "${{ inputs.names }}"
-          for d in "${DIST_LIST[@]}"; do
-            codename="${d/ubuntu-/}"
-            codename="${codename/debian-/}"
-            ARCHS="source amd64"
-            # Check for ARM64 artifacts by filename in the distro output folder
-            if compgen -G "$GITHUB_WORKSPACE/packages/${d}/*arm64*.deb" > /dev/null; then
-              ARCHS="$ARCHS arm64"
-            fi
-            if [[ -n "${NIGHTLY:-}" ]]; then
-              desc="Apt repository for rspamd nightly builds"
-            else
-              desc="Apt repository for rspamd stable builds"
-            fi
-            
-            # Check if this codename already exists in distributions file
-            if [ -f "$REPO_DIR/conf/distributions" ] && grep -q "^Codename: ${codename}$" "$REPO_DIR/conf/distributions"; then
-              # Update existing distribution entry
-              # Remove old entry for this codename and append new one
-              awk -v codename="$codename" '
-                BEGIN { skip=0 }
-                /^Codename: / { if ($2 == codename) skip=1; else skip=0 }
-                skip==0 { print }
-                /^$/ && skip==1 { skip=0; next }
-              ' "$REPO_DIR/conf/distributions" > "$REPO_DIR/conf/distributions.tmp"
-              mv "$REPO_DIR/conf/distributions.tmp" "$REPO_DIR/conf/distributions"
-            fi
-            
-            # Append the distribution for this codename
-            {
-              printf '%s\n' "Origin: Rspamd"
-              printf '%s\n' "Label: Rspamd"
-              printf '%s\n' "Codename: ${codename}"
-              printf '%s\n' "Architectures: ${ARCHS}"
-              printf '%s\n' "Components: main"
-              printf '%s\n' "Description: ${desc}"
-              printf '%s\n' "SignWith: ${KEY_FPR}"
-              printf '%s\n' "Limit: ${KEEP_BUILDS:-10}"
-              printf '\n'
-            } >> "$REPO_DIR/conf/distributions"
-          done
-
-          # Now, include packages for the current distributions
-          for d in "${DIST_LIST[@]}"; do
-            codename="${d/ubuntu-/}"
-            codename="${codename/debian-/}"
-            shopt -s nullglob
-            for deb_pkg in "$GITHUB_WORKSPACE"/packages/${d}/rspamd_*amd64*.deb; do
-              reprepro  -P extra -S mail -b "$REPO_DIR" -v --keepunreferencedfiles includedeb "$codename" "$deb_pkg"
-            done
-            for deb_pkg in "$GITHUB_WORKSPACE"/packages/${d}/rspamd-dbg_*amd64*.deb; do
-              reprepro  -P extra -S debug -b "$REPO_DIR" -v --keepunreferencedfiles includedeb "$codename" "$deb_pkg"
-            done
-            for deb_pkg in "$GITHUB_WORKSPACE"/packages/${d}/rspamd-asan_*amd64*.deb; do
-              reprepro  -P extra -S mail -b "$REPO_DIR" -v --keepunreferencedfiles includedeb "$codename" "$deb_pkg"
-            done
-            for deb_pkg in "$GITHUB_WORKSPACE"/packages/${d}/rspamd-asan-dbg_*amd64*.deb; do
-              reprepro  -P extra -S debug -b "$REPO_DIR" -v --keepunreferencedfiles includedeb "$codename" "$deb_pkg"
-            done
-            # Also include arm64 variants if present
-            for deb_pkg in "$GITHUB_WORKSPACE"/packages/${d}/rspamd_*arm64*.deb; do
-              reprepro  -P extra -S mail -b "$REPO_DIR" -v --keepunreferencedfiles includedeb "$codename" "$deb_pkg"
-            done
-            for deb_pkg in "$GITHUB_WORKSPACE"/packages/${d}/rspamd-dbg_*arm64*.deb; do
-              reprepro  -P extra -S debug -b "$REPO_DIR" -v --keepunreferencedfiles includedeb "$codename" "$deb_pkg"
-            done
-            for deb_pkg in "$GITHUB_WORKSPACE"/packages/${d}/rspamd-asan_*arm64*.deb; do
-              reprepro  -P extra -S mail -b "$REPO_DIR" -v --keepunreferencedfiles includedeb "$codename" "$deb_pkg"
-            done
-            for deb_pkg in "$GITHUB_WORKSPACE"/packages/${d}/rspamd-asan-dbg_*arm64*.deb; do
-              reprepro  -P extra -S debug -b "$REPO_DIR" -v --keepunreferencedfiles includedeb "$codename" "$deb_pkg"
-            done
-          done
-
-          # Retention is handled by reprepro's Limit field in distributions file
-          # Remove all files that are no longer referenced in any distribution
-          reprepro -b "$REPO_DIR" deleteunreferenced
-
-          # Build a minimal staging directory containing only indexed files to reduce upload size
-          STAGING_DIR="$GITHUB_WORKSPACE/repos_staging"
-          rm -rf "$STAGING_DIR"
-          mkdir -p "$STAGING_DIR"
-          # Copy indices and top-level artifacts
-          rsync -a "$REPO_DIR/dists/" "$STAGING_DIR/dists/" || true
-          if [ -d "$REPO_DIR/db" ]; then rsync -a "$REPO_DIR/db/" "$STAGING_DIR/db/"; fi
-          if [[ -f "$REPO_DIR/rspamd.asc" ]]; then cp -f "$REPO_DIR/rspamd.asc" "$STAGING_DIR/"; fi
-          # Collect referenced files from indices
-          REFERENCED_LIST="$RUNNER_TEMP/referenced_list.txt"
-          : > "$REFERENCED_LIST"
-          if compgen -G "$REPO_DIR/dists/*/*/binary-*/Packages" > /dev/null; then
-            grep -h '^Filename: ' "$REPO_DIR"/dists/*/*/binary-*/Packages | awk '{print $2}' | sort -u >> "$REFERENCED_LIST" || true
-          fi
-          if compgen -G "$REPO_DIR/dists/*/*/binary-*/Packages.gz" > /dev/null; then
-            zgrep -h '^Filename: ' "$REPO_DIR"/dists/*/*/binary-*/Packages.gz | awk '{print $2}' | sort -u >> "$REFERENCED_LIST" || true
-          fi
-          if compgen -G "$REPO_DIR/dists/*/*/source/Sources" > /dev/null; then
-            awk '/^Files:/{infiles=1;next} NF==0{infiles=0} infiles && NF>=3{print $3}' \
-              "$REPO_DIR"/dists/*/*/source/Sources | sort -u >> "$REFERENCED_LIST" || true
-            awk '/^Checksums-Sha256:/{insha=1;next} NF==0{insha=0} insha && NF>=3{print $3}' \
-              "$REPO_DIR"/dists/*/*/source/Sources | sort -u >> "$REFERENCED_LIST" || true
-          fi
-          if compgen -G "$REPO_DIR/dists/*/*/source/Sources.gz" > /dev/null; then
-            zcat "$REPO_DIR"/dists/*/*/source/Sources.gz | \
-              awk '/^Files:/{infiles=1;next} NF==0{infiles=0} infiles && NF>=3{print $3}' | sort -u >> "$REFERENCED_LIST" || true
-            zcat "$REPO_DIR"/dists/*/*/source/Sources.gz | \
-              awk '/^Checksums-Sha256:/{insha=1;next} NF==0{insha=0} insha && NF>=3{print $3}' | sort -u >> "$REFERENCED_LIST" || true
-          fi
-          # Copy referenced pool files into staging
-          while IFS= read -r rel; do
-            src="$REPO_DIR/$rel"
-            dest="$STAGING_DIR/$rel"
-            mkdir -p "$(dirname "$dest")"
-            if [[ -f "$src" ]]; then cp -f "$src" "$dest"; fi
-          done < "$REFERENCED_LIST"
-
-          # Upload repo
-          if [[ -n "${NIGHTLY:-}" ]]; then
-            TARGET_PATH="$TARGET_DEB_UNSTABLE"
-            RSYNC_KEY='${{ secrets.SSH_KEY_DEB_UNSTABLE }}'
-          else
-            TARGET_PATH="$TARGET_DEB_STABLE"
-            RSYNC_KEY='${{ secrets.SSH_KEY_DEB_STABLE }}'
-          fi
-          mkdir -p "$HOME/.ssh" && chmod 700 "$HOME/.ssh"
-          KEYFILE="$HOME/.ssh/gh_publish_key"
-          echo "$RSYNC_KEY" > "$KEYFILE"
-          chmod 600 "$KEYFILE"
-          RSYNC_ARGS="-ru --delete"
-          if [[ -z "${UPLOAD_HOST_KNOWN_HOSTS:-}" ]]; then
-            echo "Missing UPLOAD_HOST_KNOWN_HOSTS GitHub variable" >&2
-            exit 1
-          fi
-          printf '%s\n' "$UPLOAD_HOST_KNOWN_HOSTS" > "$HOME/.ssh/known_hosts"
-          chmod 644 "$HOME/.ssh/known_hosts"
-          rsync -e "ssh -l ${{ secrets.SSH_USERNAME }} -i $KEYFILE -o UserKnownHostsFile=$HOME/.ssh/known_hosts -o StrictHostKeyChecking=yes" $RSYNC_ARGS \
-            "$STAGING_DIR/" "${UPLOAD_HOST}:${UPLOAD_SUFFIX}${TARGET_PATH}"
+          chmod 600 "$RUNNER_TEMP/ssh/id_rsa"
+          echo "$UPLOAD_HOST_KNOWN_HOSTS" > "$RUNNER_TEMP/ssh/known_hosts"
+          
+          # Run the entire build process in Docker
+          docker run --rm \
+            -v "$GITHUB_WORKSPACE:/workspace" \
+            -v "$RUNNER_TEMP/gpg:/gpg:ro" \
+            -v "$RUNNER_TEMP/ssh:/ssh:ro" \
+            -e "NIGHTLY=${NIGHTLY:-}" \
+            -e "UPLOAD_HOST=$UPLOAD_HOST" \
+            -e "UPLOAD_SUFFIX=$UPLOAD_SUFFIX" \
+            -e "TARGET_PATH=$TARGET_PATH" \
+            -e "KEEP_BUILDS=$KEEP_BUILDS" \
+            -e "DIST_NAMES=$DIST_NAMES" \
+            -e "SSH_USERNAME=$SSH_USERNAME" \
+            reprepro-builder \
+            bash /workspace/.github/workflows/build-deb-repo.sh

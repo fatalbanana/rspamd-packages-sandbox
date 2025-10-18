@@ -1,0 +1,16 @@
+FROM debian:unstable
+
+# Install reprepro from unstable (has 5.4.7+)
+RUN apt-get update && \
+    apt-get install -y --no-install-recommends \
+        ca-certificates \
+        gnupg \
+        rsync \
+        openssh-client \
+        reprepro && \
+    apt-get clean && \
+    rm -rf /var/lib/apt/lists/*
+
+WORKDIR /workspace
+
+CMD ["/bin/bash"]
