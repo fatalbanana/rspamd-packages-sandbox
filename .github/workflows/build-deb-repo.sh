@@ -119,6 +119,14 @@ for d in "${DIST_LIST[@]}"; do
   done
 done
 
+# Export indices for all distributions to ensure everything is indexed
+echo "Exporting indices..."
+for d in "${DIST_LIST[@]}"; do
+  codename="${d/ubuntu-/}"
+  codename="${codename/debian-/}"
+  reprepro -b "$REPO_DIR" export "$codename"
+done
+
 # Retention is handled by reprepro's Limit field
 reprepro -b "$REPO_DIR" deleteunreferenced
 
