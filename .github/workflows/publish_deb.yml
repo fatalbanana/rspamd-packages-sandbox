@@ -115,8 +115,11 @@ jobs:
           # Export GPG keys
           mkdir -p "$RUNNER_TEMP/gpg"
           gpg --batch --yes --armor --export "$KEY_FPR" > "$RUNNER_TEMP/gpg/pubkey.asc"
-          gpg --batch --yes --armor --export-secret-keys "$KEY_FPR" > "$RUNNER_TEMP/gpg/seckey.asc"
+          
+          # Export secret key with passphrase
           echo "$GPG_PASSPHRASE" > "$RUNNER_TEMP/gpg/passphrase.txt"
+          gpg --batch --yes --pinentry-mode loopback --passphrase-file "$RUNNER_TEMP/gpg/passphrase.txt" \
+            --armor --export-secret-keys "$KEY_FPR" > "$RUNNER_TEMP/gpg/seckey.asc"
           
           # Setup SSH keys
           mkdir -p "$RUNNER_TEMP/ssh"
