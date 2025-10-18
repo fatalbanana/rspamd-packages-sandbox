@@ -135,8 +135,8 @@ jobs:
           ls -lR "$REPO_DIR"
 
           # Prepare distributions and include packages
-          # First, create a fresh distributions file for this run to ensure consistency
-          rm -f "$REPO_DIR/conf/distributions"
+          # Update distributions file for codenames being published in this run
+          # Don't delete existing distributions to preserve packages from other codenames
           IFS=',' read -ra DIST_LIST <<< "${{ inputs.names }}"
           for d in "${DIST_LIST[@]}"; do
             codename="${d/ubuntu-/}"
@@ -151,6 +151,21 @@ jobs:
             else
               desc="Apt repository for rspamd stable builds"
             fi
+            
+            # Check if this codename already exists in distributions file
+            if [ -f "$REPO_DIR/conf/distributions" ] && grep -q "^Codename: ${codename}$" "$REPO_DIR/conf/distributions"; then
+              # Update existing distribution entry
+              # Remove old entry for this codename and append new one
+              awk -v codename="$codename" '
+                BEGIN { skip=0 }
+                /^Codename: / { if ($2 == codename) skip=1; else skip=0 }
+                skip==0 { print }
+                /^$/ && skip==1 { skip=0; next }
+              ' "$REPO_DIR/conf/distributions" > "$REPO_DIR/conf/distributions.tmp"
+              mv "$REPO_DIR/conf/distributions.tmp" "$REPO_DIR/conf/distributions"
+            fi
+            
+            # Append the distribution for this codename
             {
               printf '%s\n' "Origin: Rspamd"
               printf '%s\n' "Label: Rspamd"
@@ -162,9 +177,6 @@ jobs:
               printf '\n'
             } >> "$REPO_DIR/conf/distributions"
           done
-
-          # Clean up database from distributions that are no longer in conf/distributions
-          reprepro -b "$REPO_DIR" clearvanished
 
           # Now, include packages for the current distributions
           for d in "${DIST_LIST[@]}"; do
