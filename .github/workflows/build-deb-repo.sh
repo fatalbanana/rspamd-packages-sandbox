@@ -38,7 +38,7 @@ echo "--- Listing pre-filled repository content ---"
 ls -lR "$REPO_DIR"
 
 # Export public key for clients
-gpg --armor --output "$REPO_DIR/rspamd.asc" --export "$KEY_FPR"
+gpg --batch --armor --output "$REPO_DIR/rspamd.asc" --export "$KEY_FPR"
 
 # Prepare distributions file
 IFS=',' read -ra DIST_LIST <<< "$DIST_NAMES"
