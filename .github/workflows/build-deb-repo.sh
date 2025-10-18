@@ -66,7 +66,7 @@ for d in "${DIST_LIST[@]}"; do
     printf '%s\n' "Components: main"
     printf '%s\n' "Description: ${desc}"
     printf '%s\n' "SignWith: ${KEY_FPR}"
-    printf '%s\n' "Limit: ${KEEP_BUILDS}"
+    printf '%s\n' "Limit: ${KEEP_BUILDS} rspamd*"
     printf '\n'
   } >> "$REPO_DIR/conf/distributions"
 done
