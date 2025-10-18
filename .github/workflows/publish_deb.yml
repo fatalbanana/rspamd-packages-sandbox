@@ -211,8 +211,13 @@ jobs:
                 pkg_name="${pkg_ver_line%% *}"
                 ver="${pkg_ver_line#* }"
                 base_name="${pkg_name%-dbg}"
-                # Normalize version by removing codename suffix (e.g., ~bookworm, ~trixie)
-                norm_ver="${ver%~*}"
+                # Normalize version by removing the last tilde component (codename suffix)
+                # e.g., 20251017.23.37-1~e1a38f6~bookworm -> 20251017.23.37-1~e1a38f6
+                if [[ "$ver" =~ ^(.*)~[^~]+$ ]]; then
+                  norm_ver="${BASH_REMATCH[1]}"
+                else
+                  norm_ver="$ver"
+                fi
                 # Add normalized version to list for this base_name, if not already present
                 if [[ ! " ${base_name_norm_versions[$base_name]:-} " =~ " $norm_ver " ]]; then
                   base_name_norm_versions["$base_name"]="${base_name_norm_versions[$base_name]:-}$norm_ver "
@@ -256,7 +261,12 @@ jobs:
                 base_name="${pkg%-dbg}"
                 mapfile -t pkg_versions < <(reprepro -b "$REPO_DIR" list "$codename" "$pkg" 2>/dev/null | awk '{print $NF}' | sort -u)
                 for ver in "${pkg_versions[@]}"; do
-                  norm_ver="${ver%~*}"
+                  # Normalize version by removing the last tilde component (codename suffix)
+                  if [[ "$ver" =~ ^(.*)~[^~]+$ ]]; then
+                    norm_ver="${BASH_REMATCH[1]}"
+                  else
+                    norm_ver="$ver"
+                  fi
                   if [[ -z "${norm_versions_to_keep_per_base[${base_name}:${norm_ver}]:-}" ]]; then
                     echo "Pruning $pkg version $ver from $codename (normalized: $norm_ver)"
                     reprepro -b "$REPO_DIR" removematched "$codename" "Package (== $pkg), Version (== $ver)"
