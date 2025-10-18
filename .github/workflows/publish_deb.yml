@@ -21,11 +21,8 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Install dependencies
-        shell: bash
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y debdelta devscripts gnupg reprepro rsync
+      - name: Install GPG
+        run: sudo apt-get update && sudo apt-get install -y gnupg
 
       - name: Prepare GPG
         shell: bash
