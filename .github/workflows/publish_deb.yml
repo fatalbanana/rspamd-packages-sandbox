@@ -89,7 +89,7 @@ jobs:
 
       - name: Build Docker image with reprepro 5.4.7+
         run: |
-          docker build -t reprepro-builder -f .github/workflows/Dockerfile.publish-deb .github/workflows/
+          docker build -t reprepro-builder -f .github/workflows/Dockerfile.publish-deb .
           docker run --rm reprepro-builder reprepro --version
 
       - name: Build and sign APT repository in Docker
