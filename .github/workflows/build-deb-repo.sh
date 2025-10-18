@@ -30,9 +30,9 @@ mkdir -p ~/.ssh && chmod 700 ~/.ssh
 cp /ssh/id_rsa ~/.ssh/id_rsa && chmod 600 ~/.ssh/id_rsa
 cp /ssh/known_hosts ~/.ssh/known_hosts && chmod 644 ~/.ssh/known_hosts
 
-# Prefill with existing repo content
+# Prefill with existing repo content (preserve timestamps but not ownership)
 mkdir -p "$REPO_DIR/conf"
-rsync -e "ssh -l $SSH_USERNAME -i ~/.ssh/id_rsa -o StrictHostKeyChecking=yes" -ru \
+rsync -e "ssh -l $SSH_USERNAME -i ~/.ssh/id_rsa -o StrictHostKeyChecking=yes" -rlptDv \
   "${UPLOAD_HOST}:${UPLOAD_SUFFIX}${TARGET_PATH}/" "$REPO_DIR/"
 echo "--- Listing pre-filled repository content ---"
 ls -lR "$REPO_DIR"
@@ -123,8 +123,10 @@ for d in "${DIST_LIST[@]}"; do
 done
 
 # Retention is handled by reprepro's Limit field
+echo "Removing unreferenced packages from pool..."
 reprepro -b "$REPO_DIR" deleteunreferenced
 
-# Upload
-rsync -e "ssh -l $SSH_USERNAME -i ~/.ssh/id_rsa -o StrictHostKeyChecking=yes" -ru --delete \
+# Upload (preserve timestamps but not ownership, and delete removed files)
+echo "Uploading repository..."
+rsync -e "ssh -l $SSH_USERNAME -i ~/.ssh/id_rsa -o StrictHostKeyChecking=yes" -rlptDv --delete \
   "$REPO_DIR/" "${UPLOAD_HOST}:${UPLOAD_SUFFIX}${TARGET_PATH}/"
