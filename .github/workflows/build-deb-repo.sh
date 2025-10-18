@@ -71,16 +71,14 @@ for d in "${DIST_LIST[@]}"; do
   } >> "$REPO_DIR/conf/distributions"
 done
 
-# Remove old reprepro database - it's in legacy format and needs to be rebuilt
-# Reprepro will automatically rebuild the database from existing dists/ when needed
+# Remove old reprepro database and indices - they're in legacy format
+# We'll rebuild database from pool, and the Limit field will handle retention
 if [ -d "$REPO_DIR/db" ]; then
-  echo "Removing old reprepro database (will rebuild from dists/)..."
+  echo "Removing old reprepro database..."
   rm -rf "$REPO_DIR/db"
 fi
 
-# Also need to clean up any stale indices that reference deleted packages
-# Let reprepro rebuild and then export fresh indices
-echo "Clearing old indices that may reference deleted packages..."
+echo "Removing old indices - will rebuild with Limit-based retention..."
 rm -rf "$REPO_DIR/dists"
 
 # Include packages
@@ -89,28 +87,28 @@ for d in "${DIST_LIST[@]}"; do
   codename="${codename/debian-/}"
   shopt -s nullglob
   for deb_pkg in "$PACKAGES_DIR/${d}"/rspamd_*amd64*.deb; do
-    reprepro -P extra -S mail -b "$REPO_DIR" -v --keepunreferencedfiles includedeb "$codename" "$deb_pkg"
+    reprepro -P extra -S mail -b "$REPO_DIR" -v includedeb "$codename" "$deb_pkg"
   done
   for deb_pkg in "$PACKAGES_DIR/${d}"/rspamd-dbg_*amd64*.deb; do
-    reprepro -P extra -S debug -b "$REPO_DIR" -v --keepunreferencedfiles includedeb "$codename" "$deb_pkg"
+    reprepro -P extra -S debug -b "$REPO_DIR" -v includedeb "$codename" "$deb_pkg"
   done
   for deb_pkg in "$PACKAGES_DIR/${d}"/rspamd-asan_*amd64*.deb; do
-    reprepro -P extra -S mail -b "$REPO_DIR" -v --keepunreferencedfiles includedeb "$codename" "$deb_pkg"
+    reprepro -P extra -S mail -b "$REPO_DIR" -v includedeb "$codename" "$deb_pkg"
   done
   for deb_pkg in "$PACKAGES_DIR/${d}"/rspamd-asan-dbg_*amd64*.deb; do
-    reprepro -P extra -S debug -b "$REPO_DIR" -v --keepunreferencedfiles includedeb "$codename" "$deb_pkg"
+    reprepro -P extra -S debug -b "$REPO_DIR" -v includedeb "$codename" "$deb_pkg"
   done
   for deb_pkg in "$PACKAGES_DIR/${d}"/rspamd_*arm64*.deb; do
-    reprepro -P extra -S mail -b "$REPO_DIR" -v --keepunreferencedfiles includedeb "$codename" "$deb_pkg"
+    reprepro -P extra -S mail -b "$REPO_DIR" -v includedeb "$codename" "$deb_pkg"
   done
   for deb_pkg in "$PACKAGES_DIR/${d}"/rspamd-dbg_*arm64*.deb; do
-    reprepro -P extra -S debug -b "$REPO_DIR" -v --keepunreferencedfiles includedeb "$codename" "$deb_pkg"
+    reprepro -P extra -S debug -b "$REPO_DIR" -v includedeb "$codename" "$deb_pkg"
   done
   for deb_pkg in "$PACKAGES_DIR/${d}"/rspamd-asan_*arm64*.deb; do
-    reprepro -P extra -S mail -b "$REPO_DIR" -v --keepunreferencedfiles includedeb "$codename" "$deb_pkg"
+    reprepro -P extra -S mail -b "$REPO_DIR" -v includedeb "$codename" "$deb_pkg"
   done
   for deb_pkg in "$PACKAGES_DIR/${d}"/rspamd-asan-dbg_*arm64*.deb; do
-    reprepro -P extra -S debug -b "$REPO_DIR" -v --keepunreferencedfiles includedeb "$codename" "$deb_pkg"
+    reprepro -P extra -S debug -b "$REPO_DIR" -v includedeb "$codename" "$deb_pkg"
   done
 done
 
