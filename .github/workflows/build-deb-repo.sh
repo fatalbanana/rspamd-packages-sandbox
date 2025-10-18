@@ -60,9 +60,21 @@ for d in "${DIST_LIST[@]}"; do
   if [ -f "$REPO_DIR/conf/distributions" ] && grep -q "^Codename: ${codename}$" "$REPO_DIR/conf/distributions"; then
     awk -v codename="$codename" '
       BEGIN { skip=0 }
-      /^Codename: / { if ($2 == codename) skip=1; else skip=0 }
-      skip==0 { print }
-      /^$/ && skip==1 { skip=0; next }
+      /^Codename: / { 
+        if ($2 == codename) { 
+          skip=1 
+        } else { 
+          skip=0 
+        }
+      }
+      skip==0 && NF>0 { print }
+      NF==0 { 
+        if (skip==1) { 
+          skip=0 
+        } else { 
+          print 
+        } 
+      }
     ' "$REPO_DIR/conf/distributions" > "$REPO_DIR/conf/distributions.tmp"
     mv "$REPO_DIR/conf/distributions.tmp" "$REPO_DIR/conf/distributions"
   fi
