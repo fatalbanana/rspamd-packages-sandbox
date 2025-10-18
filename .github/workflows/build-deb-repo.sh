@@ -37,7 +37,8 @@ rsync -e "ssh -l $SSH_USERNAME -i ~/.ssh/id_rsa -o StrictHostKeyChecking=yes" -r
 echo "--- Listing pre-filled repository content ---"
 ls -lR "$REPO_DIR"
 
-# Export public key for clients
+# Export public key for clients (remove old one first)
+rm -f "$REPO_DIR/rspamd.asc"
 gpg --batch --armor --output "$REPO_DIR/rspamd.asc" --export "$KEY_FPR"
 
 # Prepare distributions file
