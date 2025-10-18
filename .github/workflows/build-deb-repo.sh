@@ -85,12 +85,12 @@ done
 # If the old database is in legacy format, it's safer to rebuild from scratch
 if [ -d "$REPO_DIR/db" ]; then
   echo "Checking reprepro database format..."
-  if ! reprepro -b "$REPO_DIR" check 2>&1 | grep -q "database uses deprecated format"; then
-    echo "Database format is current"
-  else
+  if reprepro -b "$REPO_DIR" check 2>&1 | grep -q "database uses deprecated format"; then
     echo "Legacy database detected. Removing and will rebuild from dists/..."
     rm -rf "$REPO_DIR/db"
     # Reprepro will automatically rebuild the database from existing dists/ when needed
+  else
+    echo "Database format is current"
   fi
 fi
 
