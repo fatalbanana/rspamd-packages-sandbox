@@ -41,13 +41,7 @@ ls -lR "$REPO_DIR"
 rm -f "$REPO_DIR/rspamd.asc"
 gpg --batch --armor --output "$REPO_DIR/rspamd.asc" --export "$KEY_FPR"
 
-# Upgrade reprepro database format if needed
-if [ -d "$REPO_DIR/db" ]; then
-  echo "Upgrading reprepro database format..."
-  reprepro -b "$REPO_DIR" translatelegacyreferences
-fi
-
-# Prepare distributions file
+# Prepare distributions file first (needed for translatelegacyreferences)
 IFS=',' read -ra DIST_LIST <<< "$DIST_NAMES"
 for d in "${DIST_LIST[@]}"; do
   codename="${d/ubuntu-/}"
@@ -86,6 +80,12 @@ for d in "${DIST_LIST[@]}"; do
     printf '\n'
   } >> "$REPO_DIR/conf/distributions"
 done
+
+# Upgrade reprepro database format if needed (must be done after distributions file exists)
+if [ -d "$REPO_DIR/db" ]; then
+  echo "Upgrading reprepro database format..."
+  reprepro -b "$REPO_DIR" translatelegacyreferences
+fi
 
 # Include packages
 for d in "${DIST_LIST[@]}"; do
