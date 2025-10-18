@@ -41,7 +41,8 @@ ls -lR "$REPO_DIR"
 rm -f "$REPO_DIR/rspamd.asc"
 gpg --batch --armor --output "$REPO_DIR/rspamd.asc" --export "$KEY_FPR"
 
-# Prepare distributions file first (needed for translatelegacyreferences)
+# Prepare distributions file (recreate from scratch since we're rebuilding the database)
+rm -f "$REPO_DIR/conf/distributions"
 IFS=',' read -ra DIST_LIST <<< "$DIST_NAMES"
 for d in "${DIST_LIST[@]}"; do
   codename="${d/ubuntu-/}"
@@ -54,29 +55,6 @@ for d in "${DIST_LIST[@]}"; do
     desc="Apt repository for rspamd nightly builds"
   else
     desc="Apt repository for rspamd stable builds"
-  fi
-  
-  # Update existing distribution entry if exists
-  if [ -f "$REPO_DIR/conf/distributions" ] && grep -q "^Codename: ${codename}$" "$REPO_DIR/conf/distributions"; then
-    awk -v codename="$codename" '
-      BEGIN { skip=0 }
-      /^Codename: / { 
-        if ($2 == codename) { 
-          skip=1 
-        } else { 
-          skip=0 
-        }
-      }
-      skip==0 && NF>0 { print }
-      NF==0 { 
-        if (skip==1) { 
-          skip=0 
-        } else { 
-          print 
-        } 
-      }
-    ' "$REPO_DIR/conf/distributions" > "$REPO_DIR/conf/distributions.tmp"
-    mv "$REPO_DIR/conf/distributions.tmp" "$REPO_DIR/conf/distributions"
   fi
   
   # Append distribution
