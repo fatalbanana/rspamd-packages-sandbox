@@ -174,6 +174,7 @@ jobs:
               printf '%s\n' "Components: main"
               printf '%s\n' "Description: ${desc}"
               printf '%s\n' "SignWith: ${KEY_FPR}"
+              printf '%s\n' "Limit: ${KEEP_BUILDS:-10}"
               printf '\n'
             } >> "$REPO_DIR/conf/distributions"
           done
@@ -210,85 +211,8 @@ jobs:
             done
           done
 
-          # After all packages are included, perform retention
-          keep_count="${KEEP_BUILDS:-10}"
-          if [[ "$keep_count" =~ ^[0-9]+$ ]] && (( keep_count > 0 )); then
-            # Build a global map of base_name -> list of normalized versions across all codenames
-            declare -A base_name_norm_versions=()
-            for d in "${DIST_LIST[@]}"; do
-              codename="${d/ubuntu-/}"
-              codename="${codename/debian-/}"
-              mapfile -t all_packages < <(reprepro -b "$REPO_DIR" --list-format '${package} ${version}\n' list "$codename" 2>/dev/null | grep '^rspamd')
-              for pkg_ver_line in "${all_packages[@]}"; do
-                pkg_name="${pkg_ver_line%% *}"
-                ver="${pkg_ver_line#* }"
-                base_name="${pkg_name%-dbg}"
-                # Normalize version by removing the last tilde component (codename suffix)
-                # e.g., 20251017.23.37-1~e1a38f6~bookworm -> 20251017.23.37-1~e1a38f6
-                if [[ "$ver" =~ ^(.*)~[^~]+$ ]]; then
-                  norm_ver="${BASH_REMATCH[1]}"
-                else
-                  norm_ver="$ver"
-                fi
-                # Add normalized version to list for this base_name, if not already present
-                if [[ ! " ${base_name_norm_versions[$base_name]:-} " =~ " $norm_ver " ]]; then
-                  base_name_norm_versions["$base_name"]="${base_name_norm_versions[$base_name]:-}$norm_ver "
-                fi
-              done
-            done
-
-            # Determine which normalized versions to keep per base_name
-            declare -A norm_versions_to_keep_per_base=()
-            for base_name in "${!base_name_norm_versions[@]}"; do
-              mapfile -t all_norm_versions < <(echo "${base_name_norm_versions[$base_name]}" | tr ' ' '\n' | grep . | sort -u || true)
-              if (( ${#all_norm_versions[@]} == 0 )); then continue; fi
-
-              versions_sorted=()
-              for v in "${all_norm_versions[@]}"; do
-                inserted=0
-                for i in "${!versions_sorted[@]}"; do
-                  if dpkg --compare-versions "$v" gt "${versions_sorted[$i]}"; then
-                    versions_sorted=("${versions_sorted[@]:0:$i}" "$v" "${versions_sorted[@]:$i}")
-                    inserted=1
-                    break
-                  fi
-                done
-                if [[ $inserted -eq 0 ]]; then
-                  versions_sorted+=("$v")
-                fi
-              done
-
-              top_norm_versions=("${versions_sorted[@]:0:$keep_count}")
-              for v in "${top_norm_versions[@]}"; do
-                norm_versions_to_keep_per_base["${base_name}:${v}"]=1
-              done
-            done
-
-            # Prune packages based on normalized version matching
-            for d in "${DIST_LIST[@]}"; do
-              codename="${d/ubuntu-/}"
-              codename="${codename/debian-/}"
-              mapfile -t all_pkgs < <(reprepro -b "$REPO_DIR" list "$codename" 2>/dev/null | sed -E 's/.*: ([^ ]+) .*/\1/' | grep '^rspamd' | sort -u)
-              for pkg in "${all_pkgs[@]}"; do
-                base_name="${pkg%-dbg}"
-                mapfile -t pkg_versions < <(reprepro -b "$REPO_DIR" list "$codename" "$pkg" 2>/dev/null | awk '{print $NF}' | sort -u)
-                for ver in "${pkg_versions[@]}"; do
-                  # Normalize version by removing the last tilde component (codename suffix)
-                  if [[ "$ver" =~ ^(.*)~[^~]+$ ]]; then
-                    norm_ver="${BASH_REMATCH[1]}"
-                  else
-                    norm_ver="$ver"
-                  fi
-                  if [[ -z "${norm_versions_to_keep_per_base[${base_name}:${norm_ver}]:-}" ]]; then
-                    echo "Pruning $pkg version $ver from $codename (normalized: $norm_ver)"
-                    reprepro -b "$REPO_DIR" removematched "$codename" "Package (== $pkg), Version (== $ver)"
-                  fi
-                done
-              done
-            done
-          fi
-
-          # Finally, remove all files that are no longer referenced in any distribution
+          # Retention is handled by reprepro's Limit field in distributions file
+          # Remove all files that are no longer referenced in any distribution
           reprepro -b "$REPO_DIR" deleteunreferenced
 
           # Build a minimal staging directory containing only indexed files to reduce upload size
