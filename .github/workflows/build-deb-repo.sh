@@ -78,6 +78,11 @@ if [ -d "$REPO_DIR/db" ]; then
   rm -rf "$REPO_DIR/db"
 fi
 
+# Also need to clean up any stale indices that reference deleted packages
+# Let reprepro rebuild and then export fresh indices
+echo "Clearing old indices that may reference deleted packages..."
+rm -rf "$REPO_DIR/dists"
+
 # Include packages
 for d in "${DIST_LIST[@]}"; do
   codename="${d/ubuntu-/}"
