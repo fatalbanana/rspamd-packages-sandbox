@@ -81,17 +81,11 @@ for d in "${DIST_LIST[@]}"; do
   } >> "$REPO_DIR/conf/distributions"
 done
 
-# Upgrade reprepro database format if needed (must be done after distributions file exists)
-# If the old database is in legacy format, it's safer to rebuild from scratch
+# Remove old reprepro database - it's in legacy format and needs to be rebuilt
+# Reprepro will automatically rebuild the database from existing dists/ when needed
 if [ -d "$REPO_DIR/db" ]; then
-  echo "Checking reprepro database format..."
-  if reprepro -b "$REPO_DIR" check 2>&1 | grep -q "database uses deprecated format"; then
-    echo "Legacy database detected. Removing and will rebuild from dists/..."
-    rm -rf "$REPO_DIR/db"
-    # Reprepro will automatically rebuild the database from existing dists/ when needed
-  else
-    echo "Database format is current"
-  fi
+  echo "Removing old reprepro database (will rebuild from dists/)..."
+  rm -rf "$REPO_DIR/db"
 fi
 
 # Include packages
