@@ -28,7 +28,11 @@ jobs:
 
       - name: Build aptly from source
         run: |
-          git clone https://github.com/aptly-dev/aptly.git /tmp/aptly
+          # Get latest release tag
+          APTLY_VERSION=$(curl -s https://api.github.com/repos/aptly-dev/aptly/releases/latest | grep '"tag_name"' | cut -d'"' -f4)
+          echo "Installing aptly ${APTLY_VERSION}"
+          
+          git clone --depth 1 --branch "${APTLY_VERSION}" https://github.com/aptly-dev/aptly.git /tmp/aptly
           cd /tmp/aptly
           make install
           aptly version
@@ -108,17 +112,20 @@ jobs:
           UPLOAD_HOST_KNOWN_HOSTS: ${{ vars.UPLOAD_HOST_KNOWN_HOSTS }}
           DIST_NAMES: ${{ inputs.names }}
           SSH_USERNAME: ${{ secrets.SSH_USERNAME }}
+          APT_REPO_URL: ${{ vars.APT_REPO_URL_STABLE || 'https://rspamd.com/apt-stable/' }}
         run: |
           set -x
           set -euo pipefail
           
-          # Determine target path
+          # Determine target path and repo URL
           if [[ -n "${NIGHTLY:-}" ]]; then
             TARGET_PATH="$TARGET_DEB_UNSTABLE"
             SSH_KEY='${{ secrets.SSH_KEY_DEB_UNSTABLE }}'
+            APT_URL="${{ vars.APT_REPO_URL_UNSTABLE || 'https://rspamd.com/apt/' }}"
           else
             TARGET_PATH="$TARGET_DEB_STABLE"
             SSH_KEY='${{ secrets.SSH_KEY_DEB_STABLE }}'
+            APT_URL="${APT_REPO_URL}"
           fi
           
           # Setup SSH
@@ -146,9 +153,33 @@ jobs:
           }
           EOF
           
-          # Download existing aptly database if it exists
-          rsync -e "ssh -l $SSH_USERNAME -i ~/.ssh/id_rsa -o StrictHostKeyChecking=yes" -rlptDv \
-            "${UPLOAD_HOST}:${UPLOAD_SUFFIX}${TARGET_PATH}/.aptly/" "$APTLY_ROOT/" || true
+          # Mirror existing published repositories from public URL
+          # This allows us to work with existing packages without maintaining database state
+          IFS=',' read -ra DIST_LIST <<< "$DIST_NAMES"
+          for d in "${DIST_LIST[@]}"; do
+            codename="${d/ubuntu-/}"
+            codename="${codename/debian-/}"
+            MIRROR_NAME="rspamd-${codename}-mirror"
+            REPO_NAME="rspamd-${codename}"
+            
+            # Try to create mirror from existing published repo
+            echo "Attempting to mirror existing repository for ${codename}..."
+            if curl -sf "${APT_URL}dists/${codename}/Release" >/dev/null 2>&1; then
+              aptly mirror create -ignore-signatures "$MIRROR_NAME" "$APT_URL" "$codename" main || true
+              aptly mirror update -ignore-signatures "$MIRROR_NAME" || true
+              
+              # Create local repo and import from mirror
+              if ! aptly repo show "$REPO_NAME" >/dev/null 2>&1; then
+                aptly repo create -distribution="$codename" -component=main "$REPO_NAME"
+              fi
+              aptly repo import "$MIRROR_NAME" "$REPO_NAME" 'Name' || true
+            else
+              echo "No existing published repo found for ${codename}, starting fresh"
+              if ! aptly repo show "$REPO_NAME" >/dev/null 2>&1; then
+                aptly repo create -distribution="$codename" -component=main "$REPO_NAME"
+              fi
+            fi
+          done
           
           # Process each distribution
           IFS=',' read -ra DIST_LIST <<< "$DIST_NAMES"
@@ -203,10 +234,7 @@ jobs:
           mkdir -p "$APTLY_ROOT/public"
           gpg --batch --armor --output "$APTLY_ROOT/public/rspamd.asc" --export "$KEY_FPR"
           
-          # Upload published repos and aptly database
+          # Upload published repos
           rsync -e "ssh -l $SSH_USERNAME -i ~/.ssh/id_rsa -o StrictHostKeyChecking=yes" -rlptDv --delete \
             "$APTLY_ROOT/public/" "${UPLOAD_HOST}:${UPLOAD_SUFFIX}${TARGET_PATH}/"
-          
-          # Upload aptly database for next run
-          rsync -e "ssh -l $SSH_USERNAME -i ~/.ssh/id_rsa -o StrictHostKeyChecking=yes" -rlptDv \
-            "$APTLY_ROOT/db/" "${UPLOAD_HOST}:${UPLOAD_SUFFIX}${TARGET_PATH}/.aptly/db/"
+      
