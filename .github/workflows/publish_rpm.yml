@@ -97,7 +97,8 @@ jobs:
       - name: Prepare repo and sign RPMs
         shell: bash
         env:
-          KEEP_BUILDS: ${{ vars.KEEP_BUILDS || '10' }}
+          KEEP_BUILDS_STABLE: ${{ vars.KEEP_BUILDS_STABLE || '10' }}
+          KEEP_BUILDS_NIGHTLY: ${{ vars.KEEP_BUILDS_NIGHTLY || '10' }}
           NIGHTLY: ${{ inputs.nightly }}
           TARGET_RPM_STABLE: ${{ vars.TARGET_RPM_STABLE || 'rpm-stable' }}
           TARGET_RPM_UNSTABLE: ${{ vars.TARGET_RPM_UNSTABLE || 'rpm' }}
@@ -108,6 +109,13 @@ jobs:
           set -x
           set -euo pipefail
           DIST="${{ inputs.name }}"
+          
+          # Determine keep builds based on nightly/stable
+          if [[ -n "${NIGHTLY:-}" ]]; then
+            KEEP_BUILDS="${KEEP_BUILDS_NIGHTLY}"
+          else
+            KEEP_BUILDS="${KEEP_BUILDS_STABLE}"
+          fi
           REPO_DIR="$GITHUB_WORKSPACE/rpm/$DIST"
           mkdir -p "$REPO_DIR/x86_64" "$REPO_DIR/aarch64"
 

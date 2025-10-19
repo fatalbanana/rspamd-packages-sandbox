@@ -112,7 +112,8 @@ jobs:
           TARGET_DEB_STABLE: ${{ vars.TARGET_DEB_STABLE || 'apt-stable' }}
           TARGET_DEB_UNSTABLE: ${{ vars.TARGET_DEB_UNSTABLE || 'apt' }}
           GPG_PASSPHRASE: ${{ secrets.GPG_PASSPHRASE }}
-          KEEP_BUILDS: ${{ vars.KEEP_BUILDS || '10' }}
+          KEEP_BUILDS_STABLE: ${{ vars.KEEP_BUILDS_STABLE || '10' }}
+          KEEP_BUILDS_NIGHTLY: ${{ vars.KEEP_BUILDS_NIGHTLY || '10' }}
           UPLOAD_HOST_KNOWN_HOSTS: ${{ vars.UPLOAD_HOST_KNOWN_HOSTS }}
           DIST_NAMES: ${{ inputs.names }}
           SSH_USERNAME: ${{ secrets.SSH_USERNAME }}
@@ -126,10 +127,12 @@ jobs:
             TARGET_PATH="$TARGET_DEB_UNSTABLE"
             SSH_KEY='${{ secrets.SSH_KEY_DEB_UNSTABLE }}'
             APT_URL="${{ vars.APT_REPO_URL_UNSTABLE || 'https://rspamd.com/apt/' }}"
+            KEEP_BUILDS="${KEEP_BUILDS_NIGHTLY}"
           else
             TARGET_PATH="$TARGET_DEB_STABLE"
             SSH_KEY='${{ secrets.SSH_KEY_DEB_STABLE }}'
             APT_URL="${APT_REPO_URL}"
+            KEEP_BUILDS="${KEEP_BUILDS_STABLE}"
           fi
           
           # Setup SSH
