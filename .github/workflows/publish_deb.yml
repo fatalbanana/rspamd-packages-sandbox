@@ -21,8 +21,17 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Install GPG
-        run: sudo apt-get update && sudo apt-get install -y gnupg
+      - name: Set up Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: '1.21'
+
+      - name: Build aptly from source
+        run: |
+          git clone https://github.com/aptly-dev/aptly.git /tmp/aptly
+          cd /tmp/aptly
+          make install
+          aptly version
 
       - name: Prepare GPG
         shell: bash
@@ -87,13 +96,7 @@ jobs:
           merge-multiple: true
 
 
-      - name: Build Docker image with reprepro 5.4.7+
-        run: |
-          docker build -t reprepro-builder -f .github/workflows/Dockerfile.publish-deb .
-          docker run --rm reprepro-builder reprepro --version
-
-      - name: Build and sign APT repository in Docker
-        shell: bash
+      - name: Build and publish APT repository with aptly
         env:
           NIGHTLY: ${{ inputs.nightly }}
           UPLOAD_HOST: ${{ secrets.UPLOAD_HOST }}
@@ -109,39 +112,101 @@ jobs:
           set -x
           set -euo pipefail
           
-          # Export GPG keys
-          mkdir -p "$RUNNER_TEMP/gpg"
-          gpg --batch --yes --armor --export "$KEY_FPR" > "$RUNNER_TEMP/gpg/pubkey.asc"
-          
-          # Export secret key with passphrase
-          echo "$GPG_PASSPHRASE" > "$RUNNER_TEMP/gpg/passphrase.txt"
-          gpg --batch --yes --pinentry-mode loopback --passphrase-file "$RUNNER_TEMP/gpg/passphrase.txt" \
-            --armor --export-secret-keys "$KEY_FPR" > "$RUNNER_TEMP/gpg/seckey.asc"
-          
-          # Setup SSH keys
-          mkdir -p "$RUNNER_TEMP/ssh"
-          chmod 700 "$RUNNER_TEMP/ssh"
+          # Determine target path
           if [[ -n "${NIGHTLY:-}" ]]; then
-            echo '${{ secrets.SSH_KEY_DEB_UNSTABLE }}' > "$RUNNER_TEMP/ssh/id_rsa"
             TARGET_PATH="$TARGET_DEB_UNSTABLE"
+            SSH_KEY='${{ secrets.SSH_KEY_DEB_UNSTABLE }}'
           else
-            echo '${{ secrets.SSH_KEY_DEB_STABLE }}' > "$RUNNER_TEMP/ssh/id_rsa"
             TARGET_PATH="$TARGET_DEB_STABLE"
+            SSH_KEY='${{ secrets.SSH_KEY_DEB_STABLE }}'
           fi
-          chmod 600 "$RUNNER_TEMP/ssh/id_rsa"
-          echo "$UPLOAD_HOST_KNOWN_HOSTS" > "$RUNNER_TEMP/ssh/known_hosts"
           
-          # Run the entire build process in Docker
-          docker run --rm \
-            -v "$GITHUB_WORKSPACE:/workspace" \
-            -v "$RUNNER_TEMP/gpg:/gpg:ro" \
-            -v "$RUNNER_TEMP/ssh:/ssh:ro" \
-            -e "NIGHTLY=${NIGHTLY:-}" \
-            -e "UPLOAD_HOST=$UPLOAD_HOST" \
-            -e "UPLOAD_SUFFIX=$UPLOAD_SUFFIX" \
-            -e "TARGET_PATH=$TARGET_PATH" \
-            -e "KEEP_BUILDS=$KEEP_BUILDS" \
-            -e "DIST_NAMES=$DIST_NAMES" \
-            -e "SSH_USERNAME=$SSH_USERNAME" \
-            reprepro-builder \
-            bash /workspace/.github/workflows/build-deb-repo.sh
+          # Setup SSH
+          mkdir -p ~/.ssh && chmod 700 ~/.ssh
+          echo "$SSH_KEY" > ~/.ssh/id_rsa
+          chmod 600 ~/.ssh/id_rsa
+          echo "$UPLOAD_HOST_KNOWN_HOSTS" > ~/.ssh/known_hosts
+          chmod 644 ~/.ssh/known_hosts
+          
+          # Configure aptly
+          APTLY_ROOT="$HOME/.aptly"
+          mkdir -p "$APTLY_ROOT"
+          cat > ~/.aptly.conf << 'EOF'
+          {
+            "downloadConcurrency": 4,
+            "architectures": [],
+            "dependencyFollowSuggests": false,
+            "dependencyFollowRecommends": false,
+            "gpgDisableSign": false,
+            "gpgDisableVerify": false,
+            "downloadSourcePackages": false,
+            "skipLegacyPool": true,
+            "ppaDistributorID": "rspamd",
+            "skipContentsPublishing": false
+          }
+          EOF
+          
+          # Download existing aptly database if it exists
+          rsync -e "ssh -l $SSH_USERNAME -i ~/.ssh/id_rsa -o StrictHostKeyChecking=yes" -rlptDv \
+            "${UPLOAD_HOST}:${UPLOAD_SUFFIX}${TARGET_PATH}/.aptly/" "$APTLY_ROOT/" || true
+          
+          # Process each distribution
+          IFS=',' read -ra DIST_LIST <<< "$DIST_NAMES"
+          for d in "${DIST_LIST[@]}"; do
+            codename="${d/ubuntu-/}"
+            codename="${codename/debian-/}"
+            REPO_NAME="rspamd-${codename}"
+            
+            # Create repo if it doesn't exist
+            if ! aptly repo show "$REPO_NAME" >/dev/null 2>&1; then
+              echo "Creating repository: $REPO_NAME"
+              aptly repo create -distribution="$codename" -component=main "$REPO_NAME"
+            fi
+            
+            # Check retention BEFORE adding new packages
+            # For each package type, see if we already have KEEP_BUILDS versions
+            for pkg_base in rspamd rspamd-asan rspamd-dbg rspamd-asan-dbg; do
+              # Get current count of versions for this package
+              count=$(aptly repo search "$REPO_NAME" "Name (= $pkg_base)" 2>/dev/null | wc -l || echo "0")
+              
+              if [ "$count" -ge "$KEEP_BUILDS" ]; then
+                # Need to remove oldest version(s) to make room
+                versions=$(aptly repo search "$REPO_NAME" "Name (= $pkg_base)" 2>/dev/null | \
+                  grep "^${pkg_base}_" | awk '{print $1}' | sed "s/${pkg_base}_//" | sort -V || true)
+                
+                # Remove oldest version (first in sorted list)
+                echo "$versions" | head -n $((count - KEEP_BUILDS + 1)) | while read old_version; do
+                  echo "Removing old version to make room: ${pkg_base} ${old_version}"
+                  aptly repo remove "$REPO_NAME" "Name (= $pkg_base), Version (= $old_version)" || true
+                done
+              fi
+            done
+            
+            # Now add new packages
+            shopt -s nullglob
+            for deb_pkg in "$GITHUB_WORKSPACE/packages/${d}"/*.deb; do
+              echo "Adding package: $deb_pkg"
+              aptly repo add -force-replace "$REPO_NAME" "$deb_pkg"
+            done
+            
+            # Publish or update
+            if aptly publish list 2>/dev/null | grep -q "$codename"; then
+              echo "Updating published repository: $codename"
+              aptly publish update -batch -passphrase="$GPG_PASSPHRASE" "$codename"
+            else
+              echo "Publishing repository: $codename"
+              aptly publish repo -batch -passphrase="$GPG_PASSPHRASE" -distribution="$codename" "$REPO_NAME"
+            fi
+          done
+          
+          # Export public key
+          mkdir -p "$APTLY_ROOT/public"
+          gpg --batch --armor --output "$APTLY_ROOT/public/rspamd.asc" --export "$KEY_FPR"
+          
+          # Upload published repos and aptly database
+          rsync -e "ssh -l $SSH_USERNAME -i ~/.ssh/id_rsa -o StrictHostKeyChecking=yes" -rlptDv --delete \
+            "$APTLY_ROOT/public/" "${UPLOAD_HOST}:${UPLOAD_SUFFIX}${TARGET_PATH}/"
+          
+          # Upload aptly database for next run
+          rsync -e "ssh -l $SSH_USERNAME -i ~/.ssh/id_rsa -o StrictHostKeyChecking=yes" -rlptDv \
+            "$APTLY_ROOT/db/" "${UPLOAD_HOST}:${UPLOAD_SUFFIX}${TARGET_PATH}/.aptly/db/"
