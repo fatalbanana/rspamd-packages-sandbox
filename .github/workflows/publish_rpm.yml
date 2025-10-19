@@ -218,7 +218,7 @@ jobs:
             {
               printf '%s\n' "[rspamd-experimental]"
               printf '%s\n' "name=Rspamd experimental repository"
-              printf 'baseurl=http://rspamd.com/rpm/%s/$basearch\n' '$DIST'
+              printf 'baseurl=http://rspamd.com/rpm/%s/$basearch\n' "$DIST"
               printf '%s\n' "enabled=1"
               printf '%s\n' "gpgcheck=1"
               printf '%s\n' "repo_gpgcheck=1"
@@ -228,7 +228,7 @@ jobs:
             {
               printf '%s\n' "[rspamd]"
               printf '%s\n' "name=Rspamd stable repository"
-              printf 'baseurl=http://rspamd.com/rpm-stable/%s/$basearch\n' '$DIST'
+              printf 'baseurl=http://rspamd.com/rpm-stable/%s/$basearch\n' "$DIST"
               printf '%s\n' "enabled=1"
               printf '%s\n' "gpgcheck=1"
               printf '%s\n' "repo_gpgcheck=1"
