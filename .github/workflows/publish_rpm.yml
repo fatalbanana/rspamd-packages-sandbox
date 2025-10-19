@@ -12,6 +12,10 @@ on:
         type: string
         description: 'Set to any value to enable nightly (unstable) publish logic.'
 
+concurrency:
+  group: rpm-publishing-${{ inputs.name }}-${{ inputs.nightly && 'nightly' || 'stable' }}
+  cancel-in-progress: false
+
 jobs:
   publish:
     name: 'publish (${{ inputs.name }})'
