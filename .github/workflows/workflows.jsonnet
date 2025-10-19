@@ -58,7 +58,7 @@ local build_test_jobs(name, image) = {
     skip_tests: '${{ vars.SKIP_TESTS || vars.SKIP_TESTS_' + std.asciiUpper(std.strReplace(name, '-', '_')) + ' }}',
   },
   [name + '-test-' + arch]: {
-    'if': '${{ !vars.SKIP_PUBLISH && !vars.SKIP_TEST }}',
+    'if': '${{ !vars.SKIP_PUBLISH && !vars.SKIP_TESTS }}',
     needs: name + '-build-' + arch,
     uses: './.github/workflows/test_package.yml',
     with: test_with(arch),
