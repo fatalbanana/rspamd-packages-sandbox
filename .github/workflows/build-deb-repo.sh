@@ -71,15 +71,21 @@ for d in "${DIST_LIST[@]}"; do
   } >> "$REPO_DIR/conf/distributions"
 done
 
-# Remove old reprepro database and indices - they're in legacy format
-# We'll rebuild database from pool, and the Limit field will handle retention
+# Check if database is in legacy format (one-time migration needed)
+# Old reprepro used a deprecated format - newer reprepro can't use it
 if [ -d "$REPO_DIR/db" ]; then
-  echo "Removing old reprepro database..."
-  rm -rf "$REPO_DIR/db"
+  echo "Checking database format..."
+  if reprepro -b "$REPO_DIR" check 2>&1 | grep -q "database uses deprecated format"; then
+    echo "Legacy database format detected. Removing and will rebuild from dists/..."
+    rm -rf "$REPO_DIR/db"
+  else
+    echo "Database format is current, keeping it."
+  fi
 fi
 
-echo "Removing old indices - will rebuild with Limit-based retention..."
-rm -rf "$REPO_DIR/dists"
+# Don't remove indices - they're valid regardless of db format
+# Just update the distributions file for the current run
+# The Limit field will handle retention when we add new packages
 
 # Include packages
 for d in "${DIST_LIST[@]}"; do
