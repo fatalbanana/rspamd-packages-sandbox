@@ -30,15 +30,6 @@ jobs:
       revision: ${{ steps.save_commit.outputs.revision }}
 
     steps:
-      - name: Set version information for nightly
-        if: ${{ inputs.nightly }}
-        run: |
-          export RSPAMD_VERSION=`date +%Y%m%d.%H.%M`
-          export PATCH_VERSION=1
-
-          echo "PATCH_VERSION=${PATCH_VERSION}" >> "$GITHUB_ENV"
-          echo "RSPAMD_VERSION=${RSPAMD_VERSION}" >> "$GITHUB_ENV"
-
       - name: Set version information for release
         if: ${{ ! inputs.nightly }}
         run: |
@@ -62,6 +53,15 @@ jobs:
           echo "revision=$(git rev-parse HEAD)" >> "$GITHUB_OUTPUT"
           export GIT_VERSION=$(git rev-parse --short HEAD)
           echo "GIT_VERSION=${GIT_VERSION}" >> "$GITHUB_ENV"
+
+      - name: Set version information for nightly builds
+        if: ${{ inputs.nightly }}
+        run: |
+          # For nightly builds, use rspamd commit timestamp for consistent version
+          export RSPAMD_VERSION=$(git show -s --format=%cd --date=format:'%Y%m%d.%H.%M' HEAD)
+          export PATCH_VERSION=1
+          echo "PATCH_VERSION=${PATCH_VERSION}" >> "$GITHUB_ENV"
+          echo "RSPAMD_VERSION=${RSPAMD_VERSION}" >> "$GITHUB_ENV"
 
       - name: Set OS-specific variables
         run: |
