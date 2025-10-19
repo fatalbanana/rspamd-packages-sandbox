@@ -220,10 +220,19 @@ jobs:
               fi
             done
             
-            # Now add new packages
+            # Now add new packages (skip if exact version already exists)
             shopt -s nullglob
             for deb_pkg in "$GITHUB_WORKSPACE/packages/${d}"/*.deb; do
-              echo "Adding package: $deb_pkg"
+              pkg_name=$(dpkg-deb -f "$deb_pkg" Package)
+              pkg_version=$(dpkg-deb -f "$deb_pkg" Version)
+              
+              # Check if this exact version already exists in the repo
+              if aptly repo search "$REPO_NAME" "Name (= $pkg_name), Version (= $pkg_version)" 2>/dev/null | grep -q "^${pkg_name}_${pkg_version}"; then
+                echo "Package $pkg_name version $pkg_version already exists in repository, skipping"
+                continue
+              fi
+              
+              echo "Adding package: $deb_pkg ($pkg_name $pkg_version)"
               aptly repo add -force-replace "$REPO_NAME" "$deb_pkg"
             done
             

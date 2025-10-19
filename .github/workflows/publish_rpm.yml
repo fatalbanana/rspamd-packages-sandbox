@@ -144,15 +144,26 @@ jobs:
             "${UPLOAD_HOST}:${UPLOAD_SUFFIX}${TARGET_PATH}/" "$REPO_DIR/"
 
           # Copy built artifacts into arch dirs and record newly added files for signing
+          # Skip if exact version already exists
           shopt -s nullglob
           COPIED_FILES=()
           for rpm in "$GITHUB_WORKSPACE/packages/$DIST/"*x86_64.rpm; do
+            rpm_name=$(basename "$rpm")
+            if [[ -f "$REPO_DIR/x86_64/$rpm_name" ]]; then
+              echo "Package $rpm_name already exists in x86_64 repo, skipping"
+              continue
+            fi
             cp -f "$rpm" "$REPO_DIR/x86_64/"
-            COPIED_FILES+=("$REPO_DIR/x86_64/$(basename "$rpm")")
+            COPIED_FILES+=("$REPO_DIR/x86_64/$rpm_name")
           done
           for rpm in "$GITHUB_WORKSPACE/packages/$DIST/"*aarch64.rpm; do
+            rpm_name=$(basename "$rpm")
+            if [[ -f "$REPO_DIR/aarch64/$rpm_name" ]]; then
+              echo "Package $rpm_name already exists in aarch64 repo, skipping"
+              continue
+            fi
             cp -f "$rpm" "$REPO_DIR/aarch64/"
-            COPIED_FILES+=("$REPO_DIR/aarch64/$(basename "$rpm")")
+            COPIED_FILES+=("$REPO_DIR/aarch64/$rpm_name")
           done
 
           # Sign only the newly added RPMs to avoid re-signing existing ones
