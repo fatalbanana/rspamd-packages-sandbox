@@ -226,7 +226,12 @@ jobs:
               aptly publish update -batch -passphrase="$GPG_PASSPHRASE" "$codename"
             else
               echo "Publishing repository: $codename"
-              aptly publish repo -batch -passphrase="$GPG_PASSPHRASE" -distribution="$codename" "$REPO_NAME"
+              aptly publish repo -batch -passphrase="$GPG_PASSPHRASE" \
+                -distribution="$codename" \
+                -origin="Rspamd" \
+                -label="Rspamd" \
+                -suite="" \
+                "$REPO_NAME"
             fi
           done
           
