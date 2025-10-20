@@ -240,28 +240,23 @@ jobs:
             # Apply retention policy AFTER adding new packages
             # For each package type, keep only the latest KEEP_BUILDS versions
             for pkg_base in rspamd rspamd-asan rspamd-dbg rspamd-asan-dbg; do
-              # Get list of all versions for this package (format: package_version)
-              pkg_list=$(aptly repo search "$REPO_NAME" "Name (= $pkg_base)" 2>/dev/null | grep "^${pkg_base}_" || true)
-              count=$(echo "$pkg_list" | grep -c "^${pkg_base}_" || echo "0")
+              # Get current count of versions for this package
+              count=$(aptly repo search "$REPO_NAME" "Name (= $pkg_base)" 2>/dev/null | wc -l || echo "0")
               
               if [ "$count" -gt "$KEEP_BUILDS" ]; then
+                # Get all versions, sorted oldest to newest
+                versions=$(aptly repo search "$REPO_NAME" "Name (= $pkg_base)" 2>/dev/null | \
+                  grep "^${pkg_base}_" | awk '{print $1}' | sed "s/${pkg_base}_//" | sort -V || true)
+                
                 # Calculate how many to remove
                 to_remove=$((count - KEEP_BUILDS))
+                
+                # Remove oldest versions
                 echo "Package $pkg_base has $count versions, removing $to_remove oldest to keep $KEEP_BUILDS"
-                
-                # Get sorted list of package_version strings, extract just versions, sort, get oldest
-                old_versions=$(echo "$pkg_list" | \
-                  sed "s/^${pkg_base}_//" | \
-                  sort -V | \
-                  head -n "$to_remove")
-                
-                # Remove each old version
-                while IFS= read -r old_version; do
-                  if [[ -n "$old_version" ]]; then
-                    echo "  Removing old version: ${pkg_base} ${old_version}"
-                    aptly repo remove "$REPO_NAME" "Name (= $pkg_base), Version (= $old_version)"
-                  fi
-                done <<< "$old_versions"
+                echo "$versions" | head -n "$to_remove" | while read old_version; do
+                  echo "  Removing old version: ${pkg_base} ${old_version}"
+                  aptly repo remove "$REPO_NAME" "Name (= $pkg_base), Version (= $old_version)"
+                done
               fi
             done
             
