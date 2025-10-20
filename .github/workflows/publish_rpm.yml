@@ -236,21 +236,21 @@ jobs:
             {
               printf '%s\n' "[rspamd-experimental]"
               printf '%s\n' "name=Rspamd experimental repository"
-              printf 'baseurl=http://rspamd.com/rpm/%s/$basearch\n' "$DIST"
+              printf 'baseurl=https://rspamd.com/rpm/%s/$basearch\n' "$DIST"
               printf '%s\n' "enabled=1"
               printf '%s\n' "gpgcheck=1"
               printf '%s\n' "repo_gpgcheck=1"
-              printf '%s\n' "gpgkey=http://rspamd.com/rpm/rspamd.asc"
+              printf '%s\n' "gpgkey=https://rspamd.com/rpm/rspamd.asc"
             } > "$REPO_DIR/rspamd-experimental.repo"
           else
             {
               printf '%s\n' "[rspamd]"
               printf '%s\n' "name=Rspamd stable repository"
-              printf 'baseurl=http://rspamd.com/rpm-stable/%s/$basearch\n' "$DIST"
+              printf 'baseurl=https://rspamd.com/rpm-stable/%s/$basearch\n' "$DIST"
               printf '%s\n' "enabled=1"
               printf '%s\n' "gpgcheck=1"
               printf '%s\n' "repo_gpgcheck=1"
-              printf '%s\n' "gpgkey=http://rspamd.com/rpm/rspamd.asc"
+              printf '%s\n' "gpgkey=https://rspamd.com/rpm/rspamd.asc"
             } > "$REPO_DIR/rspamd.repo"
           fi
 
