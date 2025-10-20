@@ -58,6 +58,7 @@ jobs:
         if: ${{ inputs.nightly }}
         run: |
           # For nightly builds, use rspamd commit timestamp for consistent version
+          cd rspamd
           export RSPAMD_VERSION=$(git show -s --format=%cd --date=format:'%Y%m%d.%H.%M' HEAD)
           export PATCH_VERSION=1
           echo "PATCH_VERSION=${PATCH_VERSION}" >> "$GITHUB_ENV"
