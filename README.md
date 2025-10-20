@@ -20,6 +20,7 @@ Configure these in your repository settings under Settings → Secrets and varia
 |----------|-------------|---------|
 | `KEEP_BUILDS_STABLE` | Number of stable package versions to retain per distribution | `10` |
 | `KEEP_BUILDS_NIGHTLY` | Number of nightly package versions to retain per distribution | `10` |
+| `GPG_KEY_ID` | GPG key ID/fingerprint for signing packages | (required) |
 | `UPLOAD_HOST_KNOWN_HOSTS` | SSH known_hosts entries for upload server | (required) |
 | `UPLOAD_SUFFIX` | Path prefix on upload server | `rspamd.com/dist/` |
 
@@ -63,7 +64,6 @@ Configure these in your repository settings under Settings → Secrets and varia
 |--------|-------------|
 | `GPG_PRIVATE_KEY` | GPG private key in ASCII armored format for signing packages |
 | `GPG_PASSPHRASE` | Passphrase for the GPG private key |
-| `GPG_KEY_ID` | GPG key ID/fingerprint |
 
 #### SSH Upload Keys
 
