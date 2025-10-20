@@ -30,6 +30,8 @@ Configure these in your repository settings under Settings → Secrets and varia
 | `SKIP_PUBLISH` | Skip publishing step entirely | (not set) |
 | `SKIP_TESTS` | Skip tests for all distributions | (not set) |
 | `SKIP_TESTS_<DISTRO>_<VERSION>` | Skip tests for specific distribution (e.g., `SKIP_TESTS_CENTOS_8`, `SKIP_TESTS_DEBIAN_BOOKWORM`, `SKIP_TESTS_UBUNTU_NOBLE`) | (not set) |
+| `SKIP_MIRROR_APT` | Skip mirroring existing APT repository (start from empty) | (not set) |
+| `SKIP_MIRROR_RPM` | Skip mirroring existing RPM repository (start from empty) | (not set) |
 
 > **Note**: Set these variables to any non-empty value (e.g., `true`, `1`, `yes`) to enable the skip behavior.
 > 
@@ -94,7 +96,7 @@ Builds packages for all supported distributions and publishes to nightly reposit
 **Process**:
 1. Mirrors existing published repository from public URL
 2. Imports existing packages to local repository
-3. Applies retention policy (removes versions beyond `KEEP_BUILDS`)
+3. Applies retention policy (removes versions beyond `KEEP_BUILDS_STABLE` or `KEEP_BUILDS_NIGHTLY`)
 4. Adds new packages
 5. Publishes repository with GPG signing
 6. Uploads to server via rsync

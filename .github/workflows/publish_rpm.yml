@@ -102,6 +102,7 @@ jobs:
           NIGHTLY: ${{ inputs.nightly }}
           TARGET_RPM_STABLE: ${{ vars.TARGET_RPM_STABLE || 'rpm-stable' }}
           TARGET_RPM_UNSTABLE: ${{ vars.TARGET_RPM_UNSTABLE || 'rpm' }}
+          SKIP_MIRROR_RPM: ${{ vars.SKIP_MIRROR_RPM }}
           UPLOAD_HOST: ${{ secrets.UPLOAD_HOST }}
           UPLOAD_HOST_KNOWN_HOSTS: ${{ vars.UPLOAD_HOST_KNOWN_HOSTS }}
           UPLOAD_SUFFIX: ${{ vars.UPLOAD_SUFFIX || 'rspamd.com/dist/' }}
@@ -119,7 +120,7 @@ jobs:
           REPO_DIR="$GITHUB_WORKSPACE/rpm/$DIST"
           mkdir -p "$REPO_DIR/x86_64" "$REPO_DIR/aarch64"
 
-          # Prefill: fetch existing latest RPMs from remote to retain previous builds in index
+          # Setup SSH credentials
           if [[ -n "${NIGHTLY:-}" ]]; then
             TARGET_PATH="$TARGET_RPM_UNSTABLE/${{ inputs.name }}"
             RSYNC_KEY='${{ secrets.SSH_KEY_RPM_UNSTABLE }}'
@@ -138,10 +139,16 @@ jobs:
           fi
           printf '%s\n' "$UPLOAD_HOST_KNOWN_HOSTS" > "$HOME/.ssh/known_hosts"
           chmod 644 "$HOME/.ssh/known_hosts"
-          SSH_CMD="ssh -l ${{ secrets.SSH_USERNAME }} -i ${KEYFILE} -o UserKnownHostsFile=$HOME/.ssh/known_hosts -o StrictHostKeyChecking=yes"
-          # Prefill with all existing repo content
-          rsync -e "$SSH_CMD" -ru \
-            "${UPLOAD_HOST}:${UPLOAD_SUFFIX}${TARGET_PATH}/" "$REPO_DIR/"
+          
+          # Mirror existing repository or start fresh
+          if [[ -z "${SKIP_MIRROR_RPM:-}" ]]; then
+            echo "Syncing existing repository content..."
+            SSH_CMD="ssh -l ${{ secrets.SSH_USERNAME }} -i ${KEYFILE} -o UserKnownHostsFile=$HOME/.ssh/known_hosts -o StrictHostKeyChecking=yes"
+            rsync -e "$SSH_CMD" -ru "${UPLOAD_HOST}:${UPLOAD_SUFFIX}${TARGET_PATH}/" "$REPO_DIR/"
+          else
+            echo "SKIP_MIRROR_RPM is set, starting with empty repository"
+            mkdir -p "$REPO_DIR/x86_64" "$REPO_DIR/aarch64"
+          fi
 
           # Copy built artifacts into arch dirs and record newly added files for signing
           # Skip if exact version already exists

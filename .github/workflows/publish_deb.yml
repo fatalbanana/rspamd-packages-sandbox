@@ -114,6 +114,7 @@ jobs:
           GPG_PASSPHRASE: ${{ secrets.GPG_PASSPHRASE }}
           KEEP_BUILDS_STABLE: ${{ vars.KEEP_BUILDS_STABLE || '10' }}
           KEEP_BUILDS_NIGHTLY: ${{ vars.KEEP_BUILDS_NIGHTLY || '10' }}
+          SKIP_MIRROR_APT: ${{ vars.SKIP_MIRROR_APT }}
           UPLOAD_HOST_KNOWN_HOSTS: ${{ vars.UPLOAD_HOST_KNOWN_HOSTS }}
           DIST_NAMES: ${{ inputs.names }}
           SSH_USERNAME: ${{ secrets.SSH_USERNAME }}
@@ -160,33 +161,52 @@ jobs:
           }
           EOF
           
-          # Mirror existing published repositories from public URL
+          # Mirror existing published repositories from public URL (unless skipped)
           # This allows us to work with existing packages without maintaining database state
-          IFS=',' read -ra DIST_LIST <<< "$DIST_NAMES"
-          for d in "${DIST_LIST[@]}"; do
-            codename="${d/ubuntu-/}"
-            codename="${codename/debian-/}"
-            MIRROR_NAME="rspamd-${codename}-mirror"
-            REPO_NAME="rspamd-${codename}"
-            
-            # Try to create mirror from existing published repo
-            echo "Attempting to mirror existing repository for ${codename}..."
-            if curl -sf "${APT_URL}dists/${codename}/Release" >/dev/null 2>&1; then
-              aptly mirror create -ignore-signatures "$MIRROR_NAME" "$APT_URL" "$codename" main || true
-              aptly mirror update -ignore-signatures "$MIRROR_NAME" || true
+          if [[ -z "${SKIP_MIRROR_APT:-}" ]]; then
+            IFS=',' read -ra DIST_LIST <<< "$DIST_NAMES"
+            for d in "${DIST_LIST[@]}"; do
+              codename="${d/ubuntu-/}"
+              codename="${codename/debian-/}"
+              MIRROR_NAME="rspamd-${codename}-mirror"
+              REPO_NAME="rspamd-${codename}"
               
-              # Create local repo and import from mirror
+              # Check if existing published repo exists
+              echo "Checking for existing repository for ${codename}..."
+              http_code=$(curl -s -o /dev/null -w "%{http_code}" "${APT_URL}dists/${codename}/Release")
+              
+              if [[ "$http_code" == "200" ]]; then
+                echo "Found existing repository, mirroring..."
+                aptly mirror create -ignore-signatures "$MIRROR_NAME" "$APT_URL" "$codename" main || true
+                aptly mirror update -ignore-signatures "$MIRROR_NAME" || true
+                
+                # Create local repo and import from mirror
+                if ! aptly repo show "$REPO_NAME" >/dev/null 2>&1; then
+                  aptly repo create -distribution="$codename" -component=main "$REPO_NAME"
+                fi
+                aptly repo import "$MIRROR_NAME" "$REPO_NAME" 'Name' || true
+              elif [[ "$http_code" == "404" ]]; then
+                echo "No existing repository found for ${codename} (404), starting fresh"
+                if ! aptly repo show "$REPO_NAME" >/dev/null 2>&1; then
+                  aptly repo create -distribution="$codename" -component=main "$REPO_NAME"
+                fi
+              else
+                echo "ERROR: Unexpected HTTP status $http_code when checking ${APT_URL}dists/${codename}/Release" >&2
+                exit 1
+              fi
+            done
+          else
+            echo "Skipping mirror step (SKIP_MIRROR_APT is set), starting with empty repositories"
+            IFS=',' read -ra DIST_LIST <<< "$DIST_NAMES"
+            for d in "${DIST_LIST[@]}"; do
+              codename="${d/ubuntu-/}"
+              codename="${codename/debian-/}"
+              REPO_NAME="rspamd-${codename}"
               if ! aptly repo show "$REPO_NAME" >/dev/null 2>&1; then
                 aptly repo create -distribution="$codename" -component=main "$REPO_NAME"
               fi
-              aptly repo import "$MIRROR_NAME" "$REPO_NAME" 'Name' || true
-            else
-              echo "No existing published repo found for ${codename}, starting fresh"
-              if ! aptly repo show "$REPO_NAME" >/dev/null 2>&1; then
-                aptly repo create -distribution="$codename" -component=main "$REPO_NAME"
-              fi
-            fi
-          done
+            done
+          fi
           
           # Process each distribution
           IFS=',' read -ra DIST_LIST <<< "$DIST_NAMES"
@@ -201,26 +221,7 @@ jobs:
               aptly repo create -distribution="$codename" -component=main "$REPO_NAME"
             fi
             
-            # Check retention BEFORE adding new packages
-            # For each package type, see if we already have KEEP_BUILDS versions
-            for pkg_base in rspamd rspamd-asan rspamd-dbg rspamd-asan-dbg; do
-              # Get current count of versions for this package
-              count=$(aptly repo search "$REPO_NAME" "Name (= $pkg_base)" 2>/dev/null | wc -l || echo "0")
-              
-              if [ "$count" -ge "$KEEP_BUILDS" ]; then
-                # Need to remove oldest version(s) to make room
-                versions=$(aptly repo search "$REPO_NAME" "Name (= $pkg_base)" 2>/dev/null | \
-                  grep "^${pkg_base}_" | awk '{print $1}' | sed "s/${pkg_base}_//" | sort -V || true)
-                
-                # Remove oldest version (first in sorted list)
-                echo "$versions" | head -n $((count - KEEP_BUILDS + 1)) | while read old_version; do
-                  echo "Removing old version to make room: ${pkg_base} ${old_version}"
-                  aptly repo remove "$REPO_NAME" "Name (= $pkg_base), Version (= $old_version)" || true
-                done
-              fi
-            done
-            
-            # Now add new packages (skip if exact version already exists)
+            # Add new packages (skip if exact version already exists)
             shopt -s nullglob
             for deb_pkg in "$GITHUB_WORKSPACE/packages/${d}"/*.deb; do
               pkg_name=$(dpkg-deb -f "$deb_pkg" Package)
@@ -234,6 +235,29 @@ jobs:
               
               echo "Adding package: $deb_pkg ($pkg_name $pkg_version)"
               aptly repo add -force-replace "$REPO_NAME" "$deb_pkg"
+            done
+            
+            # Apply retention policy AFTER adding new packages
+            # For each package type, keep only the latest KEEP_BUILDS versions
+            for pkg_base in rspamd rspamd-asan rspamd-dbg rspamd-asan-dbg; do
+              # Get current count of versions for this package
+              count=$(aptly repo search "$REPO_NAME" "Name (= $pkg_base)" 2>/dev/null | wc -l || echo "0")
+              
+              if [ "$count" -gt "$KEEP_BUILDS" ]; then
+                # Get all versions, sorted oldest to newest
+                versions=$(aptly repo search "$REPO_NAME" "Name (= $pkg_base)" 2>/dev/null | \
+                  grep "^${pkg_base}_" | awk '{print $1}' | sed "s/${pkg_base}_//" | sort -V || true)
+                
+                # Calculate how many to remove
+                to_remove=$((count - KEEP_BUILDS))
+                
+                # Remove oldest versions
+                echo "Package $pkg_base has $count versions, removing $to_remove oldest to keep $KEEP_BUILDS"
+                echo "$versions" | head -n "$to_remove" | while read old_version; do
+                  echo "  Removing old version: ${pkg_base} ${old_version}"
+                  aptly repo remove "$REPO_NAME" "Name (= $pkg_base), Version (= $old_version)" || true
+                done
+              fi
             done
             
             # Publish or update
