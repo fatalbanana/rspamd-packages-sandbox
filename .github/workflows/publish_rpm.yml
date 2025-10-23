@@ -110,7 +110,7 @@ jobs:
           set -x
           set -euo pipefail
           DIST="${{ inputs.name }}"
-          
+
           # Determine keep builds based on nightly/stable
           if [[ -n "${NIGHTLY:-}" ]]; then
             KEEP_BUILDS="${KEEP_BUILDS_NIGHTLY}"
@@ -139,12 +139,14 @@ jobs:
           fi
           printf '%s\n' "$UPLOAD_HOST_KNOWN_HOSTS" > "$HOME/.ssh/known_hosts"
           chmod 644 "$HOME/.ssh/known_hosts"
-          
+
           # Mirror existing repository or start fresh
+
           if [[ -z "${SKIP_MIRROR_RPM:-}" ]]; then
             echo "Syncing existing repository content..."
+            RSYNC_ARGS="--recursive"
             SSH_CMD="ssh -l ${{ secrets.SSH_USERNAME }} -i ${KEYFILE} -o UserKnownHostsFile=$HOME/.ssh/known_hosts -o StrictHostKeyChecking=yes"
-            rsync -e "$SSH_CMD" -ru "${UPLOAD_HOST}:${UPLOAD_SUFFIX}${TARGET_PATH}/" "$REPO_DIR/"
+            rsync -e "$SSH_CMD" $RSYNC_ARGS "${UPLOAD_HOST}:${UPLOAD_SUFFIX}${TARGET_PATH}/" "$REPO_DIR/"
           else
             echo "SKIP_MIRROR_RPM is set, starting with empty repository"
             mkdir -p "$REPO_DIR/x86_64" "$REPO_DIR/aarch64"
@@ -200,7 +202,7 @@ jobs:
               for base_name in "${!base_name_builds_str[@]}"; do
                 # For each base_name, sort its builds by buildtime and keep top N EVRs
                 mapfile -t sorted_evrs < <(echo -e "${base_name_builds_str[$base_name]}" | sort -k1,1nr -k2,2 | awk '{print $2}' | uniq)
-                
+
                 top_evrs=("${sorted_evrs[@]:0:$keep_count}")
                 for evr in "${top_evrs[@]}"; do
                   keep_map["$base_name:$evr"]=1
@@ -274,7 +276,7 @@ jobs:
           else
             TARGET_PATH="$TARGET_RPM_STABLE/${{ inputs.name }}"
           fi
-          RSYNC_ARGS="-ru --delete"
+          RSYNC_ARGS="--checksum --delete --recursive"
           rsync -e "ssh -l ${{ secrets.SSH_USERNAME }} -i ${KEYFILE} -o UserKnownHostsFile=$HOME/.ssh/known_hosts -o StrictHostKeyChecking=yes" $RSYNC_ARGS \
             "$GITHUB_WORKSPACE/rpm/${{ inputs.name }}/" "${UPLOAD_HOST}:${UPLOAD_SUFFIX}${TARGET_PATH}/"
 
@@ -288,7 +290,8 @@ jobs:
           UPLOAD_SUFFIX: ${{ vars.UPLOAD_SUFFIX || 'rspamd.com/dist/' }}
         run: |
           set -euo pipefail
-          rsync -e "ssh -l ${{ secrets.SSH_USERNAME }} -i ${KEYFILE} -o UserKnownHostsFile=$HOME/.ssh/known_hosts -o StrictHostKeyChecking=yes" -ru \
+          RSYNC_ARGS="--checksum --recursive"
+          rsync -e "ssh -l ${{ secrets.SSH_USERNAME }} -i ${KEYFILE} -o UserKnownHostsFile=$HOME/.ssh/known_hosts -o StrictHostKeyChecking=yes" $RSYNC_ARGS \
             "$GITHUB_WORKSPACE/rpm/rspamd.asc" "${UPLOAD_HOST}:${UPLOAD_SUFFIX}${TARGET_RPM_UNSTABLE}"
-          rsync -e "ssh -l ${{ secrets.SSH_USERNAME }} -i ${KEYFILE} -o UserKnownHostsFile=$HOME/.ssh/known_hosts -o StrictHostKeyChecking=yes" -ru \
+          rsync -e "ssh -l ${{ secrets.SSH_USERNAME }} -i ${KEYFILE} -o UserKnownHostsFile=$HOME/.ssh/known_hosts -o StrictHostKeyChecking=yes" $RSYNC_ARGS \
             "$GITHUB_WORKSPACE/rpm/rspamd.asc" "${UPLOAD_HOST}:${UPLOAD_SUFFIX}${TARGET_RPM_STABLE}"

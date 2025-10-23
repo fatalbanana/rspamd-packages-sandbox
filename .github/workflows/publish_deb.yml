@@ -280,6 +280,7 @@ jobs:
           gpg --batch --armor --output "$APTLY_ROOT/public/rspamd.asc" --export "$KEY_FPR"
           
           # Upload published repos
-          rsync -e "ssh -l $SSH_USERNAME -i ~/.ssh/id_rsa -o StrictHostKeyChecking=yes" -rlptDv --delete \
+          RSYNC_ARGS="--checksum --delete --recursive"
+          rsync -e "ssh -l $SSH_USERNAME -i ~/.ssh/id_rsa -o UserKnownHostsFile=$HOME/.ssh/known_hosts -o StrictHostKeyChecking=yes" $RSYNC_ARGS \
             "$APTLY_ROOT/public/" "${UPLOAD_HOST}:${UPLOAD_SUFFIX}${TARGET_PATH}/"
       
