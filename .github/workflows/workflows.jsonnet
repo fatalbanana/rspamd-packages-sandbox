@@ -55,10 +55,10 @@ local build_test_jobs(name, image) = {
     image: image,
     platform: arch,
     revision: '${{ needs.' + name + '-build-' + arch + '.outputs.revision }}',
-    skip_tests: '${{ vars.SKIP_TESTS || vars.SKIP_TESTS_' + std.asciiUpper(std.strReplace(name, '-', '_')) + ' }}',
   },
   [name + '-test-' + arch]: {
-    'if': '${{ !(vars.SKIP_PUBLISH && (vars.SKIP_TESTS || vars.SKIP_TESTS_' + std.asciiUpper(std.strReplace(name, '-', '_')) + ')) }}',
+    // Skip test job entirely if tests are disabled, regardless of publish intent
+    'if': '${{ !(vars.SKIP_TESTS || vars.SKIP_TESTS_' + std.asciiUpper(std.strReplace(name, '-', '_')) + ') }}',
     needs: name + '-build-' + arch,
     uses: './.github/workflows/test_package.yml',
     with: test_with(arch),
@@ -74,7 +74,10 @@ local distribs_deb_test = [
 
 local publish_debian = {
   'debian-publish': {
-    'if': '${{ !vars.SKIP_PUBLISH }}',
+    // Run if publishing is enabled AND (tests were skipped OR all tests succeeded)
+    // always() ensures this runs even when test jobs are skipped
+    // !contains(needs.*.result, 'failure') ensures no test failed if they ran
+    'if': '${{ always() && !vars.SKIP_PUBLISH && !contains(needs.*.result, \'failure\') && !contains(needs.*.result, \'cancelled\') }}',
     needs: distribs_deb_test,
     uses: './.github/workflows/publish_deb.yml',
     secrets: 'inherit',
@@ -87,7 +90,10 @@ local publish_debian = {
 
 local publish_rpm(name) = {
   [name + '-publish']: {
-    'if': '${{ !vars.SKIP_PUBLISH && !vars.SKIP_PUBLISH_' + std.asciiUpper(std.strReplace(name, '-', '_')) + ' }}',
+    // Run if publishing is enabled AND (tests were skipped OR all tests succeeded)
+    // always() ensures this runs even when test jobs are skipped
+    // !contains(needs.*.result, 'failure') ensures no test failed if they ran
+    'if': '${{ always() && !vars.SKIP_PUBLISH && !vars.SKIP_PUBLISH_' + std.asciiUpper(std.strReplace(name, '-', '_')) + ' && !contains(needs.*.result, \'failure\') && !contains(needs.*.result, \'cancelled\') }}',
     needs: [name + '-test-ARM64', name + '-test-X64'],
     uses: './.github/workflows/publish_rpm.yml',
     with: {
