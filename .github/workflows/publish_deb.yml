@@ -149,7 +149,7 @@ jobs:
           cat > ~/.aptly.conf << 'EOF'
           {
             "downloadConcurrency": 4,
-            "architectures": [],
+            "architectures": ["amd64", "arm64"],
             "dependencyFollowSuggests": false,
             "dependencyFollowRecommends": false,
             "gpgDisableSign": false,
@@ -221,43 +221,46 @@ jobs:
               aptly repo create -distribution="$codename" -component=main "$REPO_NAME"
             fi
             
-            # Add new packages (skip if exact version already exists)
+            # Add new packages (skip if exact version and architecture already exists)
             shopt -s nullglob
             for deb_pkg in "$GITHUB_WORKSPACE/packages/${d}"/*.deb; do
               pkg_name=$(dpkg-deb -f "$deb_pkg" Package)
               pkg_version=$(dpkg-deb -f "$deb_pkg" Version)
+              pkg_arch=$(dpkg-deb -f "$deb_pkg" Architecture)
               
-              # Check if this exact version already exists in the repo
-              if aptly repo search "$REPO_NAME" "Name (= $pkg_name), Version (= $pkg_version)" 2>/dev/null | grep -q "^${pkg_name}_${pkg_version}"; then
-                echo "Package $pkg_name version $pkg_version already exists in repository, skipping"
+              # Check if this exact version and architecture already exists in the repo
+              if aptly repo search "$REPO_NAME" "Name (= $pkg_name), Version (= $pkg_version), Architecture (= $pkg_arch)" 2>/dev/null | grep -q "^${pkg_name}_${pkg_version}"; then
+                echo "Package $pkg_name version $pkg_version ($pkg_arch) already exists in repository, skipping"
                 continue
               fi
               
-              echo "Adding package: $deb_pkg ($pkg_name $pkg_version)"
+              echo "Adding package: $deb_pkg ($pkg_name $pkg_version $pkg_arch)"
               aptly repo add -force-replace "$REPO_NAME" "$deb_pkg"
             done
             
             # Apply retention policy AFTER adding new packages
-            # For each package type, keep only the latest KEEP_BUILDS versions
+            # For each package type and architecture, keep only the latest KEEP_BUILDS versions
             for pkg_base in rspamd rspamd-asan rspamd-dbg rspamd-asan-dbg; do
-              # Get current count of versions for this package
-              count=$(aptly repo search "$REPO_NAME" "Name (= $pkg_base)" 2>/dev/null | wc -l || echo "0")
-              
-              if [ "$count" -gt "$KEEP_BUILDS" ]; then
-                # Get all versions, sorted oldest to newest
-                versions=$(aptly repo search "$REPO_NAME" "Name (= $pkg_base)" 2>/dev/null | \
-                  grep "^${pkg_base}_" | awk '{print $1}' | sed "s/${pkg_base}_//" | sort -V || true)
+              for arch in amd64 arm64; do
+                # Get current count of versions for this package and architecture
+                count=$(aptly repo search "$REPO_NAME" "Name (= $pkg_base), Architecture (= $arch)" 2>/dev/null | wc -l || echo "0")
                 
-                # Calculate how many to remove
-                to_remove=$((count - KEEP_BUILDS))
-                
-                # Remove oldest versions
-                echo "Package $pkg_base has $count versions, removing $to_remove oldest to keep $KEEP_BUILDS"
-                echo "$versions" | head -n "$to_remove" | while read old_version; do
-                  echo "  Removing old version: ${pkg_base} ${old_version}"
-                  aptly repo remove "$REPO_NAME" "Name (= $pkg_base), Version (= $old_version)"
-                done
-              fi
+                if [ "$count" -gt "$KEEP_BUILDS" ]; then
+                  # Get all versions for this architecture, sorted oldest to newest
+                  versions=$(aptly repo search "$REPO_NAME" "Name (= $pkg_base), Architecture (= $arch)" 2>/dev/null | \
+                    grep "^${pkg_base}_" | awk '{print $1}' | sed "s/${pkg_base}_//" | sort -V || true)
+
+                  # Calculate how many to remove
+                  to_remove=$((count - KEEP_BUILDS))
+
+                  # Remove oldest versions for this architecture
+                  echo "Package $pkg_base ($arch) has $count versions, removing $to_remove oldest to keep $KEEP_BUILDS"
+                  echo "$versions" | head -n "$to_remove" | while read old_version; do
+                    echo "  Removing old version: ${pkg_base} ${old_version} ($arch)"
+                    aptly repo remove "$REPO_NAME" "Name (= $pkg_base), Version (= $old_version), Architecture (= $arch)"
+                  done
+                fi
+              done
             done
             
             # Publish or update
