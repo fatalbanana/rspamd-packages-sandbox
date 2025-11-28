@@ -34,7 +34,7 @@
          "needs": "centos-10-build-ARM64",
          "uses": "./.github/workflows/test_package.yml",
          "with": {
-            "image": "oraclelinux:10",
+            "image": "rockylinux:10",
             "name": "centos-10",
             "platform": "ARM64",
             "revision": "${{ needs.centos-10-build-ARM64.outputs.revision }}"
@@ -45,7 +45,7 @@
          "needs": "centos-10-build-X64",
          "uses": "./.github/workflows/test_package.yml",
          "with": {
-            "image": "oraclelinux:10",
+            "image": "rockylinux:10",
             "name": "centos-10",
             "platform": "X64",
             "revision": "${{ needs.centos-10-build-X64.outputs.revision }}"
@@ -85,7 +85,7 @@
          "needs": "centos-8-build-ARM64",
          "uses": "./.github/workflows/test_package.yml",
          "with": {
-            "image": "oraclelinux:8",
+            "image": "rockylinux:8",
             "name": "centos-8",
             "platform": "ARM64",
             "revision": "${{ needs.centos-8-build-ARM64.outputs.revision }}"
@@ -96,7 +96,7 @@
          "needs": "centos-8-build-X64",
          "uses": "./.github/workflows/test_package.yml",
          "with": {
-            "image": "oraclelinux:8",
+            "image": "rockylinux:8",
             "name": "centos-8",
             "platform": "X64",
             "revision": "${{ needs.centos-8-build-X64.outputs.revision }}"
@@ -136,7 +136,7 @@
          "needs": "centos-9-build-ARM64",
          "uses": "./.github/workflows/test_package.yml",
          "with": {
-            "image": "oraclelinux:9",
+            "image": "rockylinux:9",
             "name": "centos-9",
             "platform": "ARM64",
             "revision": "${{ needs.centos-9-build-ARM64.outputs.revision }}"
@@ -147,7 +147,7 @@
          "needs": "centos-9-build-X64",
          "uses": "./.github/workflows/test_package.yml",
          "with": {
-            "image": "oraclelinux:9",
+            "image": "rockylinux:9",
             "name": "centos-9",
             "platform": "X64",
             "revision": "${{ needs.centos-9-build-X64.outputs.revision }}"

@@ -51,17 +51,17 @@ jobs:
             fi
             dpkg -i "${debs[@]}" || apt-get install -f -y
           elif [[ "${{ inputs.name }}" == centos-10 ]] ; then
-            echo "Setting up CentOS/Oracle Linux 10 repositories..."
-            dnf config-manager --set-enabled ol10_codeready_builder
-            dnf -qy install oracle-epel-release-el10
+            echo "Setting up CentOS/Rocky Linux 10 repositories..."
+            dnf config-manager --set-enabled crb
+            dnf -qy install epel-release
           elif [[ "${{ inputs.name }}" == centos-9 ]] ; then
-            echo "Setting up CentOS/Oracle Linux 9 repositories..."
+            echo "Setting up CentOS/Rocky Linux 9 repositories..."
             dnf -qy install epel-release
-            dnf config-manager --set-enabled ol9_codeready_builder
+            dnf config-manager --set-enabled crb
           elif [[ "${{ inputs.name }}" == centos-8 ]] ; then
-            echo "Setting up CentOS/Oracle Linux 8 repositories..."
+            echo "Setting up CentOS/Rocky Linux 8 repositories..."
             dnf -qy install epel-release
-            dnf config-manager --set-enabled ol8_codeready_builder
+            dnf config-manager --set-enabled powertools
           else
             echo "Bad inputs.name: ${{ inputs.name }}"
             exit 1
