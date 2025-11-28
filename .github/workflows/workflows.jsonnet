@@ -1,9 +1,9 @@
 local architectures = ['X64', 'ARM64'];
 
 local imagemap = {
-  'centos-8': 'rockylinux/rockylinux:8',
-  'centos-9': 'rockylinux/rockylinux:9',
-  'centos-10': 'rockylinux/rockylinux:10',
+  'centos-8': 'almalinux:8',
+  'centos-9': 'almalinux:9',
+  'centos-10': 'almalinux:10',
   'debian-bullseye': 'debian:bullseye',
   'debian-bookworm': 'debian:bookworm',
   'debian-trixie': 'debian:trixie',
