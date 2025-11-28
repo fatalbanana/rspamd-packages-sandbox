@@ -92,7 +92,7 @@ jobs:
           export BUILDDIR=${{ github.workspace }}/rspamd/build
           export DEBIAN=0
           export DOCKER_IMAGE=${{ inputs.name }}
-          export DOCKER_REPO=ghcr.io/fatalbanana/rspamd-build-docker
+          export DOCKER_REPO=ghcr.io/rspamd/rspamd-build-docker
           export LUAJIT=1
           export PRESERVE_ENVVARS=LUAJIT,ASAN
           # Use $RELEASE_VERSION and $RSPAMD_VERSION from $GITHUB_ENV
