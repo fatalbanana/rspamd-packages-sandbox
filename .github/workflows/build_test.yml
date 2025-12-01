@@ -327,6 +327,13 @@
    },
    "name": "build_test",
    "on": {
-      "workflow_call": { }
+      "workflow_call": {
+         "inputs": {
+            "version": {
+               "required": true,
+               "type": "string"
+            }
+         }
+      }
    }
 }

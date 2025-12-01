@@ -23,3 +23,5 @@ jobs:
     needs: validate_inputs
     uses: ./.github/workflows/build_test.yml
     secrets: inherit
+    with:
+      version: ${{ github.event.inputs.version }}

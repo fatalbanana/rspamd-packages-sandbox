@@ -28,6 +28,12 @@ local build_test_pipeline = {
   name: 'build_test',
   on: {
     workflow_call: {
+      inputs: {
+        version: {
+          required: true,
+          type: 'string',
+        },
+      },
     },
   },
 };
