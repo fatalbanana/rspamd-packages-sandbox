@@ -33,6 +33,10 @@ local build_test_pipeline = {
           required: true,
           type: 'string',
         },
+        experimental: {
+          required: false,
+          type: 'boolean',
+        },
       },
     },
   },
@@ -43,6 +47,7 @@ local build_test_jobs(name, image) = {
     name: name,
     platform: arch,
     version: '${{ inputs.version }}',
+    experimental: '${{ inputs.experimental }}',
   },
   [name + '-build-' + arch]: {
     uses: './.github/workflows/build_packages.yml',

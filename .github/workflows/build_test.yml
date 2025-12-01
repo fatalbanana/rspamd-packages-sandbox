@@ -3,6 +3,7 @@
       "centos-10-build-ARM64": {
          "uses": "./.github/workflows/build_packages.yml",
          "with": {
+            "experimental": "${{ inputs.experimental }}",
             "name": "centos-10",
             "platform": "ARM64",
             "version": "${{ inputs.version }}"
@@ -11,6 +12,7 @@
       "centos-10-build-X64": {
          "uses": "./.github/workflows/build_packages.yml",
          "with": {
+            "experimental": "${{ inputs.experimental }}",
             "name": "centos-10",
             "platform": "X64",
             "version": "${{ inputs.version }}"
@@ -41,6 +43,7 @@
       "centos-8-build-ARM64": {
          "uses": "./.github/workflows/build_packages.yml",
          "with": {
+            "experimental": "${{ inputs.experimental }}",
             "name": "centos-8",
             "platform": "ARM64",
             "version": "${{ inputs.version }}"
@@ -49,6 +52,7 @@
       "centos-8-build-X64": {
          "uses": "./.github/workflows/build_packages.yml",
          "with": {
+            "experimental": "${{ inputs.experimental }}",
             "name": "centos-8",
             "platform": "X64",
             "version": "${{ inputs.version }}"
@@ -79,6 +83,7 @@
       "centos-9-build-ARM64": {
          "uses": "./.github/workflows/build_packages.yml",
          "with": {
+            "experimental": "${{ inputs.experimental }}",
             "name": "centos-9",
             "platform": "ARM64",
             "version": "${{ inputs.version }}"
@@ -87,6 +92,7 @@
       "centos-9-build-X64": {
          "uses": "./.github/workflows/build_packages.yml",
          "with": {
+            "experimental": "${{ inputs.experimental }}",
             "name": "centos-9",
             "platform": "X64",
             "version": "${{ inputs.version }}"
@@ -117,6 +123,7 @@
       "debian-bookworm-build-ARM64": {
          "uses": "./.github/workflows/build_packages.yml",
          "with": {
+            "experimental": "${{ inputs.experimental }}",
             "name": "debian-bookworm",
             "platform": "ARM64",
             "version": "${{ inputs.version }}"
@@ -125,6 +132,7 @@
       "debian-bookworm-build-X64": {
          "uses": "./.github/workflows/build_packages.yml",
          "with": {
+            "experimental": "${{ inputs.experimental }}",
             "name": "debian-bookworm",
             "platform": "X64",
             "version": "${{ inputs.version }}"
@@ -155,6 +163,7 @@
       "debian-bullseye-build-ARM64": {
          "uses": "./.github/workflows/build_packages.yml",
          "with": {
+            "experimental": "${{ inputs.experimental }}",
             "name": "debian-bullseye",
             "platform": "ARM64",
             "version": "${{ inputs.version }}"
@@ -163,6 +172,7 @@
       "debian-bullseye-build-X64": {
          "uses": "./.github/workflows/build_packages.yml",
          "with": {
+            "experimental": "${{ inputs.experimental }}",
             "name": "debian-bullseye",
             "platform": "X64",
             "version": "${{ inputs.version }}"
@@ -193,6 +203,7 @@
       "debian-trixie-build-ARM64": {
          "uses": "./.github/workflows/build_packages.yml",
          "with": {
+            "experimental": "${{ inputs.experimental }}",
             "name": "debian-trixie",
             "platform": "ARM64",
             "version": "${{ inputs.version }}"
@@ -201,6 +212,7 @@
       "debian-trixie-build-X64": {
          "uses": "./.github/workflows/build_packages.yml",
          "with": {
+            "experimental": "${{ inputs.experimental }}",
             "name": "debian-trixie",
             "platform": "X64",
             "version": "${{ inputs.version }}"
@@ -231,6 +243,7 @@
       "ubuntu-focal-build-ARM64": {
          "uses": "./.github/workflows/build_packages.yml",
          "with": {
+            "experimental": "${{ inputs.experimental }}",
             "name": "ubuntu-focal",
             "platform": "ARM64",
             "version": "${{ inputs.version }}"
@@ -239,6 +252,7 @@
       "ubuntu-focal-build-X64": {
          "uses": "./.github/workflows/build_packages.yml",
          "with": {
+            "experimental": "${{ inputs.experimental }}",
             "name": "ubuntu-focal",
             "platform": "X64",
             "version": "${{ inputs.version }}"
@@ -269,6 +283,7 @@
       "ubuntu-jammy-build-ARM64": {
          "uses": "./.github/workflows/build_packages.yml",
          "with": {
+            "experimental": "${{ inputs.experimental }}",
             "name": "ubuntu-jammy",
             "platform": "ARM64",
             "version": "${{ inputs.version }}"
@@ -277,6 +292,7 @@
       "ubuntu-jammy-build-X64": {
          "uses": "./.github/workflows/build_packages.yml",
          "with": {
+            "experimental": "${{ inputs.experimental }}",
             "name": "ubuntu-jammy",
             "platform": "X64",
             "version": "${{ inputs.version }}"
@@ -307,6 +323,7 @@
       "ubuntu-noble-build-ARM64": {
          "uses": "./.github/workflows/build_packages.yml",
          "with": {
+            "experimental": "${{ inputs.experimental }}",
             "name": "ubuntu-noble",
             "platform": "ARM64",
             "version": "${{ inputs.version }}"
@@ -315,6 +332,7 @@
       "ubuntu-noble-build-X64": {
          "uses": "./.github/workflows/build_packages.yml",
          "with": {
+            "experimental": "${{ inputs.experimental }}",
             "name": "ubuntu-noble",
             "platform": "X64",
             "version": "${{ inputs.version }}"
@@ -347,6 +365,10 @@
    "on": {
       "workflow_call": {
          "inputs": {
+            "experimental": {
+               "required": false,
+               "type": "boolean"
+            },
             "version": {
                "required": true,
                "type": "string"

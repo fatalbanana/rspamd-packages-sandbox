@@ -5,6 +5,10 @@ on:
       version:
         description: 'Release version in format vX.Y.Z+N'
         required: true
+      experimental:
+        description: 'If true, build from master but use provided version number'
+        required: false
+        type: boolean
 
 concurrency:
   group: rspamd-packages-release-${{ github.event.inputs.version }}
@@ -25,3 +29,4 @@ jobs:
     secrets: inherit
     with:
       version: ${{ github.event.inputs.version }}
+      experimental: ${{ github.event.inputs.experimental }}

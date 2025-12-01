@@ -15,6 +15,10 @@ on:
         required: true
         type: string
         description: 'Version in format vX.Y.Z+N'
+      experimental:
+        required: false
+        type: boolean
+        description: 'If true, build package for experimental repo (checkout master instead of tag)'
 
     outputs:
       revision:
@@ -43,7 +47,7 @@ jobs:
         with:
           repository: rspamd/rspamd
           path: rspamd
-          ref: ${{ env.RSPAMD_VERSION }}
+          ref: ${{ inputs.experimental && 'master' || env.RSPAMD_VERSION }}
 
       - name: Save commit hash
         id: save_commit
