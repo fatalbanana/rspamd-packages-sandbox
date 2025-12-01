@@ -42,6 +42,7 @@ local build_test_jobs(name, image) = {
   local build_with(arch) = {
     name: name,
     platform: arch,
+    version: '${{ inputs.version }}',
   },
   [name + '-build-' + arch]: {
     uses: './.github/workflows/build_packages.yml',
