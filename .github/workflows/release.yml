@@ -1,14 +1,25 @@
 name: release
 on:
-  push:
-    tags:
-      - v[0-9]+.[0-9]+.[0-9]+\+[0-9]+
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'Release version in format vX.Y.Z+N'
+        required: true
 
 concurrency:
-  cancel-in-progress: false
-  group: rspamd-packages-release
+  group: rspamd-packages-release-${{ github.event.inputs.version }}
 
 jobs:
+  validate_inputs:
+    runs-on: ubuntu-24.04
+    steps:
+      - name: Check version format
+        run: |
+          if [[ ! "${{ github.event.inputs.version }}" =~ ^v[0-9]+\.[0-9]+\.[0-9]+\+[0-9]+$ ]]; then
+            echo "Version must match vX.Y.Z+N" >&2
+            exit 1
+          fi
   build_test:
+    needs: validate_inputs
     uses: ./.github/workflows/build_test.yml
     secrets: inherit
