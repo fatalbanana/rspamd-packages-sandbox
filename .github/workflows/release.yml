@@ -29,4 +29,4 @@ jobs:
     secrets: inherit
     with:
       version: ${{ github.event.inputs.version }}
-      experimental: ${{ github.event.inputs.experimental }}
+      experimental: ${{ github.event.inputs.experimental == 'true' }}
