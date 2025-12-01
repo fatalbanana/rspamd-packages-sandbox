@@ -9,6 +9,6 @@ concurrency:
   group: rspamd-packages-release
 
 jobs:
-  build_test_publish:
-    uses: ./.github/workflows/build_test_publish.yml
+  build_test:
+    uses: ./.github/workflows/build_test.yml
     secrets: inherit

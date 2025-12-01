@@ -7,10 +7,6 @@ on:
         required: true
         type: string
         description: 'The target OS/distro name (e.g., ubuntu-jammy, centos-7)'
-      nightly:
-        required: false
-        type: string
-        description: 'Set to any value to enable nightly build logic.'
       platform:
         required: true
         type: string
@@ -31,7 +27,6 @@ jobs:
 
     steps:
       - name: Set version information for release
-        if: ${{ ! inputs.nightly }}
         run: |
           export RSPAMD_VERSION=`echo ${{ github.ref_name }} | sed s/^v// | sed 's/\+.*//'`
           export PATCH_VERSION=`echo ${{ github.ref_name }} | cut -d'+' -f2`
@@ -44,7 +39,7 @@ jobs:
         with:
           repository: rspamd/rspamd
           path: rspamd
-          ref: ${{ inputs.nightly && 'master' || env.RSPAMD_VERSION }}
+          ref: ${{ env.RSPAMD_VERSION }}
 
       - name: Save commit hash
         id: save_commit
@@ -53,16 +48,6 @@ jobs:
           echo "revision=$(git rev-parse HEAD)" >> "$GITHUB_OUTPUT"
           export GIT_VERSION=$(git rev-parse --short HEAD)
           echo "GIT_VERSION=${GIT_VERSION}" >> "$GITHUB_ENV"
-
-      - name: Set version information for nightly builds
-        if: ${{ inputs.nightly }}
-        run: |
-          # For nightly builds, use rspamd commit timestamp for consistent version
-          cd rspamd
-          export RSPAMD_VERSION=$(git show -s --format=%cd --date=format:'%Y%m%d.%H.%M' HEAD)
-          export PATCH_VERSION=1
-          echo "PATCH_VERSION=${PATCH_VERSION}" >> "$GITHUB_ENV"
-          echo "RSPAMD_VERSION=${RSPAMD_VERSION}" >> "$GITHUB_ENV"
 
       - name: Set OS-specific variables
         run: |
