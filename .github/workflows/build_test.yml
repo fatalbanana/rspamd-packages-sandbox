@@ -6,6 +6,7 @@
          "with": {
             "experimental": "${{ inputs.experimental }}",
             "name": "centos-10",
+            "no_asan": "${{ inputs.no_asan }}",
             "platform": "ARM64",
             "version": "${{ inputs.version }}"
          }
@@ -16,6 +17,7 @@
          "with": {
             "experimental": "${{ inputs.experimental }}",
             "name": "centos-10",
+            "no_asan": "${{ inputs.no_asan }}",
             "platform": "X64",
             "version": "${{ inputs.version }}"
          }
@@ -48,6 +50,7 @@
          "with": {
             "experimental": "${{ inputs.experimental }}",
             "name": "centos-8",
+            "no_asan": "${{ inputs.no_asan }}",
             "platform": "ARM64",
             "version": "${{ inputs.version }}"
          }
@@ -58,6 +61,7 @@
          "with": {
             "experimental": "${{ inputs.experimental }}",
             "name": "centos-8",
+            "no_asan": "${{ inputs.no_asan }}",
             "platform": "X64",
             "version": "${{ inputs.version }}"
          }
@@ -90,6 +94,7 @@
          "with": {
             "experimental": "${{ inputs.experimental }}",
             "name": "centos-9",
+            "no_asan": "${{ inputs.no_asan }}",
             "platform": "ARM64",
             "version": "${{ inputs.version }}"
          }
@@ -100,6 +105,7 @@
          "with": {
             "experimental": "${{ inputs.experimental }}",
             "name": "centos-9",
+            "no_asan": "${{ inputs.no_asan }}",
             "platform": "X64",
             "version": "${{ inputs.version }}"
          }
@@ -132,6 +138,7 @@
          "with": {
             "experimental": "${{ inputs.experimental }}",
             "name": "debian-bookworm",
+            "no_asan": "${{ inputs.no_asan }}",
             "platform": "ARM64",
             "version": "${{ inputs.version }}"
          }
@@ -142,6 +149,7 @@
          "with": {
             "experimental": "${{ inputs.experimental }}",
             "name": "debian-bookworm",
+            "no_asan": "${{ inputs.no_asan }}",
             "platform": "X64",
             "version": "${{ inputs.version }}"
          }
@@ -174,6 +182,7 @@
          "with": {
             "experimental": "${{ inputs.experimental }}",
             "name": "debian-bullseye",
+            "no_asan": "${{ inputs.no_asan }}",
             "platform": "ARM64",
             "version": "${{ inputs.version }}"
          }
@@ -184,6 +193,7 @@
          "with": {
             "experimental": "${{ inputs.experimental }}",
             "name": "debian-bullseye",
+            "no_asan": "${{ inputs.no_asan }}",
             "platform": "X64",
             "version": "${{ inputs.version }}"
          }
@@ -216,6 +226,7 @@
          "with": {
             "experimental": "${{ inputs.experimental }}",
             "name": "debian-trixie",
+            "no_asan": "${{ inputs.no_asan }}",
             "platform": "ARM64",
             "version": "${{ inputs.version }}"
          }
@@ -226,6 +237,7 @@
          "with": {
             "experimental": "${{ inputs.experimental }}",
             "name": "debian-trixie",
+            "no_asan": "${{ inputs.no_asan }}",
             "platform": "X64",
             "version": "${{ inputs.version }}"
          }
@@ -258,6 +270,7 @@
          "with": {
             "experimental": "${{ inputs.experimental }}",
             "name": "ubuntu-focal",
+            "no_asan": "${{ inputs.no_asan }}",
             "platform": "ARM64",
             "version": "${{ inputs.version }}"
          }
@@ -268,6 +281,7 @@
          "with": {
             "experimental": "${{ inputs.experimental }}",
             "name": "ubuntu-focal",
+            "no_asan": "${{ inputs.no_asan }}",
             "platform": "X64",
             "version": "${{ inputs.version }}"
          }
@@ -300,6 +314,7 @@
          "with": {
             "experimental": "${{ inputs.experimental }}",
             "name": "ubuntu-jammy",
+            "no_asan": "${{ inputs.no_asan }}",
             "platform": "ARM64",
             "version": "${{ inputs.version }}"
          }
@@ -310,6 +325,7 @@
          "with": {
             "experimental": "${{ inputs.experimental }}",
             "name": "ubuntu-jammy",
+            "no_asan": "${{ inputs.no_asan }}",
             "platform": "X64",
             "version": "${{ inputs.version }}"
          }
@@ -342,6 +358,7 @@
          "with": {
             "experimental": "${{ inputs.experimental }}",
             "name": "ubuntu-noble",
+            "no_asan": "${{ inputs.no_asan }}",
             "platform": "ARM64",
             "version": "${{ inputs.version }}"
          }
@@ -352,6 +369,7 @@
          "with": {
             "experimental": "${{ inputs.experimental }}",
             "name": "ubuntu-noble",
+            "no_asan": "${{ inputs.no_asan }}",
             "platform": "X64",
             "version": "${{ inputs.version }}"
          }
@@ -392,6 +410,10 @@
                "type": "string"
             },
             "experimental": {
+               "required": false,
+               "type": "boolean"
+            },
+            "no_asan": {
                "required": false,
                "type": "boolean"
             },

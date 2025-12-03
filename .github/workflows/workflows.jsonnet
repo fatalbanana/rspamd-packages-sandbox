@@ -45,6 +45,10 @@ local build_test_pipeline = {
           required: false,
           type: 'string',
         },
+        no_asan: {
+          required: false,
+          type: 'boolean',
+        },
       },
     },
   },
@@ -67,6 +71,7 @@ local build_test_jobs(name, image) = {
     platform: arch,
     version: '${{ inputs.version }}',
     experimental: '${{ inputs.experimental }}',
+    no_asan: '${{ inputs.no_asan }}',
   },
   [name + '-build-' + arch]: {
     'if': '${{ (' + include_distro(name) + ') && (' + include_arch(arch) + ') }}',

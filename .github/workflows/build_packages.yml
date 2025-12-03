@@ -19,6 +19,10 @@ on:
         required: false
         type: boolean
         description: 'If true, build package for experimental repo (checkout master instead of tag)'
+      no_asan:
+        required: false
+        type: boolean
+        description: 'If true, skip building ASAN variants'
 
     outputs:
       revision:
@@ -57,6 +61,18 @@ jobs:
           export GIT_VERSION=$(git rev-parse --short HEAD)
           echo "GIT_VERSION=${GIT_VERSION}" >> "$GITHUB_ENV"
 
+
+       - name: Patch debian/control for asan build profiles
+         if: ${{ startsWith(inputs.name, 'debian-') || startsWith(inputs.name, 'ubuntu-') }}
+         run: |
+           if [ ! -f rspamd/debian/control ]; then
+             echo "debian/control not found"
+             exit 1
+           fi
+           # Add Build-Profiles: <!noasan> to asan packages
+           sed -i '/^Package: rspamd-asan$/a Build-Profiles: <!noasan>' rspamd/debian/control
+           sed -i '/^Package: rspamd-asan-dbg$/a Build-Profiles: <!noasan>' rspamd/debian/control
+           grep -A1 "^Package: rspamd-asan" rspamd/debian/control | head -4
       - name: Set OS-specific variables
         run: |
           if [[ "${{ inputs.name }}" == ubuntu-* || "${{ inputs.name }}" == debian-* ]]; then
@@ -87,7 +103,7 @@ jobs:
           export DOCKER_IMAGE=${{ inputs.name }}
           export DOCKER_REPO=ghcr.io/rspamd/rspamd-build-docker
           export LUAJIT=1
-          export PRESERVE_ENVVARS=LUAJIT,ASAN
+          export PRESERVE_ENVVARS=LUAJIT,ASAN,DEB_BUILD_PROFILES
           # Use $RELEASE_VERSION and $RSPAMD_VERSION from $GITHUB_ENV
           export RELEASE=$PACKAGE_VERSION
           export RPM=0
@@ -98,6 +114,9 @@ jobs:
 
           if [[ "${{ env.PKG_TYPE }}" == "deb" ]]; then
             export DEBIAN=1
+             if [ "${{ inputs.no_asan }}" == "true" ]; then
+               export DEB_BUILD_PROFILES="noasan"
+             fi
           elif [[ "${{ env.PKG_TYPE }}" == "rpm" ]]; then
             export RPM=1
           else
@@ -107,7 +126,7 @@ jobs:
 
           cd rspamd
           ../packpack/packpack
-          if [ $RPM -eq 1 ]; then
+          if [ $RPM -eq 1 ] && [ "${{ inputs.no_asan }}" != "true" ]; then
             export ASAN=1
             ../packpack/packpack
           fi

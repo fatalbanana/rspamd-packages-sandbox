@@ -17,6 +17,10 @@ on:
         description: 'Architectures to build - comma-separated list (e.g., X64,ARM64). Leave empty to build all.'
         required: false
         type: string
+      no_asan:
+        description: 'If true, skip building ASAN variants of the package'
+        required: false
+        type: boolean
 
 jobs:
   validate_inputs:
@@ -37,3 +41,4 @@ jobs:
       experimental: ${{ github.event.inputs.experimental == 'true' }}
       distributions: ${{ github.event.inputs.distributions }}
       architectures: ${{ github.event.inputs.architectures }}
+      no_asan: ${{ github.event.inputs.no_asan == 'true' }}
