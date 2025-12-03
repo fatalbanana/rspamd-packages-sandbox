@@ -9,6 +9,10 @@ on:
         description: 'If true, build from master but use provided version number'
         required: false
         type: boolean
+      distributions:
+        description: 'Distributions to build - comma-separated list (e.g., centos-9,debian-trixie). Leave empty to build all.'
+        required: false
+        type: string
 
 concurrency:
   group: rspamd-packages-release-${{ github.event.inputs.version }}
@@ -30,3 +34,4 @@ jobs:
     with:
       version: ${{ github.event.inputs.version }}
       experimental: ${{ github.event.inputs.experimental == 'true' }}
+      distributions: ${{ github.event.inputs.distributions }}

@@ -37,10 +37,20 @@ local build_test_pipeline = {
           required: false,
           type: 'boolean',
         },
+        distributions: {
+          required: false,
+          type: 'string',
+        },
       },
     },
   },
 };
+
+// Check if a distribution should be built
+// If distributions is empty, build all. Otherwise, check if this distro is in the comma-separated list.
+// We wrap with commas so "centos-10" doesn't match "centos-101" (contains checks for ",centos-10," not just "centos-10")
+local include_distro(name) =
+  'inputs.distributions == \'\' || contains(\',\' + inputs.distributions + \',\', \',\' + \'' + name + '\' + \',\')';
 
 local build_test_jobs(name, image) = {
   local build_with(arch) = {
@@ -50,6 +60,7 @@ local build_test_jobs(name, image) = {
     experimental: '${{ inputs.experimental }}',
   },
   [name + '-build-' + arch]: {
+    'if': '${{ ' + include_distro(name) + ' }}',
     uses: './.github/workflows/build_packages.yml',
     with: build_with(arch),
   }
@@ -62,7 +73,7 @@ local build_test_jobs(name, image) = {
     revision: '${{ needs.' + name + '-build-' + arch + '.outputs.revision }}',
   },
   [name + '-test-' + arch]: {
-    'if': '${{ !(vars.SKIP_TESTS || vars.SKIP_TESTS_' + std.asciiUpper(std.strReplace(name, '-', '_')) + ') }}',
+    'if': '${{ (' + include_distro(name) + ') && !(vars.SKIP_TESTS || vars.SKIP_TESTS_' + std.asciiUpper(std.strReplace(name, '-', '_')) + ') }}',
     needs: name + '-build-' + arch,
     uses: './.github/workflows/test_package.yml',
     with: test_with(arch),
