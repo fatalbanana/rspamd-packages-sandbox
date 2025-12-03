@@ -14,9 +14,6 @@ on:
         required: false
         type: string
 
-concurrency:
-  group: rspamd-packages-release-${{ github.event.inputs.version }}
-
 jobs:
   validate_inputs:
     runs-on: ubuntu-24.04
