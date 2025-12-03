@@ -41,6 +41,10 @@ local build_test_pipeline = {
           required: false,
           type: 'string',
         },
+        architectures: {
+          required: false,
+          type: 'string',
+        },
       },
     },
   },
@@ -52,6 +56,11 @@ local build_test_pipeline = {
 local include_distro(name) =
   'inputs.distributions == \'\' || contains(format(\',{0},\', inputs.distributions), format(\',{0},\', \'' + name + '\'))';
 
+// Check if an architecture should be built
+// If architectures is empty, build all. Otherwise check if arch is in the comma-separated list.
+local include_arch(arch) =
+  'inputs.architectures == \'\' || contains(format(\',{0},\', inputs.architectures), format(\',{0},\', \'' + arch + '\'))';
+
 local build_test_jobs(name, image) = {
   local build_with(arch) = {
     name: name,
@@ -60,7 +69,7 @@ local build_test_jobs(name, image) = {
     experimental: '${{ inputs.experimental }}',
   },
   [name + '-build-' + arch]: {
-    'if': '${{ ' + include_distro(name) + ' }}',
+    'if': '${{ (' + include_distro(name) + ') && (' + include_arch(arch) + ') }}',
     uses: './.github/workflows/build_packages.yml',
     with: build_with(arch),
   }
@@ -73,7 +82,7 @@ local build_test_jobs(name, image) = {
     revision: '${{ needs.' + name + '-build-' + arch + '.outputs.revision }}',
   },
   [name + '-test-' + arch]: {
-    'if': '${{ (' + include_distro(name) + ') && !(vars.SKIP_TESTS || vars.SKIP_TESTS_' + std.asciiUpper(std.strReplace(name, '-', '_')) + ') }}',
+    'if': '${{ (' + include_distro(name) + ') && (' + include_arch(arch) + ') && !(vars.SKIP_TESTS || vars.SKIP_TESTS_' + std.asciiUpper(std.strReplace(name, '-', '_')) + ') }}',
     needs: name + '-build-' + arch,
     uses: './.github/workflows/test_package.yml',
     with: test_with(arch),

@@ -13,6 +13,10 @@ on:
         description: 'Distributions to build - comma-separated list (e.g., centos-9,debian-trixie). Leave empty to build all.'
         required: false
         type: string
+      architectures:
+        description: 'Architectures to build - comma-separated list (e.g., X64,ARM64). Leave empty to build all.'
+        required: false
+        type: string
 
 jobs:
   validate_inputs:
@@ -32,3 +36,4 @@ jobs:
       version: ${{ github.event.inputs.version }}
       experimental: ${{ github.event.inputs.experimental == 'true' }}
       distributions: ${{ github.event.inputs.distributions }}
+      architectures: ${{ github.event.inputs.architectures }}
