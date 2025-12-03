@@ -48,9 +48,9 @@ local build_test_pipeline = {
 
 // Check if a distribution should be built
 // If distributions is empty, build all. Otherwise, check if this distro is in the comma-separated list.
-// We wrap with commas so "centos-10" doesn't match "centos-101" (contains checks for ",centos-10," not just "centos-10")
+// We wrap with commas so "centos-10" doesn't match "centos-101"
 local include_distro(name) =
-  'inputs.distributions == \'\' || contains(\',\' + inputs.distributions + \',\', \',\' + \'' + name + '\' + \',\')';
+  'inputs.distributions == \'\' || contains(format(\',%s,\', inputs.distributions), format(\',%s,\', \'' + name + '\'))';
 
 local build_test_jobs(name, image) = {
   local build_with(arch) = {
