@@ -61,18 +61,6 @@ jobs:
           export GIT_VERSION=$(git rev-parse --short HEAD)
           echo "GIT_VERSION=${GIT_VERSION}" >> "$GITHUB_ENV"
 
-
-      - name: Patch debian/control for asan build profiles
-        if: ${{ startsWith(inputs.name, 'debian-') || startsWith(inputs.name, 'ubuntu-') }}
-        run: |
-          if [ ! -f rspamd/debian/control ]; then
-            echo "debian/control not found"
-            exit 1
-          fi
-          # Add Build-Profiles: <!noasan> to asan packages
-          sed -i '/^Package: rspamd-asan$/a Build-Profiles: <!noasan>' rspamd/debian/control
-          sed -i '/^Package: rspamd-asan-dbg$/a Build-Profiles: <!noasan>' rspamd/debian/control
-          grep -A1 "^Package: rspamd-asan" rspamd/debian/control | head -4
       - name: Set OS-specific variables
         run: |
           if [[ "${{ inputs.name }}" == ubuntu-* || "${{ inputs.name }}" == debian-* ]]; then
